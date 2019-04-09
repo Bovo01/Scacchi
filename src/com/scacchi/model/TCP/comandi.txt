@@ -1,0 +1,19 @@
+//CONNESSIONE
+richiesta = Richiesta di entrare in partita
+richiesta rifiutata = Richiesta di entrare in partita rifiutata (partita già iniziata con un altro player)
+richiesta colore = Richiesta del colore da scegliere (nel caso in cui l'host non abbia già scelto)
+bianco/nero = Invio del colore che sarà del destinatario
+richiesta spettatore = Richiesta di vedere una partita
+richiesta accettata = Richiesta di entrare in partita accettata
+//MOSSA
+mossa xxxxx = Invio di una mossa con posizione iniziale, finale e la trasformazione (0 se non è successo nulla; 1,2,3,4 rispettivamente per regina, alfiere, cavallo, torre)
+//RESA
+resa = È stata effettuata una resa (da quello che invia il messaggio)
+//PATTA
+richiesta patta = Il giocatore chiede all'avversario la patta, che può essere accettata o rifiutata
+conferma patta = Il giocatore accetta la patta richiesta dall'avversario
+rifiuto patta = Il giocatore rifiuta la patta richiesta dall'avversario
+//RESTART
+richiesta restart = Richiesta di ricominciare la partita
+conferma restart = Accetta di ricominciare la partita
+rifiuto restart = Rifiuto di ricominciare la partita
