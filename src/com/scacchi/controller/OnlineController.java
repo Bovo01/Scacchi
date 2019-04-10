@@ -128,6 +128,7 @@ public class OnlineController implements Initializable {
 		}
 		catch (IOException ex)
 		{
+			FunctionsController.alertErrore(ex.getMessage());
 		}
 	}
 
@@ -214,7 +215,6 @@ public class OnlineController implements Initializable {
 				FunctionsController.alertErrore("Errore");
 				return;
 			}
-		Settings.schieramento = scegliSchieramento();
 		disattivaTutto();
 		btnHost2.setDisable(false);
 		threadAccetta = new ThreadAccetta(Integer.parseInt(host_port.getText()), this);
