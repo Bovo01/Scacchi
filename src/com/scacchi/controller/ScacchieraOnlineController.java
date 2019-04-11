@@ -27,6 +27,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -51,6 +52,12 @@ public class ScacchieraOnlineController implements Initializable {
 	private ImageView scacchiera;
 	@FXML
 	private AnchorPane anchorPane;
+	@FXML
+	private Button resa;
+	@FXML
+	private Button patta;
+	@FXML
+	private Button restart;
 
 	private Partita partita;
 	private GraphicsContext graphics;
@@ -62,22 +69,41 @@ public class ScacchieraOnlineController implements Initializable {
 	private static final Image SCACCHIERA_INV = new Image("com/scacchi/view/img/scacchiera_inv.jpg");
 	private static final Image SCACCHI = new Image("com/scacchi/view/img/scacchi.png");
 
+	public void disattivaBottoni() {
+		resa.setDisable(true);
+		patta.setDisable(true);
+		restart.setDisable(true);
+	}
+
 	@FXML
 	private void menu(ActionEvent event) {
+		try
+		{
+			if(Settings.thread != null && Settings.thread.isAlive())
+				Settings.thread.close();
+		}
+		catch (IOException ex)
+		{
+			FunctionsController.alertErrore("Non è stato possibile tornare al menu. Per favore riprova");
+			return;
+		}
 		Stage stage = (Stage) anchorPane.getScene().getWindow();
 		Scene scene = stage.getScene();
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/MenuPrincipale.fxml"));
 		try
 		{
 			Parent root = (Parent) fxmlLoader.load();
+			scene.getWindow().setHeight(400 + 39);
+			scene.getWindow().setWidth(600 + 16);
 			scene.setRoot(root);
+			scene.getWindow().setOnCloseRequest(((event2) -> {}));
 		}
 		catch (IOException ex)
 		{
 			FunctionsController.alertErrore(ex.getMessage());
 		}
 	}
-	
+
 	@FXML
 	private void click(MouseEvent event) {
 		double x = event.getSceneX() * scala;
@@ -145,7 +171,7 @@ public class ScacchieraOnlineController implements Initializable {
 					else if (option.get() == CAVALLO)
 						partita.promozione(pezzo, Pezzo.Simbolo.CAVALLO);
 				}
-				sendMessage("mossa " + partita.getMosse().get(partita.getMosse().size()-1).toString());
+				sendMessage("mossa " + partita.getMosse().get(partita.getMosse().size() - 1).toString());
 				if (partita.getTurno() == null)//Se c'è un vincitore il metodo "muovi" imposta il turno a null
 				{
 					Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -217,7 +243,7 @@ public class ScacchieraOnlineController implements Initializable {
 		ButtonType NO = new ButtonType("No");
 		scelta.getButtonTypes().addAll(SI, NO);
 		Optional<ButtonType> option = scelta.showAndWait();
-		if(option.get() == NO)
+		if (option.get() == NO)
 			return;
 		sendMessage("resa");
 		partita.fine();

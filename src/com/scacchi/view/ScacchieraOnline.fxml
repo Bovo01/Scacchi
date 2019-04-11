@@ -30,7 +30,7 @@
          <right>
             <VBox alignment="CENTER" prefHeight="598.0" prefWidth="150.0" spacing="50.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" text="Torna al menu principale" />
+                  <Button mnemonicParsing="false" onAction="#menu" text="Torna al menu principale" />
                   <Label alignment="BOTTOM_CENTER" text="Turno:">
                      <VBox.margin>
                         <Insets />
@@ -44,9 +44,9 @@
                         <Font size="25.0" />
                      </font>
                   </Label>
-                  <Button mnemonicParsing="false" onAction="#resa" text="Resa" />
-                  <Button mnemonicParsing="false" onAction="#patta" text="Chiedi patta" />
-                  <Button mnemonicParsing="false" onAction="#restart" text="Chiedi restart" />
+                  <Button fx:id="resa" mnemonicParsing="false" onAction="#resa" text="Resa" />
+                  <Button fx:id="patta" mnemonicParsing="false" onAction="#patta" text="Chiedi patta" />
+                  <Button fx:id="restart" mnemonicParsing="false" onAction="#restart" text="Chiedi restart" />
                </children>
             </VBox>
          </right>

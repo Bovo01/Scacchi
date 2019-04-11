@@ -300,7 +300,7 @@ public class OnlineController implements Initializable {
 						Settings.player = socket;
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;
-						Settings.thread = new ThreadAccetta(port, controller);
+						Settings.thread = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
 						Settings.thread.start();
 						if (line.equals("bianco"))
 							Settings.schieramento = Colore.BIANCO;

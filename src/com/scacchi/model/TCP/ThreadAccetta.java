@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 /**
  *
@@ -138,7 +139,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 	}
 
 	@Override
-	public void close() throws IOException {//TODO chiusura thread
+	public void close() throws IOException {
 		isFinito = true;
 		if (threadRicevi != null && threadRicevi.isAlive())
 			threadRicevi.close();
@@ -157,6 +158,12 @@ public class ThreadAccetta extends Thread implements Closeable {
 		Settings.spettatori = null;
 		Settings.spettatoriReaders = null;
 		Settings.spettatoriWriters = null;
+		Platform.runLater(() -> {
+			if(Settings.scacchieraOnlineController == null)
+				return;
+			Settings.partita.fine();
+			Settings.scacchieraOnlineController.mostraScacchi();
+		});
 	}
 
 	private class ThreadRicevi extends Thread implements Closeable {
@@ -169,6 +176,23 @@ public class ThreadAccetta extends Thread implements Closeable {
 				try
 				{
 					String line = Settings.playerReader.readLine();
+					if (line == null)
+					{
+						Platform.runLater(() ->
+						{
+							Settings.scacchieraOnlineController.disattivaBottoni();
+							Alert alert = new Alert(Alert.AlertType.INFORMATION);
+							if (Settings.partita.getTurno() == null || Settings.partita.getMosse().isEmpty())
+								alert.setTitle("Info");
+							else
+								alert.setContentText("Hai vinto!");
+							alert.setContentText("L'avversario ha abbandonato la partita");
+							alert.show();
+							Settings.partita.fine();
+						});
+						Settings.thread.close();
+						return;
+					}
 					if (line.equals("resa"))
 						Platform.runLater(() -> Settings.scacchieraOnlineController.finePartita("resa", Settings.schieramento));
 					else if (line.substring(0, 5).equals("mossa"))
@@ -180,7 +204,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 						if (temp.charAt(4) != '0')
 							Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
 						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
-						if(Settings.spettatoriWriters != null)
+						if (Settings.spettatoriWriters != null)
 							for (BufferedWriter bw : Settings.spettatoriWriters)
 							{
 								bw.write(line);
@@ -211,14 +235,8 @@ public class ThreadAccetta extends Thread implements Closeable {
 				}
 				catch (IOException ex)
 				{
-					if (isFinito)
+					if(ex.getMessage().equals("Socket closed"))
 						return;
-					if (ex.getMessage().equals("connection reset"))
-					{
-						Platform.runLater(() -> FunctionsController.alertErrore("L'avversario ha abbandonato"));
-						return;
-					}
-					Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
 				}
 			}
 		}
