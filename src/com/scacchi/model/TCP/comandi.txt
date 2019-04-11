@@ -17,3 +17,7 @@ rifiuto patta = Il giocatore rifiuta la patta richiesta dall'avversario
 richiesta restart = Richiesta di ricominciare la partita
 conferma restart = Accetta di ricominciare la partita
 rifiuto restart = Rifiuto di ricominciare la partita
+//SPETTATORI
+richiesta schieramento = Lo spettatore chiede al server quale è il suo schieramento
+bianco/nero = Lo schieramento del giocatore
+'invio partita' = Invio della partita codificata (per la prima connessione)

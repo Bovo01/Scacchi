@@ -37,6 +37,17 @@ public class Partita {
 		inizioPartita();
 		aggiungiRipezioneMosse();
 	}
+	
+	/**
+	 * Costruttore che inizia la partita dato un coding ben definito
+	 * 
+	 * @param code il coding della partita
+	 */
+	public Partita(String code) {
+		neri = new ArrayList<>();
+		bianchi = new ArrayList<>();
+		decodeScacchiera(code);
+	}
 
 	/**
 	 * Costruttore che copia i due ArrayList di pezzi
@@ -72,6 +83,29 @@ public class Partita {
 
 	public ArrayList<Pezzo> getNeri() {
 		return neri;
+	}
+	
+	private void decodeScacchiera(String code) {
+		int index = 0;
+		for(Riga r : Riga.values())
+		{
+			for(Colonna c : Colonna.values())
+			{
+				switch(code.charAt(index))
+				{
+					case 'x':
+						break;
+					default:
+						Pezzo p = new Pezzo(new Posizione(r, c), Pezzo.Simbolo.getSimboloFromChar(code.charAt(index+1)), code.charAt(index) == 'b' ? BIANCO : NERO);
+						if(code.charAt(index) == 'b')
+							bianchi.add(p);
+						else
+							neri.add(p);
+						index++;
+				}
+				index++;
+			}
+		}
 	}
 
 	/**
@@ -757,7 +791,10 @@ public class Partita {
 				if (p == null)
 					sb.append('x');
 				else
+				{
+					sb.append(p.getColore() == BIANCO ? 'b' : 'n');
 					sb.append(p.getSimbolo().getSimbolo());
+				}
 			}
 		}
 		ripetizioneMosse.add(sb.toString());

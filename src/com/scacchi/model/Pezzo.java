@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * @author Pietro
  */
 public class Pezzo implements Cloneable {
-	
+
 	private Posizione posizione;
 	private Simbolo simbolo;
 	private final Colore colore;
@@ -64,7 +64,7 @@ public class Pezzo implements Cloneable {
 	public enum Simbolo {
 		RE('K'), REGINA('Q'), ALFIERE('B'), CAVALLO('N'), TORRE('R'), PEDONE(' ');
 		private final char simbolo;
-		
+
 		private Simbolo(char simbolo) {
 			this.simbolo = simbolo;
 		}
@@ -72,15 +72,40 @@ public class Pezzo implements Cloneable {
 		public char getSimbolo() {
 			return simbolo;
 		}
+
+		public static Simbolo getSimboloFromChar(char c) {
+			switch (c)
+			{
+				case 'K':
+					return RE;
+				case 'Q':
+					return REGINA;
+				case 'B':
+					return ALFIERE;
+				case 'N':
+					return CAVALLO;
+				case 'R':
+					return TORRE;
+				case ' ':
+					return PEDONE;
+				default:
+					return null;
+			}
+		}
 	}
 
 	public enum Colore {
 		BIANCO, NERO;
-		
+
 		public Colore notThis() {
-			if(this == BIANCO)
+			if (this == BIANCO)
 				return NERO;
 			return BIANCO;
+		}
+		
+		@Override
+		public String toString() {
+			return this == BIANCO ? "bianco" : "nero";
 		}
 	}
 
@@ -100,10 +125,10 @@ public class Pezzo implements Cloneable {
 		final Pezzo other = (Pezzo) obj;
 		return this.posizione.equals(other.posizione) && this.simbolo == other.simbolo && this.colore == other.colore;
 	}
-	
+
 	@Override
 	public Object clone() throws CloneNotSupportedException {
-		Pezzo p = new Pezzo((Posizione)posizione.clone(),simbolo,colore);
+		Pezzo p = new Pezzo((Posizione) posizione.clone(), simbolo, colore);
 		p.mosse = Partita.copyArray(mosse);
 		return p;
 	}

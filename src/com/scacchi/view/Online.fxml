@@ -27,7 +27,7 @@
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Button fx:id="btnCerca1" mnemonicParsing="false" prefHeight="40.0" text="Cerca partita">
+                              <Button fx:id="btnCerca1" mnemonicParsing="false" onAction="#cerca" prefHeight="40.0" text="Cerca partita">
                                  <font>
                                     <Font size="20.0" />
                                  </font>

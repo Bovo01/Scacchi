@@ -32,5 +32,6 @@ public class Settings {//SPORCO
 	public static Pezzo.Colore schieramento;
 	public static ScacchieraOnlineController scacchieraOnlineController;
 	//Thread
-	public static ThreadAccetta thread;
+	public static ThreadAccetta threadAccetta;
+	public static ThreadRicevi threadRicevi;//Serve solo agli spettatori
 }

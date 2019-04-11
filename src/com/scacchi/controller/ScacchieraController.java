@@ -41,36 +41,42 @@ import javafx.stage.Stage;
 public class ScacchieraController implements Initializable {
 
 	@FXML
-	private Label turno;
+	protected Label turno;
 	@FXML
-	private Canvas canvas;
+	protected Canvas canvas;
 	@FXML
-	private ImageView scacchiera;
+	protected ImageView scacchiera;
 
-	private Partita partita;
-	private GraphicsContext graphics;
-	private Posizione pos1, pos2;
-	private Colore versoScacchiera;
-	private static final double SCACCHIERA_DIM = 1080;
-	private double scala;//Scala invertita
-	private static final Image SCACCHIERA = new Image("com/scacchi/view/img/scacchiera.jpg");
-	private static final Image SCACCHIERA_INV = new Image("com/scacchi/view/img/scacchiera_inv.jpg");
-	private static final Image SCACCHI = new Image("com/scacchi/view/img/scacchi.png");
+	protected Partita partita;
+	protected GraphicsContext graphics;
+	protected Posizione pos1, pos2;
+	protected Colore versoScacchiera;
+	protected static final double SCACCHIERA_DIM = 1080;
+	protected double scala;//Scala invertita
+	protected static final Image SCACCHIERA = new Image("com/scacchi/view/img/scacchiera.jpg");
+	protected static final Image SCACCHIERA_INV = new Image("com/scacchi/view/img/scacchiera_inv.jpg");
+	protected static final Image SCACCHI = new Image("com/scacchi/view/img/scacchi.png");
 
 	@FXML
-	private void click(MouseEvent event) {
+	protected void click(MouseEvent event) {
 		double x = event.getSceneX() * scala;
 		double y = event.getSceneY() * scala;
 		if (x < 48 || x > 1031 || y < 48 || y > 1031)
 			return;
 		if (partita.getTurno() == null)
 			return;
+		int y1 = (int) ((y - 48) / 123);
+		int x1 = (int) ((x - 48) / 123);
+		muovi(x1, y1);
+	}
+	
+	protected void muovi(int x, int y) {
 		if (pos1 == null)
 		{
 			if (versoScacchiera == BIANCO)
-				pos1 = new Posizione(Riga.values()[(int) ((y - 48) / 123)], Colonna.values()[(int) ((x - 48) / 123)]);
+				pos1 = new Posizione(Riga.values()[y], Colonna.values()[x]);
 			else
-				pos1 = new Posizione(Riga.values()[7 - (int) ((y - 48) / 123)], Colonna.values()[7 - (int) ((x - 48) / 123)]);
+				pos1 = new Posizione(Riga.values()[7 - y], Colonna.values()[7 - x]);
 			if (partita.trovaPezzo(pos1) == null || partita.trovaPezzo(pos1).getColore() != partita.getTurno())
 			{
 				pos1 = null;
@@ -82,9 +88,9 @@ public class ScacchieraController implements Initializable {
 		{
 			Pezzo pezzo = partita.trovaPezzo(pos1);
 			if (versoScacchiera == BIANCO)
-				pos2 = new Posizione(Riga.values()[(int) ((y - 48) / 123)], Colonna.values()[(int) ((x - 48) / 123)]);
+				pos2 = new Posizione(Riga.values()[y], Colonna.values()[x]);
 			else
-				pos2 = new Posizione(Riga.values()[7 - (int) ((y - 48) / 123)], Colonna.values()[7 - (int) ((x - 48) / 123)]);
+				pos2 = new Posizione(Riga.values()[7 - y], Colonna.values()[7 - x]);
 			if (pos1.equals(pos2))
 			{
 				pos1 = null;
@@ -147,7 +153,7 @@ public class ScacchieraController implements Initializable {
 	}
 
 	@FXML
-	private void inverti(ActionEvent event) {
+	protected void inverti(ActionEvent event) {
 		if (versoScacchiera == BIANCO)
 		{
 			versoScacchiera = NERO;
@@ -164,7 +170,7 @@ public class ScacchieraController implements Initializable {
 	}
 
 	@FXML
-	private void restart(ActionEvent event) {
+	protected void restart(ActionEvent event) {
 		pos1 = null;
 		pos2 = null;
 		partita = new Partita();
@@ -173,7 +179,7 @@ public class ScacchieraController implements Initializable {
 	}
 
 	@FXML
-	private void menu(ActionEvent event) throws IOException {
+	protected void menu(ActionEvent event) throws IOException {
 		Node node = (Node) event.getSource();
 		Stage stage = (Stage) node.getScene().getWindow();
 		Scene scene = stage.getScene();
@@ -199,7 +205,7 @@ public class ScacchieraController implements Initializable {
 		mostraScacchi();
 	}
 
-	private void mostraScacchi() {
+	public void mostraScacchi() {
 		Mossa ultimaMossa = partita.getUltimaMossa();
 		if (partita.getTurno() == null)
 			turno.setText("PARTITA CONCLUSA!");
@@ -278,7 +284,7 @@ public class ScacchieraController implements Initializable {
 		}
 	}
 
-	private void disegnaPezzo(Pezzo p) {
+	protected void disegnaPezzo(Pezzo p) {
 		double sx, sy, sw = SCACCHI.getWidth() / 6, sh = SCACCHI.getHeight() / 2;//Coordinate da cui ritagliare l'immagine
 		double dx, dy, dw = 123 / scala, dh = 123 / scala;//Coordinate dove inserire l'immagine. Le dimensioni sono fisse (rappresentano la dimensione di un quadrato della scacchiera)
 		sx = sw * p.getSimbolo().ordinal();
@@ -296,7 +302,7 @@ public class ScacchieraController implements Initializable {
 		graphics.drawImage(SCACCHI, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 
-	private void mostraMosse(Pezzo p) {
+	protected void mostraMosse(Pezzo p) {
 		ArrayList<Posizione> elenco = partita.elencoMosseScacco(p);
 		//En passant
 		if (partita.getUltimaMossa() != null && (partita.getUltimaMossa().getPosFine().getRiga().ordinal() == partita.getUltimaMossa().getPosIniz().getRiga().ordinal() + 2

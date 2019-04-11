@@ -8,20 +8,11 @@ package com.scacchi.controller;
 import com.scacchi.model.Pezzo.Colore;
 import com.scacchi.model.TCP.Settings;
 import com.scacchi.model.TCP.ThreadAccetta;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import com.scacchi.model.TCP.ThreadSend;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Random;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -116,7 +107,7 @@ public class OnlineController implements Initializable {
 		new ThreadSend(ipv4_2.getText(), Integer.parseInt(ipv4_2_port.getText()), this, "richiesta").start();
 	}
 
-@FXML
+	@FXML
 	private void esci(Event event) {
 		Stage stage = (Stage) anchorPane.getScene().getWindow();
 		Scene scene = stage.getScene();
@@ -155,9 +146,14 @@ public class OnlineController implements Initializable {
 			try
 			{
 				threadAccetta.close();
+				btnHost1.setText("Host partita");
 				threadAccetta = null;
-				Settings.thread = null;
+				Settings.threadAccetta = null;
+				sbloccaTutto();
 				FunctionsController.alertInfo("Ricerca annullata", "Hai annullato la ricerca.\nOra nessuno può più connettersi a te");
+				anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
+				{
+				});
 				return;
 			}
 			catch (IOException ex)
@@ -165,38 +161,69 @@ public class OnlineController implements Initializable {
 				FunctionsController.alertErrore("Errore");
 				return;
 			}
+		anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
+		{
+			try
+			{
+				threadAccetta.close();
+			}
+			catch (IOException ex)
+			{
+				event2.consume();
+			}
+		});
 		disattivaTutto();
 		btnHost1.setDisable(false);
+		btnHost1.setText("Annulla ricerca");
 		threadAccetta = new ThreadAccetta(Settings.DEFAULTPORT, this);
-		Settings.thread = threadAccetta;
+		Settings.threadAccetta = threadAccetta;
 		threadAccetta.start();
 	}
 	
 	@FXML
+	private void cerca(ActionEvent event) {//TODO cerca in tutta la rete
+		FunctionsController.alertInfo("TODO", "TODO");
+	}
+
+	@FXML
 	private void guardaConIp(ActionEvent event) {
-		if(ipv4_1_spect.getText().equals(""))
+		if (ipv4_1_spect.getText().equals(""))
 		{
 			FunctionsController.alertErrore("Inserisci l'indirizzo del giocatore");
 			return;
 		}
 		disattivaTutto();
-		new ThreadSend(ipv4_1_spect.getText(), Settings.DEFAULTPORT, this, "richiesta spettatore").start();
+		try
+		{
+			new ThreadSend(ipv4_1_spect.getText(), Settings.DEFAULTPORT, this, "richiesta spettatore").start();
+		}
+		catch(NumberFormatException ex)
+		{
+			FunctionsController.alertErrore("La porta deve essere un numero");
+		}
 	}
-	
+
 	@FXML
 	private void guardaConPorta(ActionEvent event) {
-		if(ipv4_2_spect.getText().equals("") || ipv4_2_port_spect.getText().equals(""))
+		if (ipv4_2_spect.getText().equals("") || ipv4_2_port_spect.getText().equals(""))
 		{
 			FunctionsController.alertErrore("Riempi tutti i campi");
 			return;
 		}
 		disattivaTutto();
-		new ThreadSend(ipv4_1_spect.getText(), Integer.parseInt(ipv4_2_port_spect.getText()), this, "richiesta spettatore").start();
+		try
+		{
+			new ThreadSend(ipv4_1_spect.getText(), Integer.parseInt(ipv4_2_port_spect.getText()), this, "richiesta spettatore").start();
+		}
+		catch(NumberFormatException ex)
+		{
+			FunctionsController.alertErrore("La porta deve essere un numero");
+		}
 	}
-	
+
 	@FXML
 	private void hostConPorta(ActionEvent event) {
-		if(host_port.getText().equals(""))
+		if (host_port.getText().equals(""))
 		{
 			FunctionsController.alertErrore("Inserisci la porta su cui aprire la partita");
 			return;
@@ -204,11 +231,15 @@ public class OnlineController implements Initializable {
 		if (threadAccetta != null)
 			try
 			{
-				sbloccaTutto();
 				threadAccetta.close();
+				btnHost2.setText("Host partita");
 				threadAccetta = null;
-				Settings.thread = null;
+				Settings.threadAccetta = null;
+				sbloccaTutto();
 				FunctionsController.alertInfo("Ricerca annullata", "Hai annullato la ricerca.\nOra nessuno può più connettersi a te");
+				anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
+				{
+				});
 				return;
 			}
 			catch (IOException ex)
@@ -216,10 +247,30 @@ public class OnlineController implements Initializable {
 				FunctionsController.alertErrore("Errore");
 				return;
 			}
+		anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
+		{
+			try
+			{
+				threadAccetta.close();
+			}
+			catch (IOException ex)
+			{
+				event2.consume();
+			}
+		});
+		try
+		{
+			threadAccetta = new ThreadAccetta(Integer.parseInt(host_port.getText()), this);
+		}
+		catch(NumberFormatException ex)
+		{
+			FunctionsController.alertErrore("La porta deve essere un numero");
+			return;
+		}
 		disattivaTutto();
 		btnHost2.setDisable(false);
-		threadAccetta = new ThreadAccetta(Integer.parseInt(host_port.getText()), this);
-		Settings.thread = threadAccetta;
+		btnHost2.setText("Annulla ricerca");
+		Settings.threadAccetta = threadAccetta;
 		threadAccetta.start();
 	}
 
@@ -258,82 +309,19 @@ public class OnlineController implements Initializable {
 
 	}
 
-	private class ThreadSend extends Thread {
-
-		private final String address;
-		private final int port;
-		private final OnlineController controller;
-		private final String message;
-
-		public ThreadSend(String address, int port, OnlineController controller, String message) {
-			this.address = address;
-			this.port = port;
-			this.controller = controller;
-			this.message = message;
+	public void inizioSpettatore() {
+		Stage stage = (Stage) anchorPane.getScene().getWindow();
+		Scene scene = stage.getScene();
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/ScacchieraOnlineSpettatori.fxml"));
+		try
+		{
+			Parent root = (Parent) fxmlLoader.load();
+			anchorPane.getScene().getWindow().setHeight(598 + 39);//height + 39
+			anchorPane.getScene().getWindow().setWidth(748 + 16);//width + 16
+			scene.setRoot(root);
 		}
-
-		@Override
-		public void run() {
-			try
-			{
-				Socket socket = new Socket();
-				socket.connect(new InetSocketAddress(address, port), 500);
-
-				InputStream is = socket.getInputStream();
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-
-				OutputStream os = socket.getOutputStream();
-				OutputStreamWriter osw = new OutputStreamWriter(os);
-				BufferedWriter bw = new BufferedWriter(osw);
-
-				bw.write(message);
-				bw.newLine();
-				bw.flush();
-
-				String line = br.readLine();
-				if(line.equals("richiesta accettata"))
-				{
-					line = br.readLine();
-					if (line.equals("bianco") || line.equals("nero"))
-					{
-						Settings.player = socket;
-						Settings.playerReader = br;
-						Settings.playerWriter = bw;
-						Settings.thread = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
-						Settings.thread.start();
-						if (line.equals("bianco"))
-							Settings.schieramento = Colore.BIANCO;
-						else if (line.equals("nero"))
-							Settings.schieramento = Colore.NERO;
-					}
-					else if(line.equals("richiesta colore"))
-					{
-						Platform.runLater(() -> {
-							try
-							{
-								Settings.schieramento = scegliSchieramento();
-								if(Settings.schieramento == null)
-									Settings.schieramento = Colore.values()[Math.abs(new Random().nextInt()) % 2];
-								if(Settings.schieramento == Colore.BIANCO)
-									bw.write("nero\n");
-								else if(Settings.schieramento == Colore.NERO)
-									bw.write("bianco\n");
-								bw.flush();
-							}
-							catch (IOException ex)
-							{
-								FunctionsController.alertErrore("È avvenuto un problema nella connessione");
-							}
-						});
-					}
-				}
-			}
-			catch (IOException ex)
-			{
-				Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
-			}
-			sbloccaTutto();
+		catch (IOException ex)
+		{
 		}
 	}
 }

@@ -8,7 +8,6 @@ package com.scacchi.model.TCP;
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
 import com.scacchi.model.Pezzo;
-import com.scacchi.model.Posizione;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -20,7 +19,6 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
 
 /**
  *
@@ -37,7 +35,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 	public ThreadAccetta(int port, OnlineController controller) {
 		this.port = port;
 		this.controller = controller;
-		threadRicevi = new ThreadRicevi();
+		threadRicevi = new ThreadRicevi(controller);
 	}
 
 	@Override
@@ -68,6 +66,8 @@ public class ThreadAccetta extends Thread implements Closeable {
 				if (isFinito)
 				{
 					socket.close();
+					server.close();
+					Settings.schieramento = null;
 					return;
 				}
 
@@ -129,6 +129,13 @@ public class ThreadAccetta extends Thread implements Closeable {
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
+					String temp = br.readLine();
+					if(temp.equals("richiesta verso"))//È sempre questa (passerà sempre in questo if)
+					{
+						bw.write(Settings.schieramento.toString());
+						bw.newLine();
+						bw.flush();
+					}
 				}
 			}
 			catch (IOException ex)
@@ -164,86 +171,5 @@ public class ThreadAccetta extends Thread implements Closeable {
 			Settings.partita.fine();
 			Settings.scacchieraOnlineController.mostraScacchi();
 		});
-	}
-
-	private class ThreadRicevi extends Thread implements Closeable {
-
-		@Override
-		public void run() {
-			Platform.runLater(() -> controller.inizioPartita());
-			while (true)
-			{
-				try
-				{
-					String line = Settings.playerReader.readLine();
-					if (line == null)
-					{
-						Platform.runLater(() ->
-						{
-							Settings.scacchieraOnlineController.disattivaBottoni();
-							Alert alert = new Alert(Alert.AlertType.INFORMATION);
-							if (Settings.partita.getTurno() == null || Settings.partita.getMosse().isEmpty())
-								alert.setTitle("Info");
-							else
-								alert.setContentText("Hai vinto!");
-							alert.setContentText("L'avversario ha abbandonato la partita");
-							alert.show();
-							Settings.partita.fine();
-						});
-						Settings.thread.close();
-						return;
-					}
-					if (line.equals("resa"))
-						Platform.runLater(() -> Settings.scacchieraOnlineController.finePartita("resa", Settings.schieramento));
-					else if (line.substring(0, 5).equals("mossa"))
-					{
-						String temp = line.substring(6, line.length());//lunghezza di 5 caratteri
-						Posizione pos1 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(temp.charAt(1))], Posizione.Colonna.getFromChar(temp.charAt(0)));
-						Posizione pos2 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(temp.charAt(3))], Posizione.Colonna.getFromChar(temp.charAt(2)));
-						Platform.runLater(() -> Settings.partita.muovi(Settings.partita.trovaPezzo(pos1), pos2));
-						if (temp.charAt(4) != '0')
-							Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
-						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
-						if (Settings.spettatoriWriters != null)
-							for (BufferedWriter bw : Settings.spettatoriWriters)
-							{
-								bw.write(line);
-								bw.newLine();
-								bw.flush();
-							}
-					}
-					else if (line.equals("richiesta patta"))
-						Platform.runLater(() ->
-						{
-							boolean isPatta = Settings.scacchieraOnlineController.richiestaPatta();
-							Settings.scacchieraOnlineController.confermaPatta(isPatta);
-						});
-					else if (line.equals("conferma patta"))
-						Platform.runLater(() -> Settings.scacchieraOnlineController.finePartita("patta", null));
-					else if (line.equals("rifiuto patta"))
-						Platform.runLater(() -> FunctionsController.alertInfo("Patta rifiutata", "La tua richiesta di patta è stata rifiutata"));
-					else if (line.equals("richiesta restart"))
-						Platform.runLater(() ->
-						{
-							boolean isRestart = Settings.scacchieraOnlineController.richiestaRestart();
-							Settings.scacchieraOnlineController.confermaRestart(isRestart);
-						});
-					else if (line.equals("conferma restart"))
-						Platform.runLater(() -> Settings.scacchieraOnlineController.ricomincia());
-					else if (line.equals("rifiuto restart"))
-						Platform.runLater(() -> FunctionsController.alertInfo("Restart rifiutato", "La tua richiesta di ricominciare è stata rifiutata"));
-				}
-				catch (IOException ex)
-				{
-					if(ex.getMessage().equals("Socket closed"))
-						return;
-				}
-			}
-		}
-
-		@Override
-		public void close() throws IOException {
-			isFinito = true;
-		}
 	}
 }
