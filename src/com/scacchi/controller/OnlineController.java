@@ -116,7 +116,7 @@ public class OnlineController implements Initializable {
 		new ThreadSend(ipv4_2.getText(), Integer.parseInt(ipv4_2_port.getText()), this, "richiesta").start();
 	}
 
-	@FXML
+@FXML
 	private void esci(Event event) {
 		Stage stage = (Stage) anchorPane.getScene().getWindow();
 		Scene scene = stage.getScene();

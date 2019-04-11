@@ -20,7 +20,10 @@ import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
@@ -31,6 +34,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 /**
@@ -58,6 +62,22 @@ public class ScacchieraOnlineController implements Initializable {
 	private static final Image SCACCHIERA_INV = new Image("com/scacchi/view/img/scacchiera_inv.jpg");
 	private static final Image SCACCHI = new Image("com/scacchi/view/img/scacchi.png");
 
+	@FXML
+	private void menu(ActionEvent event) {
+		Stage stage = (Stage) anchorPane.getScene().getWindow();
+		Scene scene = stage.getScene();
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/MenuPrincipale.fxml"));
+		try
+		{
+			Parent root = (Parent) fxmlLoader.load();
+			scene.setRoot(root);
+		}
+		catch (IOException ex)
+		{
+			FunctionsController.alertErrore(ex.getMessage());
+		}
+	}
+	
 	@FXML
 	private void click(MouseEvent event) {
 		double x = event.getSceneX() * scala;
@@ -190,12 +210,22 @@ public class ScacchieraOnlineController implements Initializable {
 
 	@FXML
 	private void resa(ActionEvent event) {
+		Alert scelta = new Alert(Alert.AlertType.NONE);
+		scelta.setTitle("Sicuro?");
+		scelta.setContentText("Sei sicuro di volerti arrendere?");
+		ButtonType SI = new ButtonType("Si");
+		ButtonType NO = new ButtonType("No");
+		scelta.getButtonTypes().addAll(SI, NO);
+		Optional<ButtonType> option = scelta.showAndWait();
+		if(option.get() == NO)
+			return;
 		sendMessage("resa");
 		partita.fine();
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Fine partita!");
 		alert.setContentText("Vicitore: " + Settings.schieramento.notThis() + " per resa");
 		alert.show();
+		mostraScacchi();
 	}
 
 	@FXML

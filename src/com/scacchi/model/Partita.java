@@ -796,4 +796,14 @@ public class Partita {
 		}
 		return false;
 	}
+	
+	/**
+	 * To string che ritorna la visualizzazione della partita con uno standard che viene utilizzato per controllare la ripetizione di mosse
+	 * 
+	 * @return la codifica per l'ultima posizione della scacchiera
+	 */
+	@Override
+	public String toString() {
+		return ripetizioneMosse.get(ripetizioneMosse.size()-1);
+	}
 }

@@ -57,14 +57,14 @@ public class ThreadAccetta extends Thread implements Closeable {
 			});
 			return;
 		}
-		if(Settings.schieramento == null)
+		if (Settings.schieramento == null)
 			Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento());
 		while (true)
 		{
 			try
 			{
 				Socket socket = server.accept();
-				if(isFinito)
+				if (isFinito)
 				{
 					socket.close();
 					return;
@@ -100,7 +100,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 							bw.write("richiesta colore\n");
 							bw.flush();
 							line = br.readLine();
-							if(line.equals("bianco"))
+							if (line.equals("bianco"))
 								Settings.schieramento = Pezzo.Colore.BIANCO;
 							else
 								Settings.schieramento = Pezzo.Colore.NERO;
@@ -122,6 +122,9 @@ public class ThreadAccetta extends Thread implements Closeable {
 				{
 					bw.write("richiesta accettata\n");
 					bw.flush();
+					bw.write(Settings.partita.toString());
+					bw.newLine();
+					bw.flush();
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
@@ -137,7 +140,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 	@Override
 	public void close() throws IOException {//TODO chiusura thread
 		isFinito = true;
-		if(threadRicevi != null && threadRicevi.isAlive())
+		if (threadRicevi != null && threadRicevi.isAlive())
 			threadRicevi.close();
 		Socket temp = new Socket("localhost", port);
 		temp.close();
@@ -175,10 +178,15 @@ public class ThreadAccetta extends Thread implements Closeable {
 						Posizione pos2 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(temp.charAt(3))], Posizione.Colonna.getFromChar(temp.charAt(2)));
 						Platform.runLater(() -> Settings.partita.muovi(Settings.partita.trovaPezzo(pos1), pos2));
 						if (temp.charAt(4) != '0')
-						{
 							Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
-						}
 						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
+						if(Settings.spettatoriWriters != null)
+							for (BufferedWriter bw : Settings.spettatoriWriters)
+							{
+								bw.write(line);
+								bw.newLine();
+								bw.flush();
+							}
 					}
 					else if (line.equals("richiesta patta"))
 						Platform.runLater(() ->
@@ -203,12 +211,9 @@ public class ThreadAccetta extends Thread implements Closeable {
 				}
 				catch (IOException ex)
 				{
-					if(isFinito)
-					{
-						Platform.runLater(() -> FunctionsController.alertInfo("Ciao", "Thread ricezione chiuso"));
+					if (isFinito)
 						return;
-					}
-					if(ex.getMessage().equals("connection reset"))
+					if (ex.getMessage().equals("connection reset"))
 					{
 						Platform.runLater(() -> FunctionsController.alertErrore("L'avversario ha abbandonato"));
 						return;
