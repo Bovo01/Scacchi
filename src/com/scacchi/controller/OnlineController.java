@@ -204,6 +204,7 @@ public class OnlineController implements Initializable {
 		if (threadAccetta != null)
 			try
 			{
+				sbloccaTutto();
 				threadAccetta.close();
 				threadAccetta = null;
 				Settings.thread = null;
@@ -305,7 +306,6 @@ public class OnlineController implements Initializable {
 							Settings.schieramento = Colore.BIANCO;
 						else if (line.equals("nero"))
 							Settings.schieramento = Colore.NERO;
-						Platform.runLater(() -> inizioPartita());
 					}
 					else if(line.equals("richiesta colore"))
 					{
@@ -320,7 +320,6 @@ public class OnlineController implements Initializable {
 								else if(Settings.schieramento == Colore.NERO)
 									bw.write("bianco\n");
 								bw.flush();
-								inizioPartita();
 							}
 							catch (IOException ex)
 							{

@@ -57,12 +57,18 @@ public class ThreadAccetta extends Thread implements Closeable {
 			});
 			return;
 		}
-		Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento());
+		if(Settings.schieramento == null)
+			Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento());
 		while (true)
 		{
 			try
 			{
 				Socket socket = server.accept();
+				if(isFinito)
+				{
+					socket.close();
+					return;
+				}
 
 				InputStream is = socket.getInputStream();
 				InputStreamReader isr = new InputStreamReader(is);
@@ -103,7 +109,6 @@ public class ThreadAccetta extends Thread implements Closeable {
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;
 						threadRicevi.start();
-						Platform.runLater(() -> controller.inizioPartita());
 					}
 					else
 					{
@@ -124,31 +129,20 @@ public class ThreadAccetta extends Thread implements Closeable {
 			}
 			catch (IOException ex)
 			{
-				System.out.println(ex.getMessage());
+				Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
 			}
 		}
 	}
 
 	@Override
 	public void close() throws IOException {//TODO chiusura thread
-		if(threadRicevi != null)
+		isFinito = true;
+		if(threadRicevi != null && threadRicevi.isAlive())
 			threadRicevi.close();
-		if (Settings.playerReader != null)
-			Settings.playerReader.close();
-		if (Settings.playerWriter != null)
-			Settings.playerWriter.close();
+		Socket temp = new Socket("localhost", port);
+		temp.close();
 		if (Settings.player != null)
 			Settings.player.close();
-		if (Settings.spettatoriReaders != null)
-			for (BufferedReader br : Settings.spettatoriReaders)
-			{
-				br.close();
-			}
-		if (Settings.spettatoriWriters != null)
-			for (BufferedWriter bw : Settings.spettatoriWriters)
-			{
-				bw.close();
-			}
 		if (Settings.spettatori != null)
 			for (Socket socket : Settings.spettatori)
 			{
@@ -160,8 +154,6 @@ public class ThreadAccetta extends Thread implements Closeable {
 		Settings.spettatori = null;
 		Settings.spettatoriReaders = null;
 		Settings.spettatoriWriters = null;
-		//Blocco di thread
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	private class ThreadRicevi extends Thread implements Closeable {
@@ -211,14 +203,24 @@ public class ThreadAccetta extends Thread implements Closeable {
 				}
 				catch (IOException ex)
 				{
-					System.out.println(ex.getMessage());
+					if(isFinito)
+					{
+						Platform.runLater(() -> FunctionsController.alertInfo("Ciao", "Thread ricezione chiuso"));
+						return;
+					}
+					if(ex.getMessage().equals("connection reset"))
+					{
+						Platform.runLater(() -> FunctionsController.alertErrore("L'avversario ha abbandonato"));
+						return;
+					}
+					Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
 				}
 			}
 		}
 
 		@Override
-		public void close() throws IOException {//TODO chiusura thread
-			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		public void close() throws IOException {
+			isFinito = true;
 		}
 	}
 }
