@@ -46,7 +46,7 @@ public class Partita {
 	public Partita(String code) {
 		neri = new ArrayList<>();
 		bianchi = new ArrayList<>();
-		decodeScacchiera(code);
+		decodeScacchiera(code);//TODO turno e/o ultima mossa
 	}
 
 	/**

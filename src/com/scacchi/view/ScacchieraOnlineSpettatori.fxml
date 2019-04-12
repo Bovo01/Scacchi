@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" fx:id="anchorPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.scacchi.controller.ScacchieraOnlineController">
+<AnchorPane id="AnchorPane" fx:id="anchorPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.scacchi.controller.ScacchieraOnlineSpettatoriController">
    <children>
       <BorderPane prefHeight="598.0" prefWidth="748.0">
          <center>

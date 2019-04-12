@@ -6,6 +6,7 @@
 package com.scacchi.model.TCP;
 
 import com.scacchi.controller.ScacchieraOnlineController;
+import com.scacchi.controller.ScacchieraOnlineSpettatoriController;
 import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ public class Settings {//SPORCO
 	public static Partita partita;
 	public static Pezzo.Colore schieramento;
 	public static ScacchieraOnlineController scacchieraOnlineController;
+	public static ScacchieraOnlineSpettatoriController scacchieraOnlineSpettatoriController;
 	//Thread
 	public static ThreadAccetta threadAccetta;
 	public static ThreadRicevi threadRicevi;//Serve solo agli spettatori

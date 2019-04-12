@@ -12,8 +12,6 @@ import com.scacchi.model.TCP.ThreadRicevi;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,12 +35,12 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		graphics = canvas.getGraphicsContext2D();
-		partita = new Partita();
-		Settings.partita = partita;
+		partita = Settings.partita;
 		scala = SCACCHIERA_DIM / canvas.getWidth();
 		try
 		{
-			Settings.playerWriter.write("richiesta verso");
+			Settings.playerWriter.write("richiesta verso\n");
+			Settings.playerWriter.flush();
 			String line = Settings.playerReader.readLine();
 			if(line.equals("bianco"))
 				Settings.schieramento = BIANCO;
@@ -57,6 +55,8 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		if(versoScacchiera == NERO)
 			scacchiera.setImage(SCACCHIERA_INV);
 		Settings.threadRicevi.start();
+		Settings.scacchieraOnlineSpettatoriController = this;
+		mostraScacchi();
 	}
 	
 	@FXML
@@ -82,8 +82,8 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		try
 		{
 			Parent root = (Parent) fxmlLoader.load();
-			stage.setHeight(598 + 39);//height + 39
-			stage.setWidth(748 + 16);//width + 16
+			stage.setHeight(400 + 39);//height + 39
+			stage.setWidth(600 + 16);//width + 16
 			scene.setRoot(root);
 		}
 		catch (IOException ex)

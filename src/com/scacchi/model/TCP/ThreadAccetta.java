@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import javafx.application.Platform;
 
 /**
@@ -126,10 +127,16 @@ public class ThreadAccetta extends Thread implements Closeable {
 					bw.write(Settings.partita.toString());
 					bw.newLine();
 					bw.flush();
+					String temp = br.readLine();
+					if(Settings.spettatori == null)
+						Settings.spettatori = new ArrayList<>();
+					if(Settings.spettatoriReaders == null)
+						Settings.spettatoriReaders = new ArrayList<>();
+					if(Settings.spettatoriWriters == null)
+						Settings.spettatoriWriters = new ArrayList<>();
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
-					String temp = br.readLine();
 					if(temp.equals("richiesta verso"))//È sempre questa (passerà sempre in questo if)
 					{
 						bw.write(Settings.schieramento.toString());

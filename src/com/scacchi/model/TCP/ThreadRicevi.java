@@ -28,9 +28,14 @@ public class ThreadRicevi extends Thread implements Closeable {
 		this.controller = controller;
 	}
 	
+	public ThreadRicevi() {
+		
+	}
+	
 	@Override
 	public void run() {
-		Platform.runLater(() -> controller.inizioPartita());
+		if(controller != null)
+			Platform.runLater(() -> controller.inizioPartita());
 		while (true)
 		{
 			try
@@ -63,7 +68,10 @@ public class ThreadRicevi extends Thread implements Closeable {
 					Platform.runLater(() -> Settings.partita.muovi(Settings.partita.trovaPezzo(pos1), pos2));
 					if (temp.charAt(4) != '0')
 						Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
-					Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
+					if(Settings.scacchieraOnlineController != null)
+						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
+					else if(Settings.scacchieraOnlineSpettatoriController != null)
+						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
 					if (Settings.spettatoriWriters != null)
 						for (BufferedWriter bw : Settings.spettatoriWriters)
 						{
@@ -95,7 +103,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 			}
 			catch (IOException ex)
 			{
-				if (ex.getMessage().equals("Socket closed"))
+				if (ex.getMessage().equals("Socket closed") || isFinito)
 					return;
 			}
 		}
@@ -104,5 +112,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 	@Override
 	public void close() throws IOException {
 		isFinito = true;
+		if(Settings.player != null && !Settings.player.isClosed())
+			Settings.player.close();
 	}
 }

@@ -105,7 +105,7 @@ public class ThreadSend extends Thread {
 						Settings.player = socket;
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;
-						Settings.threadRicevi = new ThreadRicevi(controller);
+						Settings.threadRicevi = new ThreadRicevi();
 						Platform.runLater(() -> controller.inizioSpettatore());
 					}
 				}

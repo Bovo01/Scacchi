@@ -316,8 +316,8 @@ public class OnlineController implements Initializable {
 		try
 		{
 			Parent root = (Parent) fxmlLoader.load();
-			anchorPane.getScene().getWindow().setHeight(598 + 39);//height + 39
-			anchorPane.getScene().getWindow().setWidth(748 + 16);//width + 16
+			scene.getWindow().setHeight(598 + 39);//height + 39
+			scene.getWindow().setWidth(748 + 16);//width + 16
 			scene.setRoot(root);
 		}
 		catch (IOException ex)
