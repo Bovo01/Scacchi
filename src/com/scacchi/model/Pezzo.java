@@ -102,11 +102,6 @@ public class Pezzo implements Cloneable {
 				return NERO;
 			return BIANCO;
 		}
-		
-		@Override
-		public String toString() {
-			return this == BIANCO ? "bianco" : "nero";
-		}
 	}
 
 	@Override

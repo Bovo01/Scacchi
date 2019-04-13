@@ -32,6 +32,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 	private final ThreadRicevi threadRicevi;
 	private final OnlineController controller;
 	private boolean isFinito;
+	private ServerSocket server;
 
 	public ThreadAccetta(int port, OnlineController controller) {
 		this.port = port;
@@ -43,7 +44,6 @@ public class ThreadAccetta extends Thread implements Closeable {
 	public void run() {
 		if (Settings.player != null)
 			threadRicevi.start();
-		ServerSocket server;
 		try
 		{
 			server = new ServerSocket(port);
@@ -127,7 +127,6 @@ public class ThreadAccetta extends Thread implements Closeable {
 					bw.write(Settings.partita.toString());
 					bw.newLine();
 					bw.flush();
-					String temp = br.readLine();
 					if(Settings.spettatori == null)
 						Settings.spettatori = new ArrayList<>();
 					if(Settings.spettatoriReaders == null)
@@ -137,16 +136,15 @@ public class ThreadAccetta extends Thread implements Closeable {
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
-					if(temp.equals("richiesta verso"))//È sempre questa (passerà sempre in questo if)
-					{
-						bw.write(Settings.schieramento.toString());
-						bw.newLine();
-						bw.flush();
-					}
+					bw.write(Settings.schieramento.toString().toLowerCase());
+					bw.newLine();
+					bw.flush();
 				}
 			}
 			catch (IOException ex)
 			{
+				if(isFinito)
+					return;
 				Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
 			}
 		}
@@ -157,9 +155,8 @@ public class ThreadAccetta extends Thread implements Closeable {
 		isFinito = true;
 		if (threadRicevi != null && threadRicevi.isAlive())
 			threadRicevi.close();
-		Socket temp = new Socket("localhost", port);
-		temp.close();
-		if (Settings.player != null)
+		server.close();
+		if (Settings.player != null && !Settings.player.isClosed())
 			Settings.player.close();
 		if (Settings.spettatori != null)
 			for (Socket socket : Settings.spettatori)
@@ -172,6 +169,8 @@ public class ThreadAccetta extends Thread implements Closeable {
 		Settings.spettatori = null;
 		Settings.spettatoriReaders = null;
 		Settings.spettatoriWriters = null;
+		Settings.schieramento = null;
+		Settings.threadAccetta = null;
 		Platform.runLater(() -> {
 			if(Settings.scacchieraOnlineController == null)
 				return;

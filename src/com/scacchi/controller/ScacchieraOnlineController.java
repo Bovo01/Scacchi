@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,7 +29,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 /**
  *
@@ -41,9 +39,9 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	@FXML
 	private AnchorPane anchorPane;
 	@FXML
-	private Button resa;
+	public Button resa;
 	@FXML
-	private Button patta;
+	public Button patta;
 	@FXML
 	private Button restart;
 
@@ -75,7 +73,6 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			scene.getWindow().setHeight(400 + 39);
 			scene.getWindow().setWidth(600 + 16);
 			scene.setRoot(root);
-			scene.getWindow().setOnCloseRequest(((event2) -> {}));
 		}
 		catch (IOException ex)
 		{
@@ -181,6 +178,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 
 	public void ricomincia() {
 		Settings.partita = new Partita();
+		partita = Settings.partita;
 		pos1 = null;
 		pos2 = null;
 		mostraScacchi();
@@ -193,6 +191,8 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		{
 			alert.setContentText("Restart accettato");
 			sendMessage("conferma restart");
+			resa.setDisable(false);
+			patta.setDisable(false);
 			ricomincia();
 		}
 		else
@@ -231,6 +231,8 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		alert.setTitle("Fine partita!");
 		alert.setContentText("Vicitore: " + Settings.schieramento.notThis() + " per resa");
 		alert.show();
+		resa.setDisable(true);
+		patta.setDisable(true);
 		mostraScacchi();
 	}
 
@@ -264,7 +266,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 
 	public void pattaRifiutata() {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Patta rifiutat");
+		alert.setTitle("Patta rifiutata");
 		alert.setContentText("La tua richiesta di patta è stata rifiutata");
 		alert.show();
 	}
@@ -277,6 +279,8 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			alert.setContentText("Patta accettata");
 			sendMessage("conferma patta");
 			Settings.partita.fine();
+			resa.setDisable(true);
+			patta.setDisable(true);
 			mostraScacchi();
 		}
 		else
@@ -299,18 +303,6 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			scacchiera.setImage(SCACCHIERA_INV);
 		Settings.scacchieraOnlineController = this;
 		mostraScacchi();
-		Platform.runLater(() -> anchorPane.getScene().getWindow().setOnCloseRequest((WindowEvent event) ->
-		{
-			try
-			{
-				Settings.threadAccetta.close();
-			}
-			catch (IOException ex)
-			{
-				if(Settings.threadAccetta.isAlive())
-					event.consume();
-			}
-		}));
 	}
 
 	private void sendMessage(String message) {
@@ -319,7 +311,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			Settings.playerWriter.write(message);
 			Settings.playerWriter.newLine();
 			Settings.playerWriter.flush();
-			if(message.substring(0, 6).equals("mossa") && Settings.spettatoriWriters != null)
+			if(message.length() > 5 && message.substring(0, 5).equals("mossa") && Settings.spettatoriWriters != null)
 				for(BufferedWriter bw : Settings.spettatoriWriters)
 				{
 					bw.write(message);

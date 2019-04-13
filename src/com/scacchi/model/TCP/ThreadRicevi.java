@@ -7,6 +7,7 @@ package com.scacchi.model.TCP;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
+import com.scacchi.controller.ScacchieraOnlineController;
 import com.scacchi.model.Pezzo;
 import com.scacchi.model.Posizione;
 import java.io.BufferedWriter;
@@ -23,18 +24,18 @@ public class ThreadRicevi extends Thread implements Closeable {
 
 	private OnlineController controller;
 	private boolean isFinito;
-	
+
 	public ThreadRicevi(OnlineController controller) {
 		this.controller = controller;
 	}
-	
+
 	public ThreadRicevi() {
-		
+
 	}
-	
+
 	@Override
 	public void run() {
-		if(controller != null)
+		if (controller != null)
 			Platform.runLater(() -> controller.inizioPartita());
 		while (true)
 		{
@@ -59,7 +60,12 @@ public class ThreadRicevi extends Thread implements Closeable {
 					return;
 				}
 				if (line.equals("resa"))
-					Platform.runLater(() -> Settings.scacchieraOnlineController.finePartita("resa", Settings.schieramento));
+					Platform.runLater(() ->
+					{
+						Settings.scacchieraOnlineController.finePartita("resa", Settings.schieramento);
+						Settings.scacchieraOnlineController.patta.setDisable(true);
+						Settings.scacchieraOnlineController.resa.setDisable(true);
+					});
 				else if (line.substring(0, 5).equals("mossa"))
 				{
 					String temp = line.substring(6, line.length());//lunghezza di 5 caratteri
@@ -68,9 +74,9 @@ public class ThreadRicevi extends Thread implements Closeable {
 					Platform.runLater(() -> Settings.partita.muovi(Settings.partita.trovaPezzo(pos1), pos2));
 					if (temp.charAt(4) != '0')
 						Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
-					if(Settings.scacchieraOnlineController != null)
+					if (Settings.scacchieraOnlineController != null)
 						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
-					else if(Settings.scacchieraOnlineSpettatoriController != null)
+					else if (Settings.scacchieraOnlineSpettatoriController != null)
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
 					if (Settings.spettatoriWriters != null)
 						for (BufferedWriter bw : Settings.spettatoriWriters)
@@ -87,7 +93,12 @@ public class ThreadRicevi extends Thread implements Closeable {
 						Settings.scacchieraOnlineController.confermaPatta(isPatta);
 					});
 				else if (line.equals("conferma patta"))
-					Platform.runLater(() -> Settings.scacchieraOnlineController.finePartita("patta", null));
+					Platform.runLater(() ->
+					{
+						Settings.scacchieraOnlineController.finePartita("patta", null);
+						Settings.scacchieraOnlineController.patta.setDisable(true);
+						Settings.scacchieraOnlineController.resa.setDisable(true);
+					});
 				else if (line.equals("rifiuto patta"))
 					Platform.runLater(() -> FunctionsController.alertInfo("Patta rifiutata", "La tua richiesta di patta è stata rifiutata"));
 				else if (line.equals("richiesta restart"))
@@ -97,7 +108,12 @@ public class ThreadRicevi extends Thread implements Closeable {
 						Settings.scacchieraOnlineController.confermaRestart(isRestart);
 					});
 				else if (line.equals("conferma restart"))
-					Platform.runLater(() -> Settings.scacchieraOnlineController.ricomincia());
+					Platform.runLater(() ->
+					{
+						Settings.scacchieraOnlineController.ricomincia();
+						Settings.scacchieraOnlineController.patta.setDisable(false);
+						Settings.scacchieraOnlineController.resa.setDisable(false);
+					});
 				else if (line.equals("rifiuto restart"))
 					Platform.runLater(() -> FunctionsController.alertInfo("Restart rifiutato", "La tua richiesta di ricominciare è stata rifiutata"));
 			}
@@ -112,7 +128,10 @@ public class ThreadRicevi extends Thread implements Closeable {
 	@Override
 	public void close() throws IOException {
 		isFinito = true;
-		if(Settings.player != null && !Settings.player.isClosed())
+		if (Settings.player != null && !Settings.player.isClosed())
 			Settings.player.close();
+		Settings.player = null;
+		Settings.playerReader = null;
+		Settings.playerWriter = null;
 	}
 }

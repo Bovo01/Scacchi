@@ -5,7 +5,6 @@
  */
 package com.scacchi.controller;
 
-import com.scacchi.model.Partita;
 import static com.scacchi.model.Pezzo.Colore.*;
 import com.scacchi.model.TCP.Settings;
 import com.scacchi.model.TCP.ThreadRicevi;
@@ -37,21 +36,7 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		graphics = canvas.getGraphicsContext2D();
 		partita = Settings.partita;
 		scala = SCACCHIERA_DIM / canvas.getWidth();
-		try
-		{
-			Settings.playerWriter.write("richiesta verso\n");
-			Settings.playerWriter.flush();
-			String line = Settings.playerReader.readLine();
-			if(line.equals("bianco"))
-				Settings.schieramento = BIANCO;
-			else
-				Settings.schieramento = NERO;
-			versoScacchiera = Settings.schieramento;
-		}
-		catch (IOException ex)
-		{
-			FunctionsController.alertErrore(ex.getMessage());
-		}
+		versoScacchiera = Settings.schieramento;
 		if(versoScacchiera == NERO)
 			scacchiera.setImage(SCACCHIERA_INV);
 		Settings.threadRicevi.start();

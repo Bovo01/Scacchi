@@ -9,6 +9,8 @@ import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
 import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
+import static com.scacchi.model.Pezzo.Colore.BIANCO;
+import static com.scacchi.model.Pezzo.Colore.NERO;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -102,6 +104,11 @@ public class ThreadSend extends Thread {
 					else//Spettatore (inviata la partita)
 					{
 						Settings.partita = new Partita(line);
+						line = Settings.playerReader.readLine();
+						if(line.equals("bianco"))
+							Settings.schieramento = BIANCO;
+						else
+							Settings.schieramento = NERO;
 						Settings.player = socket;
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;

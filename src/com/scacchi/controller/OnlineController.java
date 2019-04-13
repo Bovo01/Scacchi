@@ -72,8 +72,6 @@ public class OnlineController implements Initializable {
 	@FXML
 	private Button btnSpect2;
 
-	private ThreadAccetta threadAccetta;
-
 	private void disattivaTutto() {
 		tabEsci.setOnSelectionChanged((event) -> event.consume());
 		btnCerca1.setDisable(true);
@@ -142,18 +140,14 @@ public class OnlineController implements Initializable {
 
 	@FXML
 	private void host(ActionEvent event) {
-		if (threadAccetta != null)
+		if (Settings.threadAccetta != null)
 			try
 			{
-				threadAccetta.close();
+				Settings.threadAccetta.close();
 				btnHost1.setText("Host partita");
-				threadAccetta = null;
 				Settings.threadAccetta = null;
 				sbloccaTutto();
 				FunctionsController.alertInfo("Ricerca annullata", "Hai annullato la ricerca.\nOra nessuno può più connettersi a te");
-				anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
-				{
-				});
 				return;
 			}
 			catch (IOException ex)
@@ -161,23 +155,11 @@ public class OnlineController implements Initializable {
 				FunctionsController.alertErrore("Errore");
 				return;
 			}
-		anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
-		{
-			try
-			{
-				threadAccetta.close();
-			}
-			catch (IOException ex)
-			{
-				event2.consume();
-			}
-		});
 		disattivaTutto();
 		btnHost1.setDisable(false);
 		btnHost1.setText("Annulla ricerca");
-		threadAccetta = new ThreadAccetta(Settings.DEFAULTPORT, this);
-		Settings.threadAccetta = threadAccetta;
-		threadAccetta.start();
+		Settings.threadAccetta = new ThreadAccetta(Settings.DEFAULTPORT, this);
+		Settings.threadAccetta.start();
 	}
 	
 	@FXML
@@ -228,12 +210,11 @@ public class OnlineController implements Initializable {
 			FunctionsController.alertErrore("Inserisci la porta su cui aprire la partita");
 			return;
 		}
-		if (threadAccetta != null)
+		if (Settings.threadAccetta != null)
 			try
 			{
-				threadAccetta.close();
+				Settings.threadAccetta.close();
 				btnHost2.setText("Host partita");
-				threadAccetta = null;
 				Settings.threadAccetta = null;
 				sbloccaTutto();
 				FunctionsController.alertInfo("Ricerca annullata", "Hai annullato la ricerca.\nOra nessuno può più connettersi a te");
@@ -247,20 +228,9 @@ public class OnlineController implements Initializable {
 				FunctionsController.alertErrore("Errore");
 				return;
 			}
-		anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
-		{
-			try
-			{
-				threadAccetta.close();
-			}
-			catch (IOException ex)
-			{
-				event2.consume();
-			}
-		});
 		try
 		{
-			threadAccetta = new ThreadAccetta(Integer.parseInt(host_port.getText()), this);
+			Settings.threadAccetta = new ThreadAccetta(Integer.parseInt(host_port.getText()), this);
 		}
 		catch(NumberFormatException ex)
 		{
@@ -270,8 +240,7 @@ public class OnlineController implements Initializable {
 		disattivaTutto();
 		btnHost2.setDisable(false);
 		btnHost2.setText("Annulla ricerca");
-		Settings.threadAccetta = threadAccetta;
-		threadAccetta.start();
+		Settings.threadAccetta.start();
 	}
 
 	public void inizioPartita() {
