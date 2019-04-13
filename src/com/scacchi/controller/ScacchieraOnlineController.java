@@ -78,6 +78,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		{
 			FunctionsController.alertErrore(ex.getMessage());
 		}
+		Settings.scacchieraOnlineController = null;
 	}
 
 	@FXML
@@ -311,6 +312,12 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			Settings.playerWriter.write(message);
 			Settings.playerWriter.newLine();
 			Settings.playerWriter.flush();
+			if(Settings.partita.isFinita() && Settings.spettatori != null)
+				for(BufferedWriter bw : Settings.spettatoriWriters)
+				{
+					bw.write("fine\n");
+					bw.flush();
+				}
 			if(message.length() > 5 && message.substring(0, 5).equals("mossa") && Settings.spettatoriWriters != null)
 				for(BufferedWriter bw : Settings.spettatoriWriters)
 				{

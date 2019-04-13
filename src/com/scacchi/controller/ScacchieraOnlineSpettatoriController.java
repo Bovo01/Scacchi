@@ -74,5 +74,6 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		catch (IOException ex)
 		{
 		}
+		Settings.scacchieraOnlineSpettatoriController = null;
 	}
 }

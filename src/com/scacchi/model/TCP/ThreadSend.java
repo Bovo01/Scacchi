@@ -103,8 +103,8 @@ public class ThreadSend extends Thread {
 					}
 					else//Spettatore (inviata la partita)
 					{
-						Settings.partita = new Partita(line);
-						line = Settings.playerReader.readLine();
+						Settings.partita = new Partita(line, br.readLine().equals("bianco") ? BIANCO : NERO);
+						line = br.readLine();
 						if(line.equals("bianco"))
 							Settings.schieramento = BIANCO;
 						else
@@ -115,6 +115,11 @@ public class ThreadSend extends Thread {
 						Settings.threadRicevi = new ThreadRicevi();
 						Platform.runLater(() -> controller.inizioSpettatore());
 					}
+				}
+				else
+				{
+					Platform.runLater(() -> FunctionsController.alertErrore("Non è stato possibile connettersi"));
+					return;
 				}
 			}
 			catch (IOException ex)

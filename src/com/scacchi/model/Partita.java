@@ -39,13 +39,17 @@ public class Partita {
 	}
 	
 	/**
-	 * Costruttore che inizia la partita dato un coding ben definito
+	 * Costruttore che inizia la partita dato un coding ben definito e il turno attuale
 	 * 
 	 * @param code il coding della partita
+	 * @param turno il turno corrente
 	 */
-	public Partita(String code) {
-		neri = new ArrayList<>();
-		bianchi = new ArrayList<>();
+	public Partita(String code, Colore turno) {
+		this.turno = turno;
+		this.neri = new ArrayList<>();
+		this.bianchi = new ArrayList<>();
+		this.mosse = new ArrayList<>();
+		this.ripetizioneMosse = new ArrayList<>();
 		decodeScacchiera(code);//TODO turno e/o ultima mossa
 	}
 
@@ -63,10 +67,6 @@ public class Partita {
 
 	public ArrayList<Mossa> getMosse() {
 		return mosse;
-	}
-
-	public void setUltimaMossa(Mossa ultimaMossa) {
-		this.ultimaMossa = ultimaMossa;
 	}
 
 	public void fine() {
@@ -477,7 +477,7 @@ public class Partita {
 	 *
 	 * @return true se la partita è conclusa, false altrimenti
 	 */
-	private boolean isFinita() {
+	public boolean isFinita() {
 		if (isStallo(NERO) || isStallo(BIANCO))
 			return true;
 		if (isScaccoMatto(NERO) || isScaccoMatto(BIANCO))

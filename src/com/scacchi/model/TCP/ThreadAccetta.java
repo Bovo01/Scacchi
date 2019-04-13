@@ -124,7 +124,10 @@ public class ThreadAccetta extends Thread implements Closeable {
 				{
 					bw.write("richiesta accettata\n");
 					bw.flush();
-					bw.write(Settings.partita.toString());
+					bw.write(Settings.partita.toString());//Invio partita
+					bw.newLine();
+					bw.flush();
+					bw.write(Settings.partita.getTurno().toString().toLowerCase());//Invio turno attuale
 					bw.newLine();
 					bw.flush();
 					if(Settings.spettatori == null)
@@ -136,7 +139,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
-					bw.write(Settings.schieramento.toString().toLowerCase());
+					bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
 					bw.newLine();
 					bw.flush();
 				}

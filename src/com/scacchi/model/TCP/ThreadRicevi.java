@@ -7,7 +7,6 @@ package com.scacchi.model.TCP;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
-import com.scacchi.controller.ScacchieraOnlineController;
 import com.scacchi.model.Pezzo;
 import com.scacchi.model.Posizione;
 import java.io.BufferedWriter;
@@ -66,6 +65,17 @@ public class ThreadRicevi extends Thread implements Closeable {
 						Settings.scacchieraOnlineController.patta.setDisable(true);
 						Settings.scacchieraOnlineController.resa.setDisable(true);
 					});
+				else if(line.equals("fine"))//Messaggio solo per gli spettatori
+				{
+					Platform.runLater(() -> {
+						Alert alert = new Alert(Alert.AlertType.INFORMATION);
+						alert.setTitle("Fine partita!");
+						alert.setContentText("Partita finita per patta");
+						alert.show();
+						Settings.partita.fine();
+						Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
+					});
+				}
 				else if (line.substring(0, 5).equals("mossa"))
 				{
 					String temp = line.substring(6, line.length());//lunghezza di 5 caratteri
