@@ -58,7 +58,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 			return;
 		}
 		if (Settings.schieramento == null)
-			Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento());
+			Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento("Non cambia nulla"));
 		while (true)
 		{
 			try
@@ -87,7 +87,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 					{
 						bw.write("richiesta accettata\n");
 						bw.flush();
-						if (Settings.schieramento == Pezzo.Colore.BIANCO)
+						if (Settings.schieramento == Pezzo.Colore.BIANCO)//TODO fai meglio
 						{
 							bw.write("nero\n");
 							bw.flush();
@@ -130,6 +130,12 @@ public class ThreadAccetta extends Thread implements Closeable {
 					bw.write(Settings.partita.getTurno().toString().toLowerCase());//Invio turno attuale
 					bw.newLine();
 					bw.flush();
+					bw.write(Settings.partita.getUltimaMossa().toString());//Invio l'ultima mossa
+					bw.newLine();
+					bw.flush();
+					bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
+					bw.newLine();
+					bw.flush();
 					if(Settings.spettatori == null)
 						Settings.spettatori = new ArrayList<>();
 					if(Settings.spettatoriReaders == null)
@@ -139,9 +145,6 @@ public class ThreadAccetta extends Thread implements Closeable {
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
-					bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
-					bw.newLine();
-					bw.flush();
 				}
 			}
 			catch (IOException ex)

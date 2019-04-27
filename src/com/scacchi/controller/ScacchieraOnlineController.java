@@ -15,6 +15,8 @@ import com.scacchi.model.TCP.Settings;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -54,9 +56,21 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	@FXML
 	@Override
 	protected void menu(ActionEvent event) {
+		if(partita.getTurno() != null)
+		{
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			alert.setTitle("Sicuro?");
+			alert.setContentText("Sei sicuro di voler uscire? Facendolo abbandonerai la partita.");
+			ButtonType SI = new ButtonType("Si");
+			ButtonType NO = new ButtonType("No");
+			alert.getButtonTypes().addAll(SI, NO);
+			Optional<ButtonType> scelta = alert.showAndWait();
+			if (scelta.get() == NO)
+				return;
+		}
 		try
 		{
-			if(Settings.threadAccetta != null && Settings.threadAccetta.isAlive())
+			if (Settings.threadAccetta != null && Settings.threadAccetta.isAlive())
 				Settings.threadAccetta.close();
 		}
 		catch (IOException ex)
@@ -163,6 +177,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 					}
 					alert.setContentText(line);
 					alert.show();
+					sendMessage("fine");
 				}
 				mostraScacchi();
 			}
@@ -312,23 +327,48 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			Settings.playerWriter.write(message);
 			Settings.playerWriter.newLine();
 			Settings.playerWriter.flush();
-			if(Settings.partita.isFinita() && Settings.spettatori != null)
-				for(BufferedWriter bw : Settings.spettatoriWriters)
+			if (Settings.partita.isFinita() && Settings.spettatori != null)
+				for (BufferedWriter bw : Settings.spettatoriWriters)
 				{
 					bw.write("fine\n");
-					bw.flush();
-				}
-			if(message.length() > 5 && message.substring(0, 5).equals("mossa") && Settings.spettatoriWriters != null)
-				for(BufferedWriter bw : Settings.spettatoriWriters)
-				{
-					bw.write(message);
-					bw.newLine();
 					bw.flush();
 				}
 		}
 		catch (IOException ex)
 		{
 			System.out.println(ex.getMessage());
+		}
+		if ((message.equals("fine") || message.length() > 5 && message.substring(0, 5).equals("mossa")) && Settings.spettatoriWriters != null)
+		{
+			ArrayList<Integer> indexesToRemove = new ArrayList<>();
+			Iterator<BufferedWriter> it = Settings.spettatoriWriters.iterator();
+			while (it.hasNext())
+			{
+				BufferedWriter bw = it.next();
+				try
+				{
+					bw.write(message);
+					bw.newLine();
+					bw.flush();
+				}
+				catch (IOException ex)
+				{
+					indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
+				}
+			}
+			for(Integer index : indexesToRemove)
+			{
+				try
+				{
+					Settings.spettatori.get(index).close();
+				}
+				catch (IOException ex1)
+				{
+				}
+				Settings.spettatoriWriters.remove(index);
+				Settings.spettatori.remove(index);
+				Settings.spettatoriReaders.remove(index);
+			}
 		}
 	}
 }

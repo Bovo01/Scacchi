@@ -7,10 +7,12 @@ package com.scacchi.model.TCP;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
+import com.scacchi.model.Mossa;
 import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
 import static com.scacchi.model.Pezzo.Colore.BIANCO;
 import static com.scacchi.model.Pezzo.Colore.NERO;
+import com.scacchi.model.Posizione;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -84,7 +86,7 @@ public class ThreadSend extends Thread {
 						Platform.runLater(() -> {
 							try
 							{
-								Settings.schieramento = controller.scegliSchieramento();
+								Settings.schieramento = controller.scegliSchieramento("Casuale");
 								if(Settings.schieramento == null)
 									Settings.schieramento = Pezzo.Colore.values()[Math.abs(new Random().nextInt()) % 2];
 								if(Settings.schieramento == Pezzo.Colore.BIANCO)
@@ -105,6 +107,13 @@ public class ThreadSend extends Thread {
 					{
 						Settings.partita = new Partita(line, br.readLine().equals("bianco") ? BIANCO : NERO);
 						line = br.readLine();
+						Posizione pos1 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(line.charAt(1))], Posizione.Colonna.getFromChar(line.charAt(0)));
+						Posizione pos2 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(line.charAt(3))], Posizione.Colonna.getFromChar(line.charAt(2)));
+						Mossa mossa = new Mossa(pos1, pos2);
+						if (line.charAt(4) != '0')
+							mossa.setSimbolo(Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(line.charAt(4)))]);
+						Settings.partita.setUltimaMossa(mossa);
+						line = br.readLine();
 						if(line.equals("bianco"))
 							Settings.schieramento = BIANCO;
 						else
@@ -119,6 +128,7 @@ public class ThreadSend extends Thread {
 				else
 				{
 					Platform.runLater(() -> FunctionsController.alertErrore("Non è stato possibile connettersi"));
+					controller.sbloccaTutto();
 					return;
 				}
 			}

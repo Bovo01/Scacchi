@@ -12,6 +12,8 @@ import com.scacchi.model.Posizione;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -87,14 +89,48 @@ public class ThreadRicevi extends Thread implements Closeable {
 					if (Settings.scacchieraOnlineController != null)
 						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
 					else if (Settings.scacchieraOnlineSpettatoriController != null)
+					{
+//						if(Settings.playerReader.readLine().equals("fine"))
+//							Settings.partita.fine();
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
+					}
 					if (Settings.spettatoriWriters != null)
-						for (BufferedWriter bw : Settings.spettatoriWriters)
+					{
+						ArrayList<Integer> indexesToRemove = new ArrayList<>();
+						Iterator<BufferedWriter> it = Settings.spettatoriWriters.iterator();
+						while (it.hasNext())
 						{
-							bw.write(line);
-							bw.newLine();
-							bw.flush();
+							BufferedWriter bw = it.next();
+							try
+							{
+								bw.write(line);
+								bw.newLine();
+								bw.flush();
+//								if(Settings.partita.isFinita())
+//									bw.write("fine\n");
+//								else
+//									bw.write("niente\n");
+//								bw.flush();
+							}
+							catch (IOException ex)
+							{
+								indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
+							}
 						}
+						for(Integer index : indexesToRemove)
+						{
+							try
+							{
+								Settings.spettatori.get(index).close();
+							}
+							catch (IOException ex1)
+							{
+							}
+							Settings.spettatoriWriters.remove(index);
+							Settings.spettatori.remove(index);
+							Settings.spettatoriReaders.remove(index);
+						}
+					}
 				}
 				else if (line.equals("richiesta patta"))
 					Platform.runLater(() ->

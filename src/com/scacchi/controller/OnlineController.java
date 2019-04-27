@@ -121,13 +121,13 @@ public class OnlineController implements Initializable {
 		}
 	}
 
-	public Colore scegliSchieramento() {
+	public Colore scegliSchieramento(String line) {
 		Alert alert = new Alert(Alert.AlertType.NONE);
 		alert.setTitle("Scegli");
 		alert.setContentText("Quale schieramento preferisci?");
 		ButtonType BIANCHI = new ButtonType("Bianchi");
 		ButtonType NERI = new ButtonType("Neri");
-		ButtonType NIENTE = new ButtonType("Non cambia nulla");
+		ButtonType NIENTE = new ButtonType(line);
 		alert.getButtonTypes().clear();
 		alert.getButtonTypes().addAll(BIANCHI, NERI, NIENTE);
 		Optional<ButtonType> option = alert.showAndWait();

@@ -73,6 +73,10 @@ public class Partita {
 		turno = null;
 	}
 
+	public void setUltimaMossa(Mossa ultimaMossa) {
+		this.ultimaMossa = ultimaMossa;
+	}
+
 	public Colore getTurno() {
 		return turno;
 	}

@@ -23,7 +23,7 @@
                         <Image url="@img/scacchiera.jpg" />
                      </image>
                   </ImageView>
-                  <Canvas fx:id="canvas" height="598.0" onMouseClicked="#click" width="598.0" />
+                  <Canvas fx:id="canvas" height="598.0" width="598.0" />
                </children>
             </Pane>
          </center>
