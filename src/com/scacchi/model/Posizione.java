@@ -5,11 +5,13 @@
  */
 package com.scacchi.model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Pietro
  */
-public class Posizione implements Cloneable {
+public class Posizione implements Cloneable, Serializable {
 
 	private final Riga riga;
 	private final Colonna colonna;
@@ -25,10 +27,10 @@ public class Posizione implements Cloneable {
 	}
 
 	public enum Riga {
-		R8, R7, R6, R5, R4, R3, R2, R1;
+		R1, R2, R3, R4, R5, R6, R7, R8;
 		
 		public String toString() {
-			return Integer.toString(8-ordinal());
+			return Integer.toString(ordinal()+1);
 		}
 	}
 

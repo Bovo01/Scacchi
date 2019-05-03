@@ -6,12 +6,13 @@
 package com.scacchi.model;
 
 import com.scacchi.model.Pezzo.Simbolo;
+import java.io.Serializable;
 
 /**
  *
  * @author Pietro
  */
-public class Mossa implements Cloneable {
+public class Mossa implements Cloneable, Serializable {
 	
 	private final Posizione posIniz;
 	private final Posizione posFine;

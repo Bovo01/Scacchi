@@ -177,7 +177,6 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 					}
 					alert.setContentText(line);
 					alert.show();
-					sendMessage("fine");
 				}
 				mostraScacchi();
 			}
@@ -327,7 +326,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			Settings.playerWriter.write(message);
 			Settings.playerWriter.newLine();
 			Settings.playerWriter.flush();
-			if (Settings.partita.isFinita() && Settings.spettatori != null)
+			if (Settings.spettatori != null && Settings.partita.isFinita())
 				for (BufferedWriter bw : Settings.spettatoriWriters)
 				{
 					bw.write("fine\n");
@@ -338,7 +337,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		{
 			System.out.println(ex.getMessage());
 		}
-		if ((message.equals("fine") || message.length() > 5 && message.substring(0, 5).equals("mossa")) && Settings.spettatoriWriters != null)
+		if ((message.length() > 5 && message.substring(0, 5).equals("mossa")) && Settings.spettatoriWriters != null)
 		{
 			ArrayList<Integer> indexesToRemove = new ArrayList<>();
 			Iterator<BufferedWriter> it = Settings.spettatoriWriters.iterator();

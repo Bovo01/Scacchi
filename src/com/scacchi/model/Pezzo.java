@@ -5,13 +5,14 @@
  */
 package com.scacchi.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author Pietro
  */
-public class Pezzo implements Cloneable {
+public class Pezzo implements Cloneable, Serializable {
 
 	private Posizione posizione;
 	private Simbolo simbolo;

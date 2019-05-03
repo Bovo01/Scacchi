@@ -10,6 +10,7 @@ import com.scacchi.model.TCP.Settings;
 import com.scacchi.model.TCP.ThreadAccetta;
 import com.scacchi.model.TCP.ThreadSend;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -73,7 +74,6 @@ public class OnlineController implements Initializable {
 	private Button btnSpect2;
 
 	private void disattivaTutto() {
-		tabEsci.setOnSelectionChanged((event) -> event.consume());
 		btnCerca1.setDisable(true);
 		btnCerca2.setDisable(true);
 		btnCerca3.setDisable(true);
@@ -90,8 +90,18 @@ public class OnlineController implements Initializable {
 			FunctionsController.alertErrore("Riempi tutti i campi!");
 			return;
 		}
-		disattivaTutto();
-		new ThreadSend(ipv4_1.getText(), Settings.DEFAULTPORT, this, "richiesta").start();
+		disattivaTutto();//TODO togli il commento
+//		try
+//		{
+//			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
+//			server.close();
+			new ThreadSend(ipv4_1.getText(), Settings.DEFAULTPORT, this, "richiesta").start();
+//		}
+//		catch (IOException ex)
+//		{
+//			sbloccaTutto();
+//			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+//		}
 	}
 
 	@FXML
@@ -102,7 +112,17 @@ public class OnlineController implements Initializable {
 			return;
 		}
 		disattivaTutto();
-		new ThreadSend(ipv4_2.getText(), Integer.parseInt(ipv4_2_port.getText()), this, "richiesta").start();
+		try
+		{
+			ServerSocket server = new ServerSocket(Integer.parseInt(ipv4_2_port.getText()));
+			server.close();
+			new ThreadSend(ipv4_2.getText(), Integer.parseInt(ipv4_2_port.getText()), this, "richiesta").start();
+		}
+		catch (IOException ex)
+		{
+			sbloccaTutto();
+			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+		}
 	}
 
 	@FXML
@@ -113,6 +133,11 @@ public class OnlineController implements Initializable {
 		try
 		{
 			Parent root = (Parent) fxmlLoader.load();
+			if(Settings.threadAccetta != null)
+			{
+				Settings.threadAccetta.close();
+				Settings.threadAccetta = null;
+			}
 			scene.setRoot(root);
 		}
 		catch (IOException ex)
@@ -260,7 +285,6 @@ public class OnlineController implements Initializable {
 	}
 
 	public void sbloccaTutto() {
-		tabEsci.setOnSelectionChanged((event) -> esci(event));
 		btnCerca1.setDisable(false);
 		btnCerca2.setDisable(false);
 		btnCerca3.setDisable(false);

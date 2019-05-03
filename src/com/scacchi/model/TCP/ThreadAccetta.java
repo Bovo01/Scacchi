@@ -14,6 +14,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
@@ -87,17 +88,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 					{
 						bw.write("richiesta accettata\n");
 						bw.flush();
-						if (Settings.schieramento == Pezzo.Colore.BIANCO)//TODO fai meglio
-						{
-							bw.write("nero\n");
-							bw.flush();
-						}
-						else if (Settings.schieramento == Pezzo.Colore.NERO)
-						{
-							bw.write("bianco\n");
-							bw.flush();
-						}
-						else
+						if(Settings.schieramento == null)
 						{
 							bw.write("richiesta colore\n");
 							bw.flush();
@@ -106,6 +97,12 @@ public class ThreadAccetta extends Thread implements Closeable {
 								Settings.schieramento = Pezzo.Colore.BIANCO;
 							else
 								Settings.schieramento = Pezzo.Colore.NERO;
+						}
+						else
+						{
+							bw.write(Settings.schieramento.notThis().toString().toLowerCase());
+							bw.newLine();
+							bw.flush();
 						}
 						Settings.player = socket;
 						Settings.playerReader = br;
@@ -122,17 +119,10 @@ public class ThreadAccetta extends Thread implements Closeable {
 					}
 				else if (line.equals("richiesta spettatore"))
 				{
-					bw.write("richiesta accettata\n");
+					bw.write("richiesta accettata spettatore\n");
 					bw.flush();
-					bw.write(Settings.partita.toString());//Invio partita
-					bw.newLine();
-					bw.flush();
-					bw.write(Settings.partita.getTurno().toString().toLowerCase());//Invio turno attuale
-					bw.newLine();
-					bw.flush();
-					bw.write(Settings.partita.getUltimaMossa().toString());//Invio l'ultima mossa
-					bw.newLine();
-					bw.flush();
+					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+					oos.writeObject(Settings.partita);
 					bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
 					bw.newLine();
 					bw.flush();

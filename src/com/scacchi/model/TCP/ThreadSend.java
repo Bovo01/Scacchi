@@ -18,11 +18,14 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 
 /**
@@ -72,11 +75,11 @@ public class ThreadSend extends Thread {
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;
 						Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
-						Settings.threadAccetta.start();
 						if (line.equals("bianco"))
 							Settings.schieramento = Pezzo.Colore.BIANCO;
-						else if (line.equals("nero"))
+						else
 							Settings.schieramento = Pezzo.Colore.NERO;
+						Settings.threadAccetta.start();
 					}
 					else if(line.equals("richiesta colore"))
 					{
@@ -89,10 +92,8 @@ public class ThreadSend extends Thread {
 								Settings.schieramento = controller.scegliSchieramento("Casuale");
 								if(Settings.schieramento == null)
 									Settings.schieramento = Pezzo.Colore.values()[Math.abs(new Random().nextInt()) % 2];
-								if(Settings.schieramento == Pezzo.Colore.BIANCO)
-									bw.write("nero\n");
-								else if(Settings.schieramento == Pezzo.Colore.NERO)
-									bw.write("bianco\n");
+								bw.write(Settings.schieramento.notThis().toString().toLowerCase());
+								bw.newLine();
 								bw.flush();
 								Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
 								Settings.threadAccetta.start();
@@ -103,27 +104,17 @@ public class ThreadSend extends Thread {
 							}
 						});
 					}
-					else//Spettatore (inviata la partita)
-					{
-						Settings.partita = new Partita(line, br.readLine().equals("bianco") ? BIANCO : NERO);
-						line = br.readLine();
-						Posizione pos1 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(line.charAt(1))], Posizione.Colonna.getFromChar(line.charAt(0)));
-						Posizione pos2 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(line.charAt(3))], Posizione.Colonna.getFromChar(line.charAt(2)));
-						Mossa mossa = new Mossa(pos1, pos2);
-						if (line.charAt(4) != '0')
-							mossa.setSimbolo(Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(line.charAt(4)))]);
-						Settings.partita.setUltimaMossa(mossa);
-						line = br.readLine();
-						if(line.equals("bianco"))
-							Settings.schieramento = BIANCO;
-						else
-							Settings.schieramento = NERO;
-						Settings.player = socket;
-						Settings.playerReader = br;
-						Settings.playerWriter = bw;
-						Settings.threadRicevi = new ThreadRicevi();
-						Platform.runLater(() -> controller.inizioSpettatore());
-					}
+				}
+				else if(line.equals("richiesta accettata spettatore"))
+				{
+					ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+					Settings.partita = (Partita) ois.readObject();
+					Settings.schieramento = br.readLine().equals("bianco") ? BIANCO : NERO;
+					Settings.player = socket;
+					Settings.playerReader = br;
+					Settings.playerWriter = bw;
+					Settings.threadRicevi = new ThreadRicevi();
+					Platform.runLater(() -> controller.inizioSpettatore());
 				}
 				else
 				{
@@ -135,6 +126,10 @@ public class ThreadSend extends Thread {
 			catch (IOException ex)
 			{
 				Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
+			}
+			catch (ClassNotFoundException ex)
+			{
+				//Catch inutile, l'oggetto ricevuto è sempre una partita
 			}
 			controller.sbloccaTutto();
 		}

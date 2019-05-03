@@ -12,13 +12,14 @@ import com.scacchi.model.Posizione.Colonna;
 import static com.scacchi.model.Posizione.Colonna.*;
 import com.scacchi.model.Posizione.Riga;
 import static com.scacchi.model.Posizione.Riga.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author Pietro
  */
-public class Partita {
+public class Partita implements Serializable {
 
 	private Colore turno;
 	private ArrayList<Pezzo> bianchi;
@@ -36,21 +37,6 @@ public class Partita {
 		this.mosse = new ArrayList<>();
 		inizioPartita();
 		aggiungiRipezioneMosse();
-	}
-	
-	/**
-	 * Costruttore che inizia la partita dato un coding ben definito e il turno attuale
-	 * 
-	 * @param code il coding della partita
-	 * @param turno il turno corrente
-	 */
-	public Partita(String code, Colore turno) {
-		this.turno = turno;
-		this.neri = new ArrayList<>();
-		this.bianchi = new ArrayList<>();
-		this.mosse = new ArrayList<>();
-		this.ripetizioneMosse = new ArrayList<>();
-		decodeScacchiera(code);//TODO turno e/o ultima mossa
 	}
 
 	/**
@@ -88,29 +74,6 @@ public class Partita {
 	public ArrayList<Pezzo> getNeri() {
 		return neri;
 	}
-	
-	private void decodeScacchiera(String code) {
-		int index = 0;
-		for(Riga r : Riga.values())
-		{
-			for(Colonna c : Colonna.values())
-			{
-				switch(code.charAt(index))
-				{
-					case 'x':
-						break;
-					default:
-						Pezzo p = new Pezzo(new Posizione(r, c), Pezzo.Simbolo.getSimboloFromChar(code.charAt(index+1)), code.charAt(index) == 'b' ? BIANCO : NERO);
-						if(code.charAt(index) == 'b')
-							bianchi.add(p);
-						else
-							neri.add(p);
-						index++;
-				}
-				index++;
-			}
-		}
-	}
 
 	/**
 	 * Imposta la posizione iniziale di tutti i pezzi sulla scacchiera
@@ -119,30 +82,30 @@ public class Partita {
 		//Pedoni
 		for (Colonna c : Colonna.values())
 		{
-			bianchi.add(new Pezzo(new Posizione(R2, c), PEDONE, BIANCO));
-			neri.add(new Pezzo(new Posizione(R7, c), PEDONE, NERO));
+			bianchi.add(new Pezzo(new Posizione(R7, c), PEDONE, BIANCO));
+			neri.add(new Pezzo(new Posizione(R2, c), PEDONE, NERO));
 		}
 		//Torri
-		bianchi.add(new Pezzo(new Posizione(R1, A), TORRE, BIANCO));
-		bianchi.add(new Pezzo(new Posizione(R1, H), TORRE, BIANCO));
-		neri.add(new Pezzo(new Posizione(R8, A), TORRE, NERO));
-		neri.add(new Pezzo(new Posizione(R8, H), TORRE, NERO));
+		bianchi.add(new Pezzo(new Posizione(R8, A), TORRE, BIANCO));
+		bianchi.add(new Pezzo(new Posizione(R8, H), TORRE, BIANCO));
+		neri.add(new Pezzo(new Posizione(R1, A), TORRE, NERO));
+		neri.add(new Pezzo(new Posizione(R1, H), TORRE, NERO));
 		//Cavalli
-		bianchi.add(new Pezzo(new Posizione(R1, B), CAVALLO, BIANCO));
-		bianchi.add(new Pezzo(new Posizione(R1, G), CAVALLO, BIANCO));
-		neri.add(new Pezzo(new Posizione(R8, B), CAVALLO, NERO));
-		neri.add(new Pezzo(new Posizione(R8, G), CAVALLO, NERO));
+		bianchi.add(new Pezzo(new Posizione(R8, B), CAVALLO, BIANCO));
+		bianchi.add(new Pezzo(new Posizione(R8, G), CAVALLO, BIANCO));
+		neri.add(new Pezzo(new Posizione(R1, B), CAVALLO, NERO));
+		neri.add(new Pezzo(new Posizione(R1, G), CAVALLO, NERO));
 		//Alfieri
-		bianchi.add(new Pezzo(new Posizione(R1, C), ALFIERE, BIANCO));
-		bianchi.add(new Pezzo(new Posizione(R1, F), ALFIERE, BIANCO));
-		neri.add(new Pezzo(new Posizione(R8, C), ALFIERE, NERO));
-		neri.add(new Pezzo(new Posizione(R8, F), ALFIERE, NERO));
+		bianchi.add(new Pezzo(new Posizione(R8, C), ALFIERE, BIANCO));
+		bianchi.add(new Pezzo(new Posizione(R8, F), ALFIERE, BIANCO));
+		neri.add(new Pezzo(new Posizione(R1, C), ALFIERE, NERO));
+		neri.add(new Pezzo(new Posizione(R1, F), ALFIERE, NERO));
 		//Regine
-		bianchi.add(new Pezzo(new Posizione(R1, D), REGINA, BIANCO));
-		neri.add(new Pezzo(new Posizione(R8, D), REGINA, NERO));
+		bianchi.add(new Pezzo(new Posizione(R8, D), REGINA, BIANCO));
+		neri.add(new Pezzo(new Posizione(R1, D), REGINA, NERO));
 		//Re
-		bianchi.add(new Pezzo(new Posizione(R1, E), RE, BIANCO));
-		neri.add(new Pezzo(new Posizione(R8, E), RE, NERO));
+		bianchi.add(new Pezzo(new Posizione(R8, E), RE, BIANCO));
+		neri.add(new Pezzo(new Posizione(R1, E), RE, NERO));
 	}
 
 	/**
@@ -196,16 +159,12 @@ public class Partita {
 						else
 							return false;
 					if (isThereAnybodyOutThere(posFine))//Verifica se nella posizione finale c'è qualcuno (siamo sicuramente nella stessa colonna)
-
 						return false;
 					if (p.getPosizione().getRiga().ordinal() + 1 == posFine.getRiga().ordinal())//Verifica se la posizione finale è nella riga successiva a quella attuale
-
 						return true;
 					if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + 1], p.getPosizione().getColonna())))//Verifica se c'è qualcuno nella traiettoria
-
 						return false;
-					if (p.getPosizione().getRiga() == R7 && posFine.getRiga() == R5)//Se è alla posizione iniziale si può muovere di due
-
+					if (p.getPosizione().getRiga() == R2 && posFine.getRiga() == R4)//Se è alla posizione iniziale si può muovere di due
 						return true;
 				}
 				else
@@ -223,22 +182,17 @@ public class Partita {
 						else
 							return false;
 					if (isThereAnybodyOutThere(posFine))//Verifica se nella posizione finale c'è qualcuno (siamo sicuramente nella stessa colonna
-
 						return false;
 					if (p.getPosizione().getRiga().ordinal() - 1 == posFine.getRiga().ordinal())//Verifica se la posizione finale è nella riga successiva a quella attuale
-
 						return true;
 					if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - 1], p.getPosizione().getColonna())))//Verifica se c'è qualcuno nella traiettoria
-
 						return false;
-					if (p.getPosizione().getRiga() == R2 && posFine.getRiga() == R4)//Se è alla posizione iniziale si può muovere di due
-
+					if (p.getPosizione().getRiga() == R7 && posFine.getRiga() == R5)//Se è alla posizione iniziale si può muovere di due
 						return true;
 				}
 				break;//Movimento non contemplato = return false
 			case TORRE:
 				if (p.getPosizione().getRiga() != posFine.getRiga() && p.getPosizione().getColonna() != posFine.getColonna())//Verifica che riga e colonna siano orizzontali rispetto alla sua posizione
-
 					return false;
 				//Verifica traiettoria
 				return controlloCroce(p, posFine);
@@ -328,22 +282,22 @@ public class Partita {
 						return false;
 				}
 		else//Stessa colonna
-		if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Stessa colonna verso l'alto
-			for (int i = p.getPosizione().getRiga().ordinal() + 1; i < 8; i++)
-			{
-				if (posFine.getRiga().ordinal() == i)
-					return true;
-				if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
-					return false;
-			}
-		else//Stessa colonna verso il basso
-			for (int i = p.getPosizione().getRiga().ordinal() - 1; i >= 0; i--)
-			{
-				if (posFine.getRiga().ordinal() == i)
-					return true;
-				if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
-					return false;
-			}
+			if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Stessa colonna verso l'alto
+				for (int i = p.getPosizione().getRiga().ordinal() + 1; i < 8; i++)
+				{
+					if (posFine.getRiga().ordinal() == i)
+						return true;
+					if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
+						return false;
+				}
+			else//Stessa colonna verso il basso
+				for (int i = p.getPosizione().getRiga().ordinal() - 1; i >= 0; i--)
+				{
+					if (posFine.getRiga().ordinal() == i)
+						return true;
+					if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
+						return false;
+				}
 		return false;//Non si arriverà mai qua
 	}
 
@@ -357,9 +311,7 @@ public class Partita {
 	 */
 	private boolean controlloX(Pezzo p, Posizione posFine) {
 		if (posFine.getColonna().ordinal() > p.getPosizione().getColonna().ordinal())//Zona a destra del punto iniziale
-
 			if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Zona in basso a destra del punto iniziale
-
 				for (int i = 1; i <= Math.min(7 - p.getPosizione().getRiga().ordinal(), 7 - p.getPosizione().getColonna().ordinal()); i++)
 				{
 					if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() + i])))
@@ -377,24 +329,22 @@ public class Partita {
 						return false;
 				}
 		else//Zona a sinistra del punto iniziale
-		if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Zona in basso a sinistra del punto iniziale
-
-			for (int i = 1; i <= Math.min(7 - p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
-			{
-				if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-					return true;
-				if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-					return false;
-			}
-		else//Zona in basso a destra del punto iniziale
-
-			for (int i = 1; i <= Math.min(p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
-			{
-				if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-					return true;
-				if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-					return false;
-			}
+			if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Zona in basso a sinistra del punto iniziale
+				for (int i = 1; i <= Math.min(7 - p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
+				{
+					if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+						return true;
+					if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+						return false;
+				}
+			else//Zona in basso a destra del punto iniziale
+				for (int i = 1; i <= Math.min(p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
+				{
+					if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+						return true;
+					if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+						return false;
+				}
 		return false;
 	}
 
@@ -837,14 +787,15 @@ public class Partita {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * To string che ritorna la visualizzazione della partita con uno standard che viene utilizzato per controllare la ripetizione di mosse
-	 * 
+	 * To string che ritorna la visualizzazione della partita con uno standard
+	 * che viene utilizzato per controllare la ripetizione di mosse
+	 *
 	 * @return la codifica per l'ultima posizione della scacchiera
 	 */
 	@Override
 	public String toString() {
-		return ripetizioneMosse.get(ripetizioneMosse.size()-1);
+		return ripetizioneMosse.get(ripetizioneMosse.size() - 1);
 	}
 }

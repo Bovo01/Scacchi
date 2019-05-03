@@ -67,17 +67,27 @@ public class ThreadRicevi extends Thread implements Closeable {
 						Settings.scacchieraOnlineController.patta.setDisable(true);
 						Settings.scacchieraOnlineController.resa.setDisable(true);
 					});
-				else if(line.equals("fine"))//Messaggio solo per gli spettatori
-				{
-					Platform.runLater(() -> {
+				else if (line.equals("fine"))//Messaggio solo per gli spettatori
+					Platform.runLater(() ->
+					{
 						Alert alert = new Alert(Alert.AlertType.INFORMATION);
 						alert.setTitle("Fine partita!");
-						alert.setContentText("Partita finita per patta");
+						try
+						{
+							String line2 = Settings.playerReader.readLine();
+							if (line2.equals("null"))
+								alert.setContentText("Partita finita per patta");
+							else
+								alert.setContentText("Vincitore: " + line2);
+						}
+						catch (IOException ex)
+						{
+							//Me la mangio tutta io
+						}
 						alert.show();
 						Settings.partita.fine();
 						Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
 					});
-				}
 				else if (line.substring(0, 5).equals("mossa"))
 				{
 					String temp = line.substring(6, line.length());//lunghezza di 5 caratteri
@@ -89,11 +99,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 					if (Settings.scacchieraOnlineController != null)
 						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
 					else if (Settings.scacchieraOnlineSpettatoriController != null)
-					{
-//						if(Settings.playerReader.readLine().equals("fine"))
-//							Settings.partita.fine();
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
-					}
 					if (Settings.spettatoriWriters != null)
 					{
 						ArrayList<Integer> indexesToRemove = new ArrayList<>();
@@ -106,18 +112,21 @@ public class ThreadRicevi extends Thread implements Closeable {
 								bw.write(line);
 								bw.newLine();
 								bw.flush();
-//								if(Settings.partita.isFinita())
-//									bw.write("fine\n");
-//								else
-//									bw.write("niente\n");
-//								bw.flush();
+								if(Settings.partita.isFinita())
+								{
+									bw.write("fine\n");
+									bw.flush();
+									bw.write(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase());
+									bw.newLine();
+									bw.flush();
+								}
 							}
 							catch (IOException ex)
 							{
 								indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
 							}
 						}
-						for(Integer index : indexesToRemove)
+						for (Integer index : indexesToRemove)
 						{
 							try
 							{
@@ -129,6 +138,35 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.spettatoriWriters.remove(index);
 							Settings.spettatori.remove(index);
 							Settings.spettatoriReaders.remove(index);
+						}
+					}
+					if(Settings.partita.isFinita())
+					{
+						Platform.runLater(() -> {
+							Alert alert = new Alert(Alert.AlertType.INFORMATION);
+							if(Settings.partita.vincitore() == null)
+							{
+								alert.setTitle("Patta!");
+								alert.setContentText("Partita finita per " + Settings.partita.comeEFinita());
+							}
+							else
+							{
+								alert.setTitle("Fine partita!");
+								alert.setContentText(Settings.partita.comeEFinita() + "\nVincitore: " + Settings.partita.vincitore().toString().toLowerCase());
+							}
+							alert.show();
+						});
+						if(Settings.spettatoriWriters != null)
+						{
+							String vincitore = Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase();
+							for(BufferedWriter bw : Settings.spettatoriWriters)
+							{
+								bw.write("finen\n");
+								bw.flush();
+								bw.write(vincitore);
+								bw.newLine();
+								bw.flush();
+							}
 						}
 					}
 				}

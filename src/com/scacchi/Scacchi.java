@@ -7,9 +7,8 @@ package com.scacchi;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.model.TCP.Settings;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -36,6 +35,21 @@ public class Scacchi extends Application {
 		{
 			try
 			{
+				if(Settings.spettatori != null)
+				{
+					for(BufferedWriter bw : Settings.spettatoriWriters)
+					{
+						try
+						{
+							bw.write("fine\n");
+							bw.flush();
+						}
+						catch(IOException ex)
+						{
+							
+						}
+					}
+				}
 				if (Settings.threadAccetta != null && Settings.threadAccetta.isAlive())
 					Settings.threadAccetta.close();
 				if (Settings.threadRicevi != null && Settings.threadRicevi.isAlive())
