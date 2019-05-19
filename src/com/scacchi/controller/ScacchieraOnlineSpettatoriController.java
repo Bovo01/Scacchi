@@ -5,6 +5,8 @@
  */
 package com.scacchi.controller;
 
+import com.scacchi.model.Partita;
+import com.scacchi.model.Pezzo;
 import static com.scacchi.model.Pezzo.Colore.*;
 import com.scacchi.model.TCP.Settings;
 import com.scacchi.model.TCP.ThreadRicevi;
@@ -17,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -75,5 +78,23 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		{
 		}
 		Settings.scacchieraOnlineSpettatoriController = null;
+	}
+
+	public void ricomincia() {
+		Settings.partita = new Partita();
+		partita = Settings.partita;
+		mostraScacchi();
+	}
+
+	public void finePartita(String come, Pezzo.Colore vincitore) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Fine partita!");
+		String line = "Partita finita per " + come;
+		if (vincitore != null)
+			line += "\nVincitore: " + vincitore.toString();
+		alert.setContentText(line);
+		alert.show();
+		Settings.partita.fine();
+		mostraScacchi();
 	}
 }

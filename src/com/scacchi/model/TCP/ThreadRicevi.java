@@ -61,33 +61,38 @@ public class ThreadRicevi extends Thread implements Closeable {
 					return;
 				}
 				if (line.equals("resa"))
+				{
+					String line2 = Settings.scacchieraOnlineSpettatoriController != null ? Settings.playerReader.readLine() : null;
 					Platform.runLater(() ->
 					{
-						Settings.scacchieraOnlineController.finePartita("resa", Settings.schieramento);
-						Settings.scacchieraOnlineController.patta.setDisable(true);
-						Settings.scacchieraOnlineController.resa.setDisable(true);
+						if (Settings.scacchieraOnlineController != null)
+						{
+							sendToSpettatori("resa");
+							sendToSpettatori(Settings.schieramento.toString().toLowerCase());
+							Settings.scacchieraOnlineController.finePartita("resa", Settings.schieramento);
+							Settings.scacchieraOnlineController.resa.setDisable(true);
+							Settings.scacchieraOnlineController.patta.setDisable(true);
+						}
+						else if (Settings.scacchieraOnlineSpettatoriController != null)
+							Settings.scacchieraOnlineSpettatoriController.finePartita("resa", line2.equals("bianco") ? Pezzo.Colore.BIANCO : Pezzo.Colore.NERO);
 					});
+				}
 				else if (line.equals("fine"))//Messaggio solo per gli spettatori
+				{
+					String line2 = Settings.playerReader.readLine();
 					Platform.runLater(() ->
 					{
 						Alert alert = new Alert(Alert.AlertType.INFORMATION);
 						alert.setTitle("Fine partita!");
-						try
-						{
-							String line2 = Settings.playerReader.readLine();
-							if (line2.equals("null"))
-								alert.setContentText("Partita finita per patta");
-							else
-								alert.setContentText("Vincitore: " + line2);
-						}
-						catch (IOException ex)
-						{
-							//Me la mangio tutta io
-						}
+						if (line2.equals("null"))
+							alert.setContentText("Partita finita per patta");
+						else
+							alert.setContentText("Vincitore: " + line2);
 						alert.show();
 						Settings.partita.fine();
 						Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
 					});
+				}
 				else if (line.substring(0, 5).equals("mossa"))
 				{
 					String temp = line.substring(6, line.length());//lunghezza di 5 caratteri
@@ -97,7 +102,27 @@ public class ThreadRicevi extends Thread implements Closeable {
 					if (temp.charAt(4) != '0')
 						Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
 					if (Settings.scacchieraOnlineController != null)
-						Platform.runLater(() -> Settings.scacchieraOnlineController.mostraScacchi());
+						Platform.runLater(() ->
+						{
+							Settings.scacchieraOnlineController.mostraScacchi();
+							if (Settings.partita.isFinita())
+							{
+								Alert alert = new Alert(Alert.AlertType.INFORMATION);
+								if (Settings.partita.vincitore() == null)
+								{
+									alert.setTitle("Patta!");
+									alert.setContentText("Partita finita per " + Settings.partita.comeEFinita());
+								}
+								else
+								{
+									alert.setTitle("Fine partita!");
+									alert.setContentText(Settings.partita.comeEFinita() + "\nVincitore: " + Settings.partita.vincitore().toString().toLowerCase());
+								}
+								alert.show();
+								sendToSpettatori("fine");
+								sendToSpettatori(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase());
+							}
+						});
 					else if (Settings.scacchieraOnlineSpettatoriController != null)
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
 					if (Settings.spettatoriWriters != null)
@@ -112,7 +137,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 								bw.write(line);
 								bw.newLine();
 								bw.flush();
-								if(Settings.partita.isFinita())
+								if (Settings.partita.isFinita())
 								{
 									bw.write("fine\n");
 									bw.flush();
@@ -135,38 +160,9 @@ public class ThreadRicevi extends Thread implements Closeable {
 							catch (IOException ex1)
 							{
 							}
-							Settings.spettatoriWriters.remove(index);
-							Settings.spettatori.remove(index);
-							Settings.spettatoriReaders.remove(index);
-						}
-					}
-					if(Settings.partita.isFinita())
-					{
-						Platform.runLater(() -> {
-							Alert alert = new Alert(Alert.AlertType.INFORMATION);
-							if(Settings.partita.vincitore() == null)
-							{
-								alert.setTitle("Patta!");
-								alert.setContentText("Partita finita per " + Settings.partita.comeEFinita());
-							}
-							else
-							{
-								alert.setTitle("Fine partita!");
-								alert.setContentText(Settings.partita.comeEFinita() + "\nVincitore: " + Settings.partita.vincitore().toString().toLowerCase());
-							}
-							alert.show();
-						});
-						if(Settings.spettatoriWriters != null)
-						{
-							String vincitore = Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase();
-							for(BufferedWriter bw : Settings.spettatoriWriters)
-							{
-								bw.write("finen\n");
-								bw.flush();
-								bw.write(vincitore);
-								bw.newLine();
-								bw.flush();
-							}
+							Settings.spettatoriWriters.remove(index.intValue());
+							Settings.spettatori.remove(index.intValue());
+							Settings.spettatoriReaders.remove(index.intValue());
 						}
 					}
 				}
@@ -179,12 +175,21 @@ public class ThreadRicevi extends Thread implements Closeable {
 				else if (line.equals("conferma patta"))
 					Platform.runLater(() ->
 					{
-						Settings.scacchieraOnlineController.finePartita("patta", null);
-						Settings.scacchieraOnlineController.patta.setDisable(true);
-						Settings.scacchieraOnlineController.resa.setDisable(true);
+						if (Settings.scacchieraOnlineController != null)
+						{
+							sendToSpettatori(line);
+							Settings.scacchieraOnlineController.finePartita("patta", null);
+							Settings.scacchieraOnlineController.restart.setDisable(false);
+						}
+						else if (Settings.scacchieraOnlineSpettatoriController != null)
+							Settings.scacchieraOnlineSpettatoriController.finePartita("patta", null);
 					});
 				else if (line.equals("rifiuto patta"))
-					Platform.runLater(() -> FunctionsController.alertInfo("Patta rifiutata", "La tua richiesta di patta è stata rifiutata"));
+					Platform.runLater(() ->
+					{
+						Settings.scacchieraOnlineController.attivaBottoni();
+						FunctionsController.alertInfo("Patta rifiutata", "La tua richiesta di patta è stata rifiutata");
+					});
 				else if (line.equals("richiesta restart"))
 					Platform.runLater(() ->
 					{
@@ -194,12 +199,28 @@ public class ThreadRicevi extends Thread implements Closeable {
 				else if (line.equals("conferma restart"))
 					Platform.runLater(() ->
 					{
-						Settings.scacchieraOnlineController.ricomincia();
-						Settings.scacchieraOnlineController.patta.setDisable(false);
-						Settings.scacchieraOnlineController.resa.setDisable(false);
+						if (Settings.scacchieraOnlineController != null)
+						{
+							sendToSpettatori(line);
+							Settings.scacchieraOnlineController.ricomincia();
+							Settings.scacchieraOnlineController.attivaBottoni();
+						}
+						else if (Settings.scacchieraOnlineSpettatoriController != null)
+						{
+							Settings.scacchieraOnlineSpettatoriController.ricomincia();
+							Platform.runLater(() -> FunctionsController.alertInfo("Restart", "La partita è ricominciata"));
+						}
+
 					});
 				else if (line.equals("rifiuto restart"))
-					Platform.runLater(() -> FunctionsController.alertInfo("Restart rifiutato", "La tua richiesta di ricominciare è stata rifiutata"));
+					Platform.runLater(() ->
+					{
+						if(Settings.partita.getTurno() != null)
+							Settings.scacchieraOnlineController.attivaBottoni();
+						else
+							Settings.scacchieraOnlineController.restart.setDisable(false);
+						FunctionsController.alertInfo("Restart rifiutato", "La tua richiesta di ricominciare è stata rifiutata");
+					});
 			}
 			catch (IOException ex)
 			{
@@ -207,6 +228,22 @@ public class ThreadRicevi extends Thread implements Closeable {
 					return;
 			}
 		}
+	}
+
+	public static void sendToSpettatori(String message) {
+		if (Settings.spettatoriWriters != null)
+			for (BufferedWriter bw : Settings.spettatoriWriters)
+			{
+				try
+				{
+					bw.write(message);
+					bw.newLine();
+					bw.flush();
+				}
+				catch (IOException ex)
+				{
+				}
+			}
 	}
 
 	@Override

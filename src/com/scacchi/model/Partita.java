@@ -14,6 +14,7 @@ import com.scacchi.model.Posizione.Riga;
 import static com.scacchi.model.Posizione.Riga.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -148,11 +149,11 @@ public class Partita implements Serializable {
 				{
 					if (p.getPosizione().getColonna() != posFine.getColonna())//Verifica movimenti obliqui per mangiare
 						if ((p.getPosizione().getColonna().ordinal() + 1 == posFine.getColonna().ordinal()//Se si muove correttamete in obliquo (di una sola cella)
-							|| p.getPosizione().getColonna().ordinal() - 1 == posFine.getColonna().ordinal())
-							&& p.getPosizione().getRiga().ordinal() + 1 == posFine.getRiga().ordinal())
+								|| p.getPosizione().getColonna().ordinal() - 1 == posFine.getColonna().ordinal())
+								&& p.getPosizione().getRiga().ordinal() + 1 == posFine.getRiga().ordinal())
 							if (ultimaMossa != null && trovaPezzo(ultimaMossa.getPosFine()) != null && trovaPezzo(ultimaMossa.getPosFine()).getSimbolo() == PEDONE && trovaPezzo(ultimaMossa.getPosFine()).getColore() != p.getColore()
-								&& ultimaMossa.getPosIniz().getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() + 2 && p.getPosizione().getRiga() == ultimaMossa.getPosFine().getRiga()
-								&& ultimaMossa.getPosFine().getColonna() == posFine.getColonna() && posFine.getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() + 1)
+									&& ultimaMossa.getPosIniz().getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() + 2 && p.getPosizione().getRiga() == ultimaMossa.getPosFine().getRiga()
+									&& ultimaMossa.getPosFine().getColonna() == posFine.getColonna() && posFine.getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() + 1)
 								return true;//En passant
 							else
 								return isThereAnybodyOutThere(posFine, BIANCO);//Se c'è qualcuno sulla casella ritorna true, altrimenti false
@@ -171,11 +172,11 @@ public class Partita implements Serializable {
 				{
 					if (p.getPosizione().getColonna() != posFine.getColonna())//Verifica movimenti obliqui per mangiare
 						if ((p.getPosizione().getColonna().ordinal() + 1 == posFine.getColonna().ordinal()//Se si muove correttamete in obliquo (di una sola cella)
-							|| p.getPosizione().getColonna().ordinal() - 1 == posFine.getColonna().ordinal())
-							&& p.getPosizione().getRiga().ordinal() - 1 == posFine.getRiga().ordinal())
+								|| p.getPosizione().getColonna().ordinal() - 1 == posFine.getColonna().ordinal())
+								&& p.getPosizione().getRiga().ordinal() - 1 == posFine.getRiga().ordinal())
 							if (ultimaMossa != null && trovaPezzo(ultimaMossa.getPosFine()) != null && trovaPezzo(ultimaMossa.getPosFine()).getSimbolo() == PEDONE && trovaPezzo(ultimaMossa.getPosFine()).getColore() != p.getColore()
-								&& ultimaMossa.getPosIniz().getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() - 2 && p.getPosizione().getRiga() == ultimaMossa.getPosFine().getRiga()
-								&& ultimaMossa.getPosFine().getColonna() == posFine.getColonna() && posFine.getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() - 1)
+									&& ultimaMossa.getPosIniz().getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() - 2 && p.getPosizione().getRiga() == ultimaMossa.getPosFine().getRiga()
+									&& ultimaMossa.getPosFine().getColonna() == posFine.getColonna() && posFine.getRiga().ordinal() == ultimaMossa.getPosFine().getRiga().ordinal() - 1)
 								return true;//En passant
 							else
 								return isThereAnybodyOutThere(posFine, NERO);//Se c'è qualcuno sulla casella ritorna true, altrimenti false
@@ -202,17 +203,17 @@ public class Partita implements Serializable {
 					for (int j = -1; j <= 1; j += 2)//Indice di colonna
 					{
 						if (p.getPosizione().getRiga().ordinal() + i == posFine.getRiga().ordinal()
-							&& p.getPosizione().getColonna().ordinal() + j == posFine.getColonna().ordinal())//Controllo movimento a 'L'
+								&& p.getPosizione().getColonna().ordinal() + j == posFine.getColonna().ordinal())//Controllo movimento a 'L'
 							return true;
 						if (p.getPosizione().getColonna().ordinal() + i == posFine.getColonna().ordinal()
-							&& p.getPosizione().getRiga().ordinal() + j == posFine.getRiga().ordinal())//Controllo movimento a 'L'
+								&& p.getPosizione().getRiga().ordinal() + j == posFine.getRiga().ordinal())//Controllo movimento a 'L'
 							return true;
 					}
 				}
 				break;//Movimento non contemplato = return false
 			case ALFIERE:
 				if (Math.abs(posFine.getRiga().ordinal() - p.getPosizione().getRiga().ordinal())
-					!= Math.abs(posFine.getColonna().ordinal() - p.getPosizione().getColonna().ordinal()))//Esclude tutti i valori non obliqui alla posizione iniziale
+						!= Math.abs(posFine.getColonna().ordinal() - p.getPosizione().getColonna().ordinal()))//Esclude tutti i valori non obliqui alla posizione iniziale
 					return false;
 				//Verifica traiettoria
 				return controlloX(p, posFine);
@@ -227,7 +228,7 @@ public class Partita implements Serializable {
 					for (int j = -1; j <= 1; j++)//Colonna
 					{
 						if ((p.getPosizione().getRiga().ordinal() + i >= 0 && p.getPosizione().getColonna().ordinal() + j >= 0)
-							&& (p.getPosizione().getRiga().ordinal() + i < 8 && p.getPosizione().getColonna().ordinal() + j < 8))
+								&& (p.getPosizione().getRiga().ordinal() + i < 8 && p.getPosizione().getColonna().ordinal() + j < 8))
 							if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() + j])))
 								return true;
 					}
@@ -235,20 +236,20 @@ public class Partita implements Serializable {
 				if (p.getColore() == BIANCO)//Arrocco
 				{
 					if (p.getMosse().isEmpty() && trovaPezzo(new Posizione(R1, H)) != null && trovaPezzo(new Posizione(R1, H)).getMosse().isEmpty() && p.getPosizione().equals(new Posizione(R1, E)) && posFine.equals(new Posizione(R1, G)) && trovaPezzo(new Posizione(R1, F)) == null
-						&& trovaPezzo(new Posizione(R1, G)) == null && new Pezzo(new Posizione(R1, H), TORRE, BIANCO).equals(trovaPezzo(new Posizione(R1, H))))
+							&& trovaPezzo(new Posizione(R1, G)) == null && new Pezzo(new Posizione(R1, H), TORRE, BIANCO).equals(trovaPezzo(new Posizione(R1, H))))
 						return true;
 				}
 				else if (p.getMosse().isEmpty() && trovaPezzo(new Posizione(R8, H)) != null && trovaPezzo(new Posizione(R8, H)).getMosse().isEmpty() && p.getPosizione().equals(new Posizione(R8, E)) && posFine.equals(new Posizione(R8, G)) && trovaPezzo(new Posizione(R8, F)) == null
-					&& trovaPezzo(new Posizione(R8, G)) == null && new Pezzo(new Posizione(R8, H), TORRE, NERO).equals(trovaPezzo(new Posizione(R8, H))))
+						&& trovaPezzo(new Posizione(R8, G)) == null && new Pezzo(new Posizione(R8, H), TORRE, NERO).equals(trovaPezzo(new Posizione(R8, H))))
 					return true;
 				if (p.getColore() == BIANCO)//Arrocco lungo
 				{
 					if (p.getMosse().isEmpty() && trovaPezzo(new Posizione(R1, A)) != null && trovaPezzo(new Posizione(R1, A)).getMosse().isEmpty() && p.getPosizione().equals(new Posizione(R1, E)) && posFine.equals(new Posizione(R1, C)) && trovaPezzo(new Posizione(R1, D)) == null
-						&& trovaPezzo(new Posizione(R1, C)) == null && trovaPezzo(new Posizione(R1, B)) == null && new Pezzo(new Posizione(R1, A), TORRE, BIANCO).equals(trovaPezzo(new Posizione(R1, A))))
+							&& trovaPezzo(new Posizione(R1, C)) == null && trovaPezzo(new Posizione(R1, B)) == null && new Pezzo(new Posizione(R1, A), TORRE, BIANCO).equals(trovaPezzo(new Posizione(R1, A))))
 						return true;
 				}
 				else if (p.getMosse().isEmpty() && trovaPezzo(new Posizione(R8, A)) != null && trovaPezzo(new Posizione(R8, A)).getMosse().isEmpty() && p.getPosizione().equals(new Posizione(R8, E)) && posFine.equals(new Posizione(R8, C)) && trovaPezzo(new Posizione(R8, D)) == null
-					&& trovaPezzo(new Posizione(R8, C)) == null && trovaPezzo(new Posizione(R8, B)) == null && new Pezzo(new Posizione(R8, A), TORRE, NERO).equals(trovaPezzo(new Posizione(R8, A))))
+						&& trovaPezzo(new Posizione(R8, C)) == null && trovaPezzo(new Posizione(R8, B)) == null && new Pezzo(new Posizione(R8, A), TORRE, NERO).equals(trovaPezzo(new Posizione(R8, A))))
 					return true;
 			//Movimento non contemplato = return false
 		}
@@ -282,22 +283,22 @@ public class Partita implements Serializable {
 						return false;
 				}
 		else//Stessa colonna
-			if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Stessa colonna verso l'alto
-				for (int i = p.getPosizione().getRiga().ordinal() + 1; i < 8; i++)
-				{
-					if (posFine.getRiga().ordinal() == i)
-						return true;
-					if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
-						return false;
-				}
-			else//Stessa colonna verso il basso
-				for (int i = p.getPosizione().getRiga().ordinal() - 1; i >= 0; i--)
-				{
-					if (posFine.getRiga().ordinal() == i)
-						return true;
-					if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
-						return false;
-				}
+		if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Stessa colonna verso l'alto
+			for (int i = p.getPosizione().getRiga().ordinal() + 1; i < 8; i++)
+			{
+				if (posFine.getRiga().ordinal() == i)
+					return true;
+				if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
+					return false;
+			}
+		else//Stessa colonna verso il basso
+			for (int i = p.getPosizione().getRiga().ordinal() - 1; i >= 0; i--)
+			{
+				if (posFine.getRiga().ordinal() == i)
+					return true;
+				if (isThereAnybodyOutThere(new Posizione(Riga.values()[i], p.getPosizione().getColonna())))
+					return false;
+			}
 		return false;//Non si arriverà mai qua
 	}
 
@@ -329,22 +330,22 @@ public class Partita implements Serializable {
 						return false;
 				}
 		else//Zona a sinistra del punto iniziale
-			if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Zona in basso a sinistra del punto iniziale
-				for (int i = 1; i <= Math.min(7 - p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
-				{
-					if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-						return true;
-					if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-						return false;
-				}
-			else//Zona in basso a destra del punto iniziale
-				for (int i = 1; i <= Math.min(p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
-				{
-					if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-						return true;
-					if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
-						return false;
-				}
+		if (posFine.getRiga().ordinal() > p.getPosizione().getRiga().ordinal())//Zona in basso a sinistra del punto iniziale
+			for (int i = 1; i <= Math.min(7 - p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
+			{
+				if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+					return true;
+				if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() + i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+					return false;
+			}
+		else//Zona in basso a destra del punto iniziale
+			for (int i = 1; i <= Math.min(p.getPosizione().getRiga().ordinal(), p.getPosizione().getColonna().ordinal()); i++)
+			{
+				if (posFine.equals(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+					return true;
+				if (isThereAnybodyOutThere(new Posizione(Riga.values()[p.getPosizione().getRiga().ordinal() - i], Colonna.values()[p.getPosizione().getColonna().ordinal() - i])))
+					return false;
+			}
 		return false;
 	}
 
@@ -671,8 +672,10 @@ public class Partita implements Serializable {
 	 */
 	static <E> ArrayList<E> copyArray(ArrayList<E> array) {
 		ArrayList<E> finale = new ArrayList<>();
-		for (E obj : array)
+		Iterator it = array.iterator();
+		while (it.hasNext())
 		{
+			E obj = (E) it.next();
 			try
 			{
 				finale.add((E) obj.getClass().getMethod("clone").invoke(obj));

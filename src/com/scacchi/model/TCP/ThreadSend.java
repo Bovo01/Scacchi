@@ -7,12 +7,10 @@ package com.scacchi.model.TCP;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
-import com.scacchi.model.Mossa;
 import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
 import static com.scacchi.model.Pezzo.Colore.BIANCO;
 import static com.scacchi.model.Pezzo.Colore.NERO;
-import com.scacchi.model.Posizione;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -24,8 +22,6 @@ import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 
 /**
@@ -74,11 +70,11 @@ public class ThreadSend extends Thread {
 						Settings.player = socket;
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;
-						Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
 						if (line.equals("bianco"))
 							Settings.schieramento = Pezzo.Colore.BIANCO;
 						else
 							Settings.schieramento = Pezzo.Colore.NERO;
+						Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
 						Settings.threadAccetta.start();
 					}
 					else if(line.equals("richiesta colore"))

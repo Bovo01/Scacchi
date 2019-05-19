@@ -12,6 +12,7 @@ import static com.scacchi.model.Pezzo.Colore.NERO;
 import com.scacchi.model.Posizione.Colonna;
 import com.scacchi.model.Posizione.Riga;
 import com.scacchi.model.TCP.Settings;
+import com.scacchi.model.TCP.ThreadRicevi;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URL;
@@ -45,12 +46,18 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	@FXML
 	public Button patta;
 	@FXML
-	private Button restart;
+	public Button restart;
 
 	public void disattivaBottoni() {
 		resa.setDisable(true);
 		patta.setDisable(true);
 		restart.setDisable(true);
+	}
+	
+	public void attivaBottoni() {
+		resa.setDisable(false);
+		patta.setDisable(false);
+		restart.setDisable(false);
 	}
 
 	@FXML
@@ -188,6 +195,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	@FXML
 	@Override
 	protected void restart(ActionEvent event) {
+		disattivaBottoni();
 		sendMessage("richiesta restart");
 	}
 
@@ -206,9 +214,9 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		{
 			alert.setContentText("Restart accettato");
 			sendMessage("conferma restart");
-			resa.setDisable(false);
-			patta.setDisable(false);
+			attivaBottoni();
 			ricomincia();
+			ThreadRicevi.sendToSpettatori("conferma restart");
 		}
 		else
 		{
@@ -249,10 +257,13 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		resa.setDisable(true);
 		patta.setDisable(true);
 		mostraScacchi();
+		ThreadRicevi.sendToSpettatori("resa");
+		ThreadRicevi.sendToSpettatori(Settings.schieramento.notThis().toString().toLowerCase());
 	}
 
 	@FXML
 	private void patta(ActionEvent event) {
+		disattivaBottoni();
 		sendMessage("richiesta patta");
 	}
 
@@ -297,6 +308,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			resa.setDisable(true);
 			patta.setDisable(true);
 			mostraScacchi();
+			ThreadRicevi.sendToSpettatori("conferma patta");
 		}
 		else
 		{

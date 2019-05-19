@@ -11,11 +11,19 @@ import static com.scacchi.model.Pezzo.Colore.BIANCO;
 import static com.scacchi.model.Pezzo.Colore.NERO;
 import com.scacchi.model.Posizione.Colonna;
 import com.scacchi.model.Posizione.Riga;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,9 +36,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -69,7 +80,7 @@ public class ScacchieraController implements Initializable {
 		int x1 = (int) ((x - 48) / 123);
 		muovi(x1, y1);
 	}
-	
+
 	protected void muovi(int x, int y) {
 		if (pos1 == null)
 		{
@@ -134,7 +145,7 @@ public class ScacchieraController implements Initializable {
 				if (partita.getTurno() == null)//Se c'è un vincitore il metodo "muovi" imposta il turno a null
 				{
 					Alert alert = new Alert(Alert.AlertType.INFORMATION);
-					String line =  partita.comeEFinita();
+					String line = partita.comeEFinita();
 					if (partita.vincitore() == null)
 						alert.setTitle("Patta!");
 					else
@@ -176,6 +187,138 @@ public class ScacchieraController implements Initializable {
 		partita = new Partita();
 		versoScacchiera = BIANCO;
 		mostraScacchi();
+	}
+
+	@FXML
+	private void salvaCarica(ActionEvent event) {
+		String userName = System.getProperty("user.name");
+		File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "Scacchi");
+		Alert alert = new Alert(Alert.AlertType.NONE);
+		alert.setContentText("Vuoi salvare o caricare una partita?");
+		ButtonType SALVA = new ButtonType("Salva");
+		ButtonType CARICA = new ButtonType("Carica");
+		ButtonType OK = new ButtonType("Ok");
+		ButtonType ANNULLA = new ButtonType("Annulla");
+		alert.getButtonTypes().addAll(SALVA, CARICA, ANNULLA);
+		Optional<ButtonType> scelta = alert.showAndWait();
+		if(scelta.get() == ANNULLA)
+		{
+			FunctionsController.alertInfo("Annullato", "Hai annullato la procedura");
+			return;
+		}
+		if (scelta.get() == SALVA)
+		{
+			boolean ripeti = false;
+			File file = null;
+			if (!folder.exists())
+				folder.mkdirs();
+			do
+			{
+				ripeti = false;
+				Node node = new TextField();
+				node.setId("nomeFile");
+				((TextField) node).setPromptText("Inserisci il nome della partita");
+				Label label = new Label("Inserisci il nome della partita");
+				VBox vbox = new VBox(label, node);
+				do
+				{
+					alert = new Alert(Alert.AlertType.NONE);
+					alert.setTitle("Nome partita");
+					alert.getDialogPane().setContent(vbox);
+					alert.getButtonTypes().addAll(OK, ANNULLA);
+					scelta = alert.showAndWait();
+					if (scelta.get() == ANNULLA)
+					{
+						FunctionsController.alertInfo("Salvataggio annullato", "Hai annullato il salvataggio della partita");
+						return;
+					}
+				}
+				while (((TextField) node).getText().equals(""));
+
+				String nomeFile = ((TextField) node).getText();
+				file = new File(folder, nomeFile + ".dat");
+
+				if (file.exists())
+				{
+					alert = new Alert(Alert.AlertType.NONE);
+					alert.setTitle("Partita presente");
+					alert.setContentText("Vuoi sovrascrivere?");
+					alert.getButtonTypes().addAll(OK, ANNULLA);
+					scelta = alert.showAndWait();
+					if (scelta.get() != OK)
+						ripeti = true;
+				}
+				if (!ripeti)
+					try
+					{
+						file.createNewFile();
+					}
+					catch (IOException ex)
+					{
+					}
+			}
+			while (ripeti);
+
+			try
+			{
+				FileOutputStream fos = new FileOutputStream(file);
+				ObjectOutputStream foos = new ObjectOutputStream(fos);
+				foos.writeObject(partita);
+				foos.close();
+			}
+			catch (IOException ex)
+			{
+			}
+
+			FunctionsController.alertInfo("Salvato", "Partita salvata!");
+		}
+		else
+		{
+			ListView<String> listaFileDaCaricare = new ListView<>();
+			File[] files = folder.listFiles();
+			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
+			for (File file : files)
+			{
+				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
+			}
+			listaFileDaCaricare.getItems().addAll(nomiFilesDaCaricare);
+
+			int selectedIndex = -1;
+
+			do
+			{
+				alert = new Alert(Alert.AlertType.NONE);
+				alert.getButtonTypes().addAll(OK, ANNULLA);
+				alert.getDialogPane().setContent(listaFileDaCaricare);
+				scelta = alert.showAndWait();
+				selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
+				if (scelta.get() == ANNULLA)
+				{
+					FunctionsController.alertInfo("Caricamento annullato", "Hai annullato il caricamento della partita");
+					return;
+				}
+			}
+			while (selectedIndex == -1);
+
+			try
+			{
+				FileInputStream fis = new FileInputStream(files[selectedIndex]);
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				this.partita = (Partita) ois.readObject();
+				ois.close();
+				mostraScacchi();
+			}
+			catch (FileNotFoundException ex)
+			{//Il file ci sarà sempre
+			}
+			catch (IOException ex)
+			{
+			}
+			catch (ClassNotFoundException ex)
+			{
+				FunctionsController.alertErrore("Il file selezionato non è nel formato corretto");
+			}
+		}
 	}
 
 	@FXML
@@ -251,8 +394,8 @@ public class ScacchieraController implements Initializable {
 				}
 				else
 				{
-					dx = ((7-pezzo.getPosizione().getColonna().ordinal()) * 123 + 48) / scala;
-					dy = ((7-pezzo.getPosizione().getRiga().ordinal()) * 123 + 48) / scala;
+					dx = ((7 - pezzo.getPosizione().getColonna().ordinal()) * 123 + 48) / scala;
+					dy = ((7 - pezzo.getPosizione().getRiga().ordinal()) * 123 + 48) / scala;
 				}
 				graphics.fillRect(dx, dy, dw, dh);
 				disegnaPezzo(partita.trovaPezzo(pezzo.getPosizione()));
@@ -271,8 +414,8 @@ public class ScacchieraController implements Initializable {
 				}
 				else
 				{
-					dx = ((7-pezzo.getPosizione().getColonna().ordinal()) * 123 + 48) / scala;
-					dy = ((7-pezzo.getPosizione().getRiga().ordinal()) * 123 + 48) / scala;
+					dx = ((7 - pezzo.getPosizione().getColonna().ordinal()) * 123 + 48) / scala;
+					dy = ((7 - pezzo.getPosizione().getRiga().ordinal()) * 123 + 48) / scala;
 				}
 				graphics.fillRect(dx, dy, dw, dh);
 				disegnaPezzo(partita.trovaPezzo(pezzo.getPosizione()));

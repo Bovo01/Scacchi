@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.scacchi.controller.ScacchieraController">
+<AnchorPane id="AnchorPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.scacchi.controller.ScacchieraController">
    <children>
       <BorderPane prefHeight="598.0" prefWidth="748.0">
          <center>
@@ -37,6 +37,7 @@
                   </Label>
                   <Button mnemonicParsing="false" onAction="#restart" text="Ricomincia partita" />
                   <Button mnemonicParsing="false" onAction="#inverti" text="Inverti scacchiera" />
+                  <Button mnemonicParsing="false" onAction="#salvaCarica" text="Salva/Carica" />
                </children>
             </VBox>
          </right>
