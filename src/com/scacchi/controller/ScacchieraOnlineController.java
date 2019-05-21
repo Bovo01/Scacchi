@@ -14,7 +14,13 @@ import com.scacchi.model.Posizione.Riga;
 import com.scacchi.model.TCP.Settings;
 import com.scacchi.model.TCP.ThreadRicevi;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,13 +30,20 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -47,23 +60,27 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	public Button patta;
 	@FXML
 	public Button restart;
+	@FXML
+	public Button salvaCaricaElimina;
 
 	public void disattivaBottoni() {
 		resa.setDisable(true);
 		patta.setDisable(true);
 		restart.setDisable(true);
+		salvaCaricaElimina.setDisable(true);
 	}
-	
+
 	public void attivaBottoni() {
 		resa.setDisable(false);
 		patta.setDisable(false);
 		restart.setDisable(false);
+		salvaCaricaElimina.setDisable(false);
 	}
 
 	@FXML
 	@Override
 	protected void menu(ActionEvent event) {
-		if(partita.getTurno() != null)
+		if (partita.getTurno() != null)
 		{
 			Alert alert = new Alert(Alert.AlertType.NONE);
 			alert.setTitle("Sicuro?");
@@ -193,6 +210,192 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	}
 
 	@FXML
+	private void salvaCaricaElimina(ActionEvent event) {
+		String userName = System.getProperty("user.name");
+		File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
+		if (!folder.exists())
+			folder.mkdirs();
+		folder = new File(folder, "Scacchi");
+		if (!folder.exists())
+			folder.mkdirs();
+		folder = new File(folder, "Multiplayer");
+		Alert alert = new Alert(Alert.AlertType.NONE);
+		alert.setContentText("Vuoi salvare o caricare una partita?");
+		ButtonType SALVA = new ButtonType("Salva");
+		ButtonType CARICA = new ButtonType("Carica");
+		ButtonType ELIMINA = new ButtonType("Elimina");
+		ButtonType OK = new ButtonType("Ok");
+		ButtonType ANNULLA = new ButtonType("Annulla");
+		alert.getButtonTypes().addAll(SALVA, CARICA, ELIMINA, ANNULLA);
+		Optional<ButtonType> scelta = alert.showAndWait();
+		if (scelta.get() == ANNULLA)
+		{
+			FunctionsController.alertInfo("Annullato", "Hai annullato la procedura");
+			return;
+		}
+		if (scelta.get() == SALVA)
+		{
+			boolean ripeti;
+			File file = null;
+			if (!folder.exists())
+				folder.mkdirs();
+			do
+			{
+				ripeti = false;
+				Node node = new TextField();
+				node.setId("nomeFile");
+				((TextField) node).setPromptText("Inserisci il nome della partita");
+				Label label = new Label("Inserisci il nome della partita");
+				VBox vbox = new VBox(label, node);
+				do
+				{
+					alert = new Alert(Alert.AlertType.NONE);
+					alert.setTitle("Nome partita");
+					alert.getDialogPane().setContent(vbox);
+					alert.getButtonTypes().addAll(OK, ANNULLA);
+					scelta = alert.showAndWait();
+					if (scelta.get() == ANNULLA)
+					{
+						FunctionsController.alertInfo("Salvataggio annullato", "Hai annullato il salvataggio della partita");
+						return;
+					}
+				}
+				while (((TextField) node).getText().equals(""));
+
+				String nomeFile = ((TextField) node).getText();
+				file = new File(folder, nomeFile + ".dat");
+
+				if (file.exists())
+				{
+					alert = new Alert(Alert.AlertType.NONE);
+					alert.setTitle("Partita presente");
+					alert.setContentText("Vuoi sovrascrivere?");
+					alert.getButtonTypes().addAll(OK, ANNULLA);
+					scelta = alert.showAndWait();
+					if (scelta.get() != OK)
+						ripeti = true;
+				}
+				if (!ripeti)
+					try
+					{
+						file.createNewFile();
+					}
+					catch (IOException ex)
+					{
+					}
+			}
+			while (ripeti);
+
+			try
+			{
+				FileOutputStream fos = new FileOutputStream(file);
+				ObjectOutputStream foos = new ObjectOutputStream(fos);
+				foos.writeObject(partita);
+				foos.close();
+			}
+			catch (IOException ex)
+			{
+			}
+
+			FunctionsController.alertInfo("Salvato", "Partita salvata!");
+		}
+		else if (scelta.get() == CARICA)
+		{
+			ListView<String> listaFileDaCaricare = new ListView<>();
+			File[] files = folder.listFiles();
+			if (files == null || files.length == 0)
+			{
+				FunctionsController.alertErrore("Non sono presenti salvataggi");
+				return;
+			}
+			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
+			for (File file : files)
+			{
+				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
+			}
+			listaFileDaCaricare.getItems().addAll(nomiFilesDaCaricare);
+
+			int selectedIndex = -1;
+
+			do
+			{
+				alert = new Alert(Alert.AlertType.NONE);
+				alert.getButtonTypes().addAll(OK, ANNULLA);
+				alert.getDialogPane().setContent(listaFileDaCaricare);
+				scelta = alert.showAndWait();
+				selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
+				if (scelta.get() == ANNULLA)
+				{
+					FunctionsController.alertInfo("Caricamento annullato", "Hai annullato il caricamento della partita");
+					return;
+				}
+			}
+			while (selectedIndex == -1);
+
+			try
+			{
+				FileInputStream fis = new FileInputStream(files[selectedIndex]);
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				Settings.partitaDaCaricare = (Partita) ois.readObject();
+				ois.close();
+				mostraScacchi();
+				FunctionsController.alertInfo("Richiesta inviata", "Inviata la richiesta di caricamento della partita all'avversario");
+				sendMessage("richiesta caricamento");
+				disattivaBottoni();
+				if(Settings.playerOOS == null)
+					Settings.playerOOS = new ObjectOutputStream(Settings.player.getOutputStream());
+				Settings.playerOOS.writeObject(Settings.partitaDaCaricare);
+			}
+			catch (FileNotFoundException ex)
+			{//Il file ci sarà sempre
+			}
+			catch (IOException ex)
+			{
+			}
+			catch (ClassNotFoundException ex)
+			{
+				FunctionsController.alertErrore("Il file selezionato non è nel formato corretto");
+			}
+		}
+		else
+		{
+			ListView<String> listaFileDaCancellare = new ListView<>();
+			File[] files = folder.listFiles();
+			if (files == null || files.length == 0)
+			{
+				FunctionsController.alertErrore("Non sono presenti salvataggi");
+				return;
+			}
+			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
+			for (File file : files)
+			{
+				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
+			}
+			listaFileDaCancellare.getItems().addAll(nomiFilesDaCaricare);
+
+			int selectedIndex = -1;
+
+			do
+			{
+				alert = new Alert(Alert.AlertType.NONE);
+				alert.getButtonTypes().addAll(OK, ANNULLA);
+				alert.getDialogPane().setContent(listaFileDaCancellare);
+				scelta = alert.showAndWait();
+				selectedIndex = listaFileDaCancellare.getSelectionModel().getSelectedIndex();
+				if (scelta.get() == ANNULLA)
+				{
+					FunctionsController.alertInfo("Eliminazione annullato", "Hai annullato l'eliminazione della partita");
+					return;
+				}
+			}
+			while (selectedIndex == -1);
+
+			files[selectedIndex].delete();
+			FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
+		}
+	}
+
+	@FXML
 	@Override
 	protected void restart(ActionEvent event) {
 		disattivaBottoni();
@@ -226,6 +429,29 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		alert.show();
 	}
 
+	public void confermaCaricamento(boolean isCaricamento) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Caricamento");
+		if (isCaricamento)
+		{
+			alert.setContentText("Caricamento accettato");
+			sendMessage("conferma caricamento");
+			attivaBottoni();
+			partita = Settings.partitaDaCaricare;
+			Settings.partita = partita;
+			Settings.partitaDaCaricare = null;
+			mostraScacchi();
+			ThreadRicevi.sendToSpettatori("conferma caricamento");
+		}
+		else
+		{
+			alert.setContentText("Caricamento rifiutato");
+			sendMessage("rifiuto caricamento");
+			Settings.partitaDaCaricare = null;
+		}
+		alert.show();
+	}
+
 	public boolean richiestaRestart() {
 		Alert alert = new Alert(Alert.AlertType.NONE);
 		alert.setTitle("Richiesta restart");
@@ -233,6 +459,21 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		ButtonType ACCETTA = new ButtonType("Accetta");
 		ButtonType RIFIUTA = new ButtonType("Rifiuta");
 		alert.getButtonTypes().addAll(ACCETTA, RIFIUTA);
+		Optional<ButtonType> scelta = alert.showAndWait();
+		return scelta.get() == ACCETTA;
+	}
+
+	public boolean richiestaCaricamento() {
+		Alert alert = new Alert(Alert.AlertType.NONE);
+		alert.setTitle("Richiesta caricamento");
+		alert.setContentText("L'avversario ha richiesto di caricare una partita");
+		ButtonType ACCETTA = new ButtonType("Accetta");
+		ButtonType RIFIUTA = new ButtonType("Rifiuta");
+		alert.getButtonTypes().addAll(ACCETTA, RIFIUTA);
+		Canvas c = new Canvas(300, 300);
+		ScacchieraController.mostraScacchi(c, Settings.partitaDaCaricare);
+		Pane pane = new Pane(c);
+		alert.getDialogPane().setContent(c);
 		Optional<ButtonType> scelta = alert.showAndWait();
 		return scelta.get() == ACCETTA;
 	}
@@ -367,7 +608,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 					indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
 				}
 			}
-			for(Integer index : indexesToRemove)
+			for (Integer index : indexesToRemove)
 			{
 				try
 				{
@@ -376,9 +617,9 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				catch (IOException ex1)
 				{
 				}
-				Settings.spettatoriWriters.remove(index);
-				Settings.spettatori.remove(index);
-				Settings.spettatoriReaders.remove(index);
+				Settings.spettatoriWriters.remove(index.intValue());
+				Settings.spettatori.remove(index.intValue());
+				Settings.spettatoriReaders.remove(index.intValue());
 			}
 		}
 	}

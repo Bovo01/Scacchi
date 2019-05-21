@@ -37,7 +37,7 @@
                   </Label>
                   <Button mnemonicParsing="false" onAction="#restart" text="Ricomincia partita" />
                   <Button mnemonicParsing="false" onAction="#inverti" text="Inverti scacchiera" />
-                  <Button mnemonicParsing="false" onAction="#salvaCarica" text="Salva/Carica" />
+                  <Button mnemonicParsing="false" onAction="#salvaCaricaElimina" text="Salva/Carica/Elimina" />
                </children>
             </VBox>
          </right>

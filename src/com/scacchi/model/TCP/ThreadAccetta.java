@@ -132,9 +132,12 @@ public class ThreadAccetta extends Thread implements Closeable {
 						Settings.spettatoriReaders = new ArrayList<>();
 					if(Settings.spettatoriWriters == null)
 						Settings.spettatoriWriters = new ArrayList<>();
+					if(Settings.spettatoriOOS == null)
+						Settings.spettatoriOOS = new ArrayList<>();
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
+					Settings.spettatoriOOS.add(oos);
 				}
 			}
 			catch (IOException ex)
@@ -165,6 +168,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 		Settings.spettatori = null;
 		Settings.spettatoriReaders = null;
 		Settings.spettatoriWriters = null;
+		Settings.spettatoriOOS = null;
 		Settings.schieramento = null;
 		Settings.threadAccetta = null;
 		Platform.runLater(() -> {

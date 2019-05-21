@@ -7,11 +7,13 @@ package com.scacchi.model.TCP;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
+import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
 import com.scacchi.model.Posizione;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.application.Platform;
@@ -52,7 +54,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 						if (Settings.partita.getTurno() == null || Settings.partita.getMosse().isEmpty())
 							alert.setTitle("Info");
 						else
-							alert.setContentText("Hai vinto!");
+							alert.setTitle("Hai vinto!");
 						alert.setContentText("L'avversario ha abbandonato la partita");
 						alert.show();
 						Settings.partita.fine();
@@ -163,6 +165,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.spettatoriWriters.remove(index.intValue());
 							Settings.spettatori.remove(index.intValue());
 							Settings.spettatoriReaders.remove(index.intValue());
+							Settings.spettatoriOOS.remove(index.intValue());
 						}
 					}
 				}
@@ -180,6 +183,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 							sendToSpettatori(line);
 							Settings.scacchieraOnlineController.finePartita("patta", null);
 							Settings.scacchieraOnlineController.restart.setDisable(false);
+							Settings.scacchieraOnlineController.salvaCaricaElimina.setDisable(false);
 						}
 						else if (Settings.scacchieraOnlineSpettatoriController != null)
 							Settings.scacchieraOnlineSpettatoriController.finePartita("patta", null);
@@ -210,17 +214,58 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.scacchieraOnlineSpettatoriController.ricomincia();
 							Platform.runLater(() -> FunctionsController.alertInfo("Restart", "La partita è ricominciata"));
 						}
-
 					});
 				else if (line.equals("rifiuto restart"))
 					Platform.runLater(() ->
 					{
-						if(Settings.partita.getTurno() != null)
+						if (Settings.partita.getTurno() != null)
 							Settings.scacchieraOnlineController.attivaBottoni();
 						else
+						{
 							Settings.scacchieraOnlineController.restart.setDisable(false);
+							Settings.scacchieraOnlineController.salvaCaricaElimina.setDisable(false);
+						}
 						FunctionsController.alertInfo("Restart rifiutato", "La tua richiesta di ricominciare è stata rifiutata");
 					});
+				else if (line.equals("richiesta caricamento"))
+				{
+					if (Settings.playerOIS == null)
+						Settings.playerOIS = new ObjectInputStream(Settings.player.getInputStream());
+					try
+					{
+						Settings.partitaDaCaricare = (Partita) Settings.playerOIS.readObject();
+					}
+					catch (ClassNotFoundException ex)
+					{//La classe sarà sempre corretta
+					}
+					Platform.runLater(() ->
+					{
+						boolean isCaricato = Settings.scacchieraOnlineController.richiestaCaricamento();
+						Settings.scacchieraOnlineController.confermaCaricamento(isCaricato);
+					});
+				}
+				else if (line.equals("conferma caricamento"))
+					Platform.runLater(() ->
+					{
+						if (Settings.scacchieraOnlineController != null)
+						{
+							sendToSpettatori(line);
+							Settings.partita = Settings.partitaDaCaricare;
+							Settings.partitaDaCaricare = null;
+							Settings.scacchieraOnlineController.partita = Settings.partita;
+							Settings.scacchieraOnlineController.mostraScacchi();
+							Settings.scacchieraOnlineController.attivaBottoni();
+						}
+						else if (Settings.scacchieraOnlineSpettatoriController != null)
+						{
+							Settings.scacchieraOnlineSpettatoriController.ricomincia();
+							FunctionsController.alertInfo("Caricamento", "La partita è stata caricata");
+						}
+					});
+				else if (line.equals("rifiuto caricamento"))
+				{
+					Settings.partitaDaCaricare = null;
+				}
 			}
 			catch (IOException ex)
 			{
@@ -254,5 +299,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 		Settings.player = null;
 		Settings.playerReader = null;
 		Settings.playerWriter = null;
+		Settings.playerOOS = null;
+		Settings.playerOIS = null;
 	}
 }

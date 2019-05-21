@@ -11,6 +11,8 @@ import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -25,9 +27,12 @@ public class Settings {//SPORCO
 	public static Socket player;
 	public static BufferedReader playerReader;
 	public static BufferedWriter playerWriter;
+	public static ObjectOutputStream playerOOS;
+	public static ObjectInputStream playerOIS;
 	public static ArrayList<Socket> spettatori;
 	public static ArrayList<BufferedReader> spettatoriReaders;
 	public static ArrayList<BufferedWriter> spettatoriWriters;
+	public static ArrayList<ObjectOutputStream> spettatoriOOS;
 	//Interazione da thread a controller
 	public static Partita partita;
 	public static Pezzo.Colore schieramento;
@@ -36,4 +41,6 @@ public class Settings {//SPORCO
 	//Thread
 	public static ThreadAccetta threadAccetta;
 	public static ThreadRicevi threadRicevi;//Serve solo agli spettatori
+	//Caricamento partita
+	public static Partita partitaDaCaricare;
 }

@@ -21,3 +21,7 @@ rifiuto restart = Rifiuto di ricominciare la partita
 //SPETTATORI
 'invio partita' = Invio della partita serializzata
 bianco/nero = Lo schieramento del giocatore
+//Caricamento file
+richiesta caricamento = invia la richiesta a ricaricare una partita
+conferma caricamento = invia la conferma per ricaricare una partita
+rifiuto caricamento =  rifiutato il caricamento di una partita

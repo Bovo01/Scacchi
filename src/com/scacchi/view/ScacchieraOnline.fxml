@@ -47,6 +47,7 @@
                   <Button fx:id="resa" mnemonicParsing="false" onAction="#resa" text="Resa" />
                   <Button fx:id="patta" mnemonicParsing="false" onAction="#patta" text="Chiedi patta" />
                   <Button fx:id="restart" mnemonicParsing="false" onAction="#restart" text="Chiedi restart" />
+                  <Button fx:id="salvaCaricaElimina" mnemonicParsing="false" onAction="#salvaCaricaElimina" text="Salva/Carica/Elimina" />
                </children>
             </VBox>
          </right>

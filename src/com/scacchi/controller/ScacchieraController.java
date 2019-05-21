@@ -22,8 +22,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -58,7 +56,7 @@ public class ScacchieraController implements Initializable {
 	@FXML
 	protected ImageView scacchiera;
 
-	protected Partita partita;
+	public Partita partita;
 	protected GraphicsContext graphics;
 	protected Posizione pos1, pos2;
 	protected Colore versoScacchiera;
@@ -190,16 +188,23 @@ public class ScacchieraController implements Initializable {
 	}
 
 	@FXML
-	private void salvaCarica(ActionEvent event) {
+	private void salvaCaricaElimina(ActionEvent event) {
 		String userName = System.getProperty("user.name");
-		File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "Scacchi");
+		File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
+		if(!folder.exists())
+			folder.mkdirs();
+		folder = new File(folder, "Scacchi");
+		if(!folder.exists())
+			folder.mkdirs();
+		folder = new File(folder, "Singleplayer");
 		Alert alert = new Alert(Alert.AlertType.NONE);
 		alert.setContentText("Vuoi salvare o caricare una partita?");
 		ButtonType SALVA = new ButtonType("Salva");
 		ButtonType CARICA = new ButtonType("Carica");
+		ButtonType ELIMINA = new ButtonType("Elimina");
 		ButtonType OK = new ButtonType("Ok");
 		ButtonType ANNULLA = new ButtonType("Annulla");
-		alert.getButtonTypes().addAll(SALVA, CARICA, ANNULLA);
+		alert.getButtonTypes().addAll(SALVA, CARICA, ELIMINA, ANNULLA);
 		Optional<ButtonType> scelta = alert.showAndWait();
 		if(scelta.get() == ANNULLA)
 		{
@@ -208,7 +213,7 @@ public class ScacchieraController implements Initializable {
 		}
 		if (scelta.get() == SALVA)
 		{
-			boolean ripeti = false;
+			boolean ripeti;
 			File file = null;
 			if (!folder.exists())
 				folder.mkdirs();
@@ -272,10 +277,15 @@ public class ScacchieraController implements Initializable {
 
 			FunctionsController.alertInfo("Salvato", "Partita salvata!");
 		}
-		else
+		else if(scelta.get() == CARICA)
 		{
 			ListView<String> listaFileDaCaricare = new ListView<>();
 			File[] files = folder.listFiles();
+			if(files == null || files.length == 0)
+			{
+				FunctionsController.alertErrore("Non sono presenti salvataggi");
+				return;
+			}
 			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
 			for (File file : files)
 			{
@@ -307,6 +317,7 @@ public class ScacchieraController implements Initializable {
 				this.partita = (Partita) ois.readObject();
 				ois.close();
 				mostraScacchi();
+				FunctionsController.alertInfo("Successo", "Partita caricata con successo");
 			}
 			catch (FileNotFoundException ex)
 			{//Il file ci sarà sempre
@@ -318,6 +329,42 @@ public class ScacchieraController implements Initializable {
 			{
 				FunctionsController.alertErrore("Il file selezionato non è nel formato corretto");
 			}
+		}
+		else
+		{
+			ListView<String> listaFileDaCancellare = new ListView<>();
+			File[] files = folder.listFiles();
+			if(files == null || files.length == 0)
+			{
+				FunctionsController.alertErrore("Non sono presenti salvataggi");
+				return;
+			}
+			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
+			for (File file : files)
+			{
+				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
+			}
+			listaFileDaCancellare.getItems().addAll(nomiFilesDaCaricare);
+
+			int selectedIndex = -1;
+
+			do
+			{
+				alert = new Alert(Alert.AlertType.NONE);
+				alert.getButtonTypes().addAll(OK, ANNULLA);
+				alert.getDialogPane().setContent(listaFileDaCancellare);
+				scelta = alert.showAndWait();
+				selectedIndex = listaFileDaCancellare.getSelectionModel().getSelectedIndex();
+				if (scelta.get() == ANNULLA)
+				{
+					FunctionsController.alertInfo("Eliminazione annullato", "Hai annullato l'eliminazione della partita");
+					return;
+				}
+			}
+			while (selectedIndex == -1);
+
+			files[selectedIndex].delete();
+			FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
 		}
 	}
 
@@ -347,14 +394,24 @@ public class ScacchieraController implements Initializable {
 		versoScacchiera = BIANCO;
 		mostraScacchi();
 	}
-
+	
 	public void mostraScacchi() {
-		Mossa ultimaMossa = partita.getUltimaMossa();
-		if (partita.getTurno() == null)
-			turno.setText("PARTITA CONCLUSA!");
-		else
-			turno.setText(partita.getTurno().toString());
 		graphics.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		mostraScacchi(this.graphics, this.canvas, this.partita, this.turno, this.versoScacchiera, this.scala, partita.getUltimaMossa());
+	}
+	
+	public static void mostraScacchi(Canvas canvas, Partita partita) {
+		GraphicsContext context = canvas.getGraphicsContext2D();
+		context.drawImage(SCACCHIERA, 0, 0, canvas.getWidth(), canvas.getHeight());
+		mostraScacchi(context, canvas, partita, null, BIANCO, SCACCHIERA_DIM / canvas.getWidth(), null);
+	}
+
+	private static void mostraScacchi(GraphicsContext graphics, Canvas canvas, Partita partita, Label turno, Colore versoScacchiera, double scala, Mossa ultimaMossa) {
+		if(turno != null)
+			if (partita.getTurno() == null)
+				turno.setText("PARTITA CONCLUSA!");
+			else
+				turno.setText(partita.getTurno().toString());
 		ArrayList<Pezzo> unione = new ArrayList<>();
 		unione.addAll(partita.getBianchi());
 		unione.addAll(partita.getNeri());
@@ -398,7 +455,7 @@ public class ScacchieraController implements Initializable {
 					dy = ((7 - pezzo.getPosizione().getRiga().ordinal()) * 123 + 48) / scala;
 				}
 				graphics.fillRect(dx, dy, dw, dh);
-				disegnaPezzo(partita.trovaPezzo(pezzo.getPosizione()));
+				disegnaPezzo(partita.trovaPezzo(pezzo.getPosizione()), scala, graphics, versoScacchiera);
 			}
 		}
 		else if (partita.isScacco(NERO))
@@ -418,16 +475,16 @@ public class ScacchieraController implements Initializable {
 					dy = ((7 - pezzo.getPosizione().getRiga().ordinal()) * 123 + 48) / scala;
 				}
 				graphics.fillRect(dx, dy, dw, dh);
-				disegnaPezzo(partita.trovaPezzo(pezzo.getPosizione()));
+				disegnaPezzo(partita.trovaPezzo(pezzo.getPosizione()), scala, graphics, versoScacchiera);
 			}
 		}
 		for (Pezzo p : unione)
 		{
-			disegnaPezzo(p);
+			disegnaPezzo(p, scala, graphics, versoScacchiera);
 		}
 	}
 
-	protected void disegnaPezzo(Pezzo p) {
+	protected static void disegnaPezzo(Pezzo p, double scala, GraphicsContext graphics, Colore versoScacchiera) {
 		double sx, sy, sw = SCACCHI.getWidth() / 6, sh = SCACCHI.getHeight() / 2;//Coordinate da cui ritagliare l'immagine
 		double dx, dy, dw = 123 / scala, dh = 123 / scala;//Coordinate dove inserire l'immagine. Le dimensioni sono fisse (rappresentano la dimensione di un quadrato della scacchiera)
 		sx = sw * p.getSimbolo().ordinal();
@@ -507,5 +564,9 @@ public class ScacchieraController implements Initializable {
 			graphics.drawImage(new Image("com/scacchi/view/img/selected.png"), (48 + 123 * p.getPosizione().getColonna().ordinal()) / scala, (48 + 123 * p.getPosizione().getRiga().ordinal()) / scala, 123 / scala, 123 / scala);
 		else
 			graphics.drawImage(new Image("com/scacchi/view/img/selected.png"), (48 + 123 * (7 - p.getPosizione().getColonna().ordinal())) / scala, (48 + 123 * (7 - p.getPosizione().getRiga().ordinal())) / scala, 123 / scala, 123 / scala);
+	}
+
+	protected void disegnaPezzo(Pezzo pezzo) {
+		disegnaPezzo(pezzo, this.scala, this.graphics, this.versoScacchiera);
 	}
 }
