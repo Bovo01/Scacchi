@@ -26,14 +26,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -42,8 +45,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 /**
@@ -263,7 +268,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				while (((TextField) node).getText().equals(""));
 
 				String nomeFile = ((TextField) node).getText();
-				file = new File(folder, nomeFile + ".dat");
+				file = new File(folder, nomeFile + ".sca");
 
 				if (file.exists())
 				{
@@ -314,6 +319,27 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
 			}
 			listaFileDaCaricare.getItems().addAll(nomiFilesDaCaricare);
+			listaFileDaCaricare.setPrefHeight(300);
+			Canvas c = new Canvas(300, 300);
+			GraphicsContext context = c.getGraphicsContext2D();
+			context.setTextAlign(TextAlignment.CENTER);
+			context.setTextBaseline(VPos.CENTER);
+			context.fillText("Seleziona un'opzione\nper vedere l'anteprima", c.getWidth() / 2, c.getHeight() / 2);
+			listaFileDaCaricare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+			{
+				try (FileInputStream fis = new FileInputStream(files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()]))
+				{
+					ObjectInputStream fois = new ObjectInputStream(fis);
+					Partita p = (Partita) fois.readObject();
+					ScacchieraController.mostraScacchi(c, p);
+				}
+				catch (ClassNotFoundException | IOException ex)
+				{
+					context.clearRect(0, 0, c.getWidth(), c.getHeight());
+					context.setFill(Color.BLACK);
+					context.fillText("File corrotto\nAnteprima non disponibile", c.getWidth() / 2, c.getHeight() / 2);
+				}
+			});
 
 			int selectedIndex = -1;
 
@@ -321,7 +347,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			{
 				alert = new Alert(Alert.AlertType.NONE);
 				alert.getButtonTypes().addAll(OK, ANNULLA);
-				alert.getDialogPane().setContent(listaFileDaCaricare);
+				alert.getDialogPane().setContent(new HBox(c, listaFileDaCaricare));
 				scelta = alert.showAndWait();
 				selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
 				if (scelta.get() == ANNULLA)
@@ -342,17 +368,11 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				FunctionsController.alertInfo("Richiesta inviata", "Inviata la richiesta di caricamento della partita all'avversario");
 				sendMessage("richiesta caricamento");
 				disattivaBottoni();
-				if(Settings.playerOOS == null)
+				if (Settings.playerOOS == null)
 					Settings.playerOOS = new ObjectOutputStream(Settings.player.getOutputStream());
 				Settings.playerOOS.writeObject(Settings.partitaDaCaricare);
 			}
-			catch (FileNotFoundException ex)
-			{//Il file ci sarà sempre
-			}
-			catch (IOException ex)
-			{
-			}
-			catch (ClassNotFoundException ex)
+			catch (IOException | ClassNotFoundException ex)
 			{
 				FunctionsController.alertErrore("Il file selezionato non è nel formato corretto");
 			}
@@ -372,7 +392,27 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
 			}
 			listaFileDaCancellare.getItems().addAll(nomiFilesDaCaricare);
-
+			listaFileDaCancellare.setPrefHeight(300);
+			Canvas c = new Canvas(300, 300);
+			GraphicsContext context = c.getGraphicsContext2D();
+			context.setTextAlign(TextAlignment.CENTER);
+			context.setTextBaseline(VPos.CENTER);
+			context.fillText("Seleziona un'opzione\nper vedere l'anteprima", c.getWidth() / 2, c.getHeight() / 2);
+			listaFileDaCancellare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+			{
+				try (FileInputStream fis = new FileInputStream(files[listaFileDaCancellare.getSelectionModel().getSelectedIndex()]))
+				{
+					ObjectInputStream fois = new ObjectInputStream(fis);
+					Partita p = (Partita) fois.readObject();
+					ScacchieraController.mostraScacchi(c, p);
+				}
+				catch (ClassNotFoundException | IOException ex)
+				{
+					context.clearRect(0, 0, c.getWidth(), c.getHeight());
+					context.setFill(Color.BLACK);
+					context.fillText("File corrotto\nAnteprima non disponibile", c.getWidth() / 2, c.getHeight() / 2);
+				}
+			});
 			int selectedIndex = -1;
 
 			do
@@ -390,8 +430,10 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			}
 			while (selectedIndex == -1);
 
-			files[selectedIndex].delete();
-			FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
+			if (files[selectedIndex].delete())
+				FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
+			else
+				FunctionsController.alertErrore("Non è stato possibile eliminare la partita");//Non dovrebbe mai succedere
 		}
 	}
 
@@ -472,7 +514,6 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		alert.getButtonTypes().addAll(ACCETTA, RIFIUTA);
 		Canvas c = new Canvas(300, 300);
 		ScacchieraController.mostraScacchi(c, Settings.partitaDaCaricare);
-		Pane pane = new Pane(c);
 		alert.getDialogPane().setContent(c);
 		Optional<ButtonType> scelta = alert.showAndWait();
 		return scelta.get() == ACCETTA;

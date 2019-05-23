@@ -265,6 +265,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 				else if (line.equals("rifiuto caricamento"))
 				{
 					Settings.partitaDaCaricare = null;
+					Settings.scacchieraOnlineController.attivaBottoni();
 				}
 			}
 			catch (IOException ex)

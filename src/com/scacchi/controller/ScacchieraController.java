@@ -13,7 +13,6 @@ import com.scacchi.model.Posizione.Colonna;
 import com.scacchi.model.Posizione.Riga;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,10 +21,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -39,8 +41,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 /**
@@ -191,10 +195,10 @@ public class ScacchieraController implements Initializable {
 	private void salvaCaricaElimina(ActionEvent event) {
 		String userName = System.getProperty("user.name");
 		File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
-		if(!folder.exists())
+		if (!folder.exists())
 			folder.mkdirs();
 		folder = new File(folder, "Scacchi");
-		if(!folder.exists())
+		if (!folder.exists())
 			folder.mkdirs();
 		folder = new File(folder, "Singleplayer");
 		Alert alert = new Alert(Alert.AlertType.NONE);
@@ -206,7 +210,7 @@ public class ScacchieraController implements Initializable {
 		ButtonType ANNULLA = new ButtonType("Annulla");
 		alert.getButtonTypes().addAll(SALVA, CARICA, ELIMINA, ANNULLA);
 		Optional<ButtonType> scelta = alert.showAndWait();
-		if(scelta.get() == ANNULLA)
+		if (scelta.get() == ANNULLA)
 		{
 			FunctionsController.alertInfo("Annullato", "Hai annullato la procedura");
 			return;
@@ -220,16 +224,15 @@ public class ScacchieraController implements Initializable {
 			do
 			{
 				ripeti = false;
-				Node node = new TextField();
-				node.setId("nomeFile");
-				((TextField) node).setPromptText("Inserisci il nome della partita");
+				TextField textField = new TextField();
+				textField.setId("nomeFile");
+				textField.setPromptText("Inserisci il nome della partita");
 				Label label = new Label("Inserisci il nome della partita");
-				VBox vbox = new VBox(label, node);
 				do
 				{
 					alert = new Alert(Alert.AlertType.NONE);
 					alert.setTitle("Nome partita");
-					alert.getDialogPane().setContent(vbox);
+					alert.getDialogPane().setContent(new VBox(label, textField));
 					alert.getButtonTypes().addAll(OK, ANNULLA);
 					scelta = alert.showAndWait();
 					if (scelta.get() == ANNULLA)
@@ -238,10 +241,10 @@ public class ScacchieraController implements Initializable {
 						return;
 					}
 				}
-				while (((TextField) node).getText().equals(""));
+				while (textField.getText().equals(""));
 
-				String nomeFile = ((TextField) node).getText();
-				file = new File(folder, nomeFile + ".dat");
+				String nomeFile = textField.getText();
+				file = new File(folder, nomeFile + ".sca");
 
 				if (file.exists())
 				{
@@ -277,11 +280,11 @@ public class ScacchieraController implements Initializable {
 
 			FunctionsController.alertInfo("Salvato", "Partita salvata!");
 		}
-		else if(scelta.get() == CARICA)
+		else if (scelta.get() == CARICA)
 		{
 			ListView<String> listaFileDaCaricare = new ListView<>();
 			File[] files = folder.listFiles();
-			if(files == null || files.length == 0)
+			if (files == null || files.length == 0)
 			{
 				FunctionsController.alertErrore("Non sono presenti salvataggi");
 				return;
@@ -292,6 +295,30 @@ public class ScacchieraController implements Initializable {
 				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
 			}
 			listaFileDaCaricare.getItems().addAll(nomiFilesDaCaricare);
+			listaFileDaCaricare.setPrefHeight(300);
+			Canvas c = new Canvas(300, 300);
+			GraphicsContext context = c.getGraphicsContext2D();
+			context.setTextAlign(TextAlignment.CENTER);
+			context.setTextBaseline(VPos.CENTER);
+			context.fillText("Seleziona un'opzione\nper vedere l'anteprima", c.getWidth() / 2, c.getHeight() / 2);
+			listaFileDaCaricare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+			{
+				try (FileInputStream fis = new FileInputStream(files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()]))
+				{
+					String line = files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()].getName();
+					if(!line.substring(line.length()-4, line.length()).equals(".sca"))
+						throw new ClassNotFoundException();
+					ObjectInputStream fois = new ObjectInputStream(fis);
+					Partita p = (Partita) fois.readObject();
+					ScacchieraController.mostraScacchi(c, p);
+				}
+				catch (ClassNotFoundException | IOException ex)
+				{
+					context.clearRect(0, 0, c.getWidth(), c.getHeight());
+					context.setFill(Color.BLACK);
+					context.fillText("File corrotto\nAnteprima non disponibile", c.getWidth() / 2, c.getHeight() / 2);
+				}
+			});
 
 			int selectedIndex = -1;
 
@@ -299,7 +326,7 @@ public class ScacchieraController implements Initializable {
 			{
 				alert = new Alert(Alert.AlertType.NONE);
 				alert.getButtonTypes().addAll(OK, ANNULLA);
-				alert.getDialogPane().setContent(listaFileDaCaricare);
+				alert.getDialogPane().setContent(new HBox(c, listaFileDaCaricare));
 				scelta = alert.showAndWait();
 				selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
 				if (scelta.get() == ANNULLA)
@@ -310,31 +337,26 @@ public class ScacchieraController implements Initializable {
 			}
 			while (selectedIndex == -1);
 
-			try
+			try (FileInputStream fis = new FileInputStream(files[selectedIndex]))
 			{
-				FileInputStream fis = new FileInputStream(files[selectedIndex]);
+				String line = files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()].getName();
+				if(!line.substring(line.length()-4, line.length()).equals(".sca"))
+					throw new ClassNotFoundException();
 				ObjectInputStream ois = new ObjectInputStream(fis);
 				this.partita = (Partita) ois.readObject();
-				ois.close();
 				mostraScacchi();
 				FunctionsController.alertInfo("Successo", "Partita caricata con successo");
 			}
-			catch (FileNotFoundException ex)
-			{//Il file ci sarà sempre
-			}
-			catch (IOException ex)
+			catch (ClassNotFoundException | IOException ex)
 			{
-			}
-			catch (ClassNotFoundException ex)
-			{
-				FunctionsController.alertErrore("Il file selezionato non è nel formato corretto");
+				FunctionsController.alertErrore("Il file è corrotto");
 			}
 		}
 		else
 		{
 			ListView<String> listaFileDaCancellare = new ListView<>();
 			File[] files = folder.listFiles();
-			if(files == null || files.length == 0)
+			if (files == null || files.length == 0)
 			{
 				FunctionsController.alertErrore("Non sono presenti salvataggi");
 				return;
@@ -345,14 +367,34 @@ public class ScacchieraController implements Initializable {
 				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
 			}
 			listaFileDaCancellare.getItems().addAll(nomiFilesDaCaricare);
-
+			listaFileDaCancellare.setPrefHeight(300);
+			Canvas c = new Canvas(300, 300);
+			GraphicsContext context = c.getGraphicsContext2D();
+			context.setTextAlign(TextAlignment.CENTER);
+			context.setTextBaseline(VPos.CENTER);
+			context.fillText("Seleziona un'opzione\nper vedere l'anteprima", c.getWidth() / 2, c.getHeight() / 2);
+			listaFileDaCancellare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+			{
+				try (FileInputStream fis = new FileInputStream(files[listaFileDaCancellare.getSelectionModel().getSelectedIndex()]))
+				{
+					ObjectInputStream fois = new ObjectInputStream(fis);
+					Partita p = (Partita) fois.readObject();
+					ScacchieraController.mostraScacchi(c, p);
+				}
+				catch (ClassNotFoundException | IOException ex)
+				{
+					context.clearRect(0, 0, c.getWidth(), c.getHeight());
+					context.setFill(Color.BLACK);
+					context.fillText("File corrotto\nAnteprima non disponibile", c.getWidth() / 2, c.getHeight() / 2);
+				}
+			});
 			int selectedIndex = -1;
 
 			do
 			{
 				alert = new Alert(Alert.AlertType.NONE);
 				alert.getButtonTypes().addAll(OK, ANNULLA);
-				alert.getDialogPane().setContent(listaFileDaCancellare);
+				alert.getDialogPane().setContent(new HBox(c, listaFileDaCancellare));
 				scelta = alert.showAndWait();
 				selectedIndex = listaFileDaCancellare.getSelectionModel().getSelectedIndex();
 				if (scelta.get() == ANNULLA)
@@ -363,8 +405,10 @@ public class ScacchieraController implements Initializable {
 			}
 			while (selectedIndex == -1);
 
-			files[selectedIndex].delete();
-			FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
+			if (files[selectedIndex].delete())
+				FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
+			else
+				FunctionsController.alertErrore("Non è stato possibile eliminare la partita");//Non dovrebbe mai succedere
 		}
 	}
 
@@ -394,20 +438,21 @@ public class ScacchieraController implements Initializable {
 		versoScacchiera = BIANCO;
 		mostraScacchi();
 	}
-	
+
 	public void mostraScacchi() {
 		graphics.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		mostraScacchi(this.graphics, this.canvas, this.partita, this.turno, this.versoScacchiera, this.scala, partita.getUltimaMossa());
 	}
-	
+
 	public static void mostraScacchi(Canvas canvas, Partita partita) {
 		GraphicsContext context = canvas.getGraphicsContext2D();
+		context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		context.drawImage(SCACCHIERA, 0, 0, canvas.getWidth(), canvas.getHeight());
 		mostraScacchi(context, canvas, partita, null, BIANCO, SCACCHIERA_DIM / canvas.getWidth(), null);
 	}
 
 	private static void mostraScacchi(GraphicsContext graphics, Canvas canvas, Partita partita, Label turno, Colore versoScacchiera, double scala, Mossa ultimaMossa) {
-		if(turno != null)
+		if (turno != null)
 			if (partita.getTurno() == null)
 				turno.setText("PARTITA CONCLUSA!");
 			else
@@ -568,5 +613,16 @@ public class ScacchieraController implements Initializable {
 
 	protected void disegnaPezzo(Pezzo pezzo) {
 		disegnaPezzo(pezzo, this.scala, this.graphics, this.versoScacchiera);
+	}
+
+	private static class ChangeListenerImpl implements ChangeListener<String> {
+
+		public ChangeListenerImpl() {
+		}
+
+		@Override
+		public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		}
 	}
 }
