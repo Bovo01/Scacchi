@@ -5,10 +5,11 @@
  */
 package com.scacchi.controller;
 
-import com.scacchi.model.*;
+import com.scacchi.model.Partita;
+import com.scacchi.model.Pezzo;
 import com.scacchi.model.Pezzo.Colore;
-import static com.scacchi.model.Pezzo.Colore.BIANCO;
-import static com.scacchi.model.Pezzo.Colore.NERO;
+import static com.scacchi.model.Pezzo.Colore.*;
+import com.scacchi.model.Posizione;
 import com.scacchi.model.Posizione.Colonna;
 import com.scacchi.model.Posizione.Riga;
 import com.scacchi.model.TCP.Settings;
@@ -16,7 +17,6 @@ import com.scacchi.model.TCP.ThreadRicevi;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -364,7 +364,6 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				ObjectInputStream ois = new ObjectInputStream(fis);
 				Settings.partitaDaCaricare = (Partita) ois.readObject();
 				ois.close();
-				mostraScacchi();
 				FunctionsController.alertInfo("Richiesta inviata", "Inviata la richiesta di caricamento della partita all'avversario");
 				sendMessage("richiesta caricamento");
 				disattivaBottoni();
