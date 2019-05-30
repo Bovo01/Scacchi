@@ -14,6 +14,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -121,7 +122,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 				{
 					bw.write("richiesta accettata spettatore\n");
 					bw.flush();
-					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+					ObjectOutputStream oos = new ObjectOutputStream(os);
 					oos.writeObject(Settings.partita);
 					bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
 					bw.newLine();

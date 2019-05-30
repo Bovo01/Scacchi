@@ -433,6 +433,8 @@ public class Partita implements Serializable {
 	 * @return true se la partita è conclusa, false altrimenti
 	 */
 	public boolean isFinita() {
+		if (turno == null)
+			return true;
 		if (isStallo(NERO) || isStallo(BIANCO))
 			return true;
 		if (isScaccoMatto(NERO) || isScaccoMatto(BIANCO))
@@ -719,9 +721,9 @@ public class Partita implements Serializable {
 	 * @return true se si è in una situazione di stallo, altrimenti false
 	 */
 	public boolean isStallo(Colore colore) {
-		ArrayList<Pezzo> array;
 		if (isScacco(colore))
 			return false;
+		ArrayList<Pezzo> array;
 		if (colore == BIANCO)
 			array = bianchi;
 		else

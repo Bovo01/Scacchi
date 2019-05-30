@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -109,6 +111,8 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.scacchieraOnlineController.mostraScacchi();
 							if (Settings.partita.isFinita())
 							{
+								Settings.scacchieraOnlineController.resa.setDisable(true);
+								Settings.scacchieraOnlineController.patta.setDisable(true);
 								Alert alert = new Alert(Alert.AlertType.INFORMATION);
 								if (Settings.partita.vincitore() == null)
 								{
@@ -229,20 +233,32 @@ public class ThreadRicevi extends Thread implements Closeable {
 					});
 				else if (line.equals("richiesta caricamento"))
 				{
-					if (Settings.playerOIS == null)
-						Settings.playerOIS = new ObjectInputStream(Settings.player.getInputStream());
 					try
 					{
+						if(Settings.playerOIS == null)
+							Settings.playerOIS = new ObjectInputStream(Settings.player.getInputStream());
 						Settings.partitaDaCaricare = (Partita) Settings.playerOIS.readObject();
 					}
 					catch (ClassNotFoundException ex)
 					{//La classe sarà sempre corretta
 					}
-					Platform.runLater(() ->
+					catch (IOException ex)
 					{
-						boolean isCaricato = Settings.scacchieraOnlineController.richiestaCaricamento();
-						Settings.scacchieraOnlineController.confermaCaricamento(isCaricato);
-					});
+						String temp;
+						while((temp = Settings.playerReader.readLine()) != null)
+						{
+						}
+						Settings.playerWriter.write("rifiuta caricamento\n");
+						Settings.playerWriter.flush();
+					}
+					if(Settings.partitaDaCaricare != null)
+						Platform.runLater(() ->
+						{
+							boolean isCaricato = Settings.scacchieraOnlineController.richiestaCaricamento();
+							Settings.scacchieraOnlineController.confermaCaricamento(isCaricato);
+						});
+					else
+						Platform.runLater(() -> FunctionsController.alertErrore("C'è stato un problema nel caricamento"));
 				}
 				else if (line.equals("conferma caricamento"))
 					Platform.runLater(() ->
@@ -272,6 +288,8 @@ public class ThreadRicevi extends Thread implements Closeable {
 			{
 				if (ex.getMessage().equals("Socket closed") || isFinito)
 					return;
+				Logger logger = Logger.getAnonymousLogger();
+				logger.log(Level.SEVERE, "an exception was thrown", ex);
 			}
 		}
 	}

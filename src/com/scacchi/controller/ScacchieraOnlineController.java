@@ -51,6 +51,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+
 /**
  *
  * @author Pietro
@@ -208,6 +209,11 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 					alert.show();
 				}
 				mostraScacchi();
+			}
+			if(partita.isFinita())
+			{
+				resa.setDisable(true);
+				patta.setDisable(true);
 			}
 			pos1 = null;
 			pos2 = null;
@@ -367,7 +373,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				FunctionsController.alertInfo("Richiesta inviata", "Inviata la richiesta di caricamento della partita all'avversario");
 				sendMessage("richiesta caricamento");
 				disattivaBottoni();
-				if (Settings.playerOOS == null)
+				if(Settings.playerOOS == null)
 					Settings.playerOOS = new ObjectOutputStream(Settings.player.getOutputStream());
 				Settings.playerOOS.writeObject(Settings.partitaDaCaricare);
 			}
