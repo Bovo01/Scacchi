@@ -625,12 +625,8 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			Settings.playerWriter.write(message);
 			Settings.playerWriter.newLine();
 			Settings.playerWriter.flush();
-			if (Settings.spettatori != null && Settings.partita.isFinita())
-				for (BufferedWriter bw : Settings.spettatoriWriters)
-				{
-					bw.write("fine\n");
-					bw.flush();
-				}
+			if (Settings.partita.isFinita() && !message.equals("richiesta restart") && !message.equals("conferma restart"))
+				ThreadRicevi.sendToSpettatori("fine");
 		}
 		catch (IOException ex)
 		{

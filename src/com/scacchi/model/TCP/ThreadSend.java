@@ -31,125 +31,129 @@ import javafx.scene.control.ListView;
  */
 public class ThreadSend extends Thread {
 
-		private final String address;
-		private final int port;
-		private final OnlineController controller;
-		private final String message;
-		private ListView<String> listView;
+	private final String address;
+	private final int port;
+	private final OnlineController controller;
+	private final String message;
+	private ListView<String> listView;
 
-		public ThreadSend(String address, int port, OnlineController controller, String message) {
-			this.address = address;
-			this.port = port;
-			this.controller = controller;
-			this.message = message;
-		}
-		
-		public ThreadSend(String address, int port, OnlineController controller, String message, ListView<String> listView) {
-			this.address = address;
-			this.port = port;
-			this.controller = controller;
-			this.message = message;
-			this.listView = listView;
-		}
+	public ThreadSend(String address, int port, OnlineController controller, String message) {
+		this.address = address;
+		this.port = port;
+		this.controller = controller;
+		this.message = message;
+	}
 
-		@Override
-		public void run() {
-			try
+	public ThreadSend(String address, int port, OnlineController controller, String message, ListView<String> listView) {
+		this.address = address;
+		this.port = port;
+		this.controller = controller;
+		this.message = message;
+		this.listView = listView;
+	}
+
+	@Override
+	public void run() {
+		try
+		{
+			Socket socket = new Socket();
+			socket.connect(new InetSocketAddress(address, port), 500);
+
+			InputStream is = socket.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+
+			OutputStream os = socket.getOutputStream();
+			OutputStreamWriter osw = new OutputStreamWriter(os);
+			BufferedWriter bw = new BufferedWriter(osw);
+
+			bw.write(message);
+			bw.newLine();
+			bw.flush();
+
+			String line = br.readLine();
+			if (line.equals("richiesta accettata"))
 			{
-				Socket socket = new Socket();
-				socket.connect(new InetSocketAddress(address, port), 500);
-
-				InputStream is = socket.getInputStream();
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-
-				OutputStream os = socket.getOutputStream();
-				OutputStreamWriter osw = new OutputStreamWriter(os);
-				BufferedWriter bw = new BufferedWriter(osw);
-
-				bw.write(message);
-				bw.newLine();
-				bw.flush();
-				
-				String line = br.readLine();
-				if(line.equals("richiesta accettata"))
+				line = br.readLine();
+				if (line.equals("bianco") || line.equals("nero"))
 				{
-					line = br.readLine();
-					if (line.equals("bianco") || line.equals("nero"))
-					{
-						Settings.player = socket;
-						Settings.playerReader = br;
-						Settings.playerWriter = bw;
-						if (line.equals("bianco"))
-							Settings.schieramento = Pezzo.Colore.BIANCO;
-						else
-							Settings.schieramento = Pezzo.Colore.NERO;
-						Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
-						Settings.threadAccetta.start();
-					}
-					else if(line.equals("richiesta colore"))
-					{
-						Settings.player = socket;
-						Settings.playerReader = br;
-						Settings.playerWriter = bw;
-						Platform.runLater(() -> {
-							try
-							{
-								Settings.schieramento = controller.scegliSchieramento("Casuale");
-								if(Settings.schieramento == null)
-									Settings.schieramento = Pezzo.Colore.values()[Math.abs(new Random().nextInt()) % 2];
-								bw.write(Settings.schieramento.notThis().toString().toLowerCase());
-								bw.newLine();
-								bw.flush();
-								Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
-								Settings.threadAccetta.start();
-							}
-							catch (IOException ex)
-							{
-								FunctionsController.alertErrore("È avvenuto un problema nella connessione");
-							}
-						});
-					}
-				}
-				else if(line.equals("richiesta accettata spettatore"))
-				{
-					Settings.playerOIS = new ObjectInputStream(socket.getInputStream());
 					Settings.player = socket;
 					Settings.playerReader = br;
 					Settings.playerWriter = bw;
-					Settings.threadRicevi = new ThreadRicevi(controller, true);
-					if(br.readLine().equals("aspetta"))
-					{
-						Settings.threadRicevi.start();
-						Platform.runLater(() -> FunctionsController.alertInfo("Partita non iniziata", "La partita non è ancora iniziata, attendi"));
-					}
+					if (line.equals("bianco"))
+						Settings.schieramento = Pezzo.Colore.BIANCO;
 					else
-					{
-						Settings.partita = (Partita) Settings.playerOIS.readObject();
-						Settings.schieramento = br.readLine().equals("bianco") ? BIANCO : NERO;
-						Platform.runLater(() -> controller.inizioSpettatore());
-					}
+						Settings.schieramento = Pezzo.Colore.NERO;
+					Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
+					Settings.threadAccetta.start();
 				}
-				else if(line.equals("niente"))
+				else if (line.equals("richiesta colore"))
 				{
-					listView.getItems().add(socket.getInetAddress().getHostAddress());
+					Settings.player = socket;
+					Settings.playerReader = br;
+					Settings.playerWriter = bw;
+					Platform.runLater(() ->
+					{
+						try
+						{
+							Settings.schieramento = controller.scegliSchieramento("Casuale");
+							if (Settings.schieramento == null)
+								Settings.schieramento = Pezzo.Colore.values()[Math.abs(new Random().nextInt()) % 2];
+							bw.write(Settings.schieramento.notThis().toString().toLowerCase());
+							bw.newLine();
+							bw.flush();
+							Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
+							Settings.threadAccetta.start();
+						}
+						catch (IOException ex)
+						{
+							FunctionsController.alertErrore("È avvenuto un problema nella connessione");
+						}
+					});
+				}
+			}
+			else if (line.equals("richiesta accettata spettatore"))
+			{
+				Settings.playerOIS = new ObjectInputStream(socket.getInputStream());
+				Settings.player = socket;
+				Settings.playerReader = br;
+				Settings.playerWriter = bw;
+				Settings.threadRicevi = new ThreadRicevi(controller, true);
+				if (br.readLine().equals("aspetta"))
+				{
+					Settings.threadRicevi.start();
+					Platform.runLater(() ->
+					{
+						controller.disattivaTutto();
+						controller.btnSpect.setDisable(false);
+						FunctionsController.alertInfo("Partita non iniziata", "La partita non è ancora iniziata, attendi");
+					});
 				}
 				else
 				{
-					Platform.runLater(() -> FunctionsController.alertErrore("Non è stato possibile connettersi"));
-					controller.sbloccaTutto();
-					return;
+					Settings.partita = (Partita) Settings.playerOIS.readObject();
+					Settings.schieramento = br.readLine().equals("bianco") ? BIANCO : NERO;
+					Platform.runLater(() -> controller.inizioSpettatore());
 				}
 			}
-			catch (IOException ex)
+			else if (line.equals("niente"))
+				listView.getItems().add(socket.getInetAddress().getHostAddress());
+			else
 			{
-				if(!message.equals("niente"))
-					Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
+				Platform.runLater(() -> FunctionsController.alertErrore("Non è stato possibile connettersi"));
+				controller.sbloccaTutto();
+				return;
 			}
-			catch (ClassNotFoundException ex)
-			{
-				//Catch inutile, l'oggetto ricevuto è sempre una partita
-			}
-			controller.sbloccaTutto();
 		}
+		catch (IOException ex)
+		{
+			if (!message.equals("niente"))
+				Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
+		}
+		catch (ClassNotFoundException ex)
+		{
+			//Catch inutile, l'oggetto ricevuto è sempre una partita
+		}
+		controller.sbloccaTutto();
 	}
+}

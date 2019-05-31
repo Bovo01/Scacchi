@@ -72,13 +72,13 @@ public class OnlineController implements Initializable {
 	@FXML
 	private Button btnHost2;
 	@FXML
-	private Button btnSpect;
+	public Button btnSpect;
 	@FXML
 	private Button btnSpect1;
 	@FXML
 	private Button btnSpect2;
 
-	private void disattivaTutto() {
+	public void disattivaTutto() {
 		btnCerca1.setDisable(true);
 		btnCerca2.setDisable(true);
 		btnCerca3.setDisable(true);
@@ -152,13 +152,13 @@ public class OnlineController implements Initializable {
 		}
 	}
 
-	public Colore scegliSchieramento(String line) {
+	public Colore scegliSchieramento(String message) {
 		Alert alert = new Alert(Alert.AlertType.NONE);
 		alert.setTitle("Scegli");
 		alert.setContentText("Quale schieramento preferisci?");
 		ButtonType BIANCHI = new ButtonType("Bianchi");
 		ButtonType NERI = new ButtonType("Neri");
-		ButtonType NIENTE = new ButtonType(line);
+		ButtonType NIENTE = new ButtonType(message);
 		alert.getButtonTypes().clear();
 		alert.getButtonTypes().addAll(BIANCHI, NERI, NIENTE);
 		Optional<ButtonType> option = alert.showAndWait();
@@ -281,7 +281,7 @@ public class OnlineController implements Initializable {
 		if (btnSpect.getText().equals("Guarda"))
 			btnSpect.setText("Annulla");
 		else
-			btnSpect.setText("Guarda");
+			btnSpect.setText("Guarda");//TODO togli il commento
 //		try
 //		{
 //			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
@@ -294,6 +294,11 @@ public class OnlineController implements Initializable {
 //			return;
 //		}
 		String net = getReteOfMe();
+		if(net.equals("127.0.0."))
+		{
+			FunctionsController.alertErrore("Non sei connesso ad una rete");
+			return;
+		}
 		ListView<String> listView = new ListView<>();
 		listView.setPrefHeight(300);
 		for (int i = 1; i <= 254; i++)

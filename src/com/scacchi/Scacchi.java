@@ -35,21 +35,6 @@ public class Scacchi extends Application {
 		{
 			try
 			{
-				if(Settings.spettatori != null)
-				{
-					for(BufferedWriter bw : Settings.spettatoriWriters)
-					{
-						try
-						{
-							bw.write("fine\n");
-							bw.flush();
-						}
-						catch(IOException ex)
-						{
-							
-						}
-					}
-				}
 				if (Settings.threadAccetta != null && Settings.threadAccetta.isAlive())
 					Settings.threadAccetta.close();
 				if (Settings.threadRicevi != null && Settings.threadRicevi.isAlive())

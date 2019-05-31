@@ -38,7 +38,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 		this.controller = controller;
 		this.isSpettatore = false;
 	}
-	
+
 	public ThreadRicevi(OnlineController controller, boolean isSpettatore) {
 		this.controller = controller;
 		this.isSpettatore = isSpettatore;
@@ -59,19 +59,28 @@ public class ThreadRicevi extends Thread implements Closeable {
 				String line = Settings.playerReader.readLine();
 				if (line == null)
 				{
-					Platform.runLater(() ->
-					{
-						Settings.scacchieraOnlineController.disattivaBottoni();
-						Alert alert = new Alert(Alert.AlertType.INFORMATION);
-						if (Settings.partita.getTurno() == null || Settings.partita.getMosse().isEmpty())
-							alert.setTitle("Info");
-						else
-							alert.setTitle("Hai vinto!");
-						alert.setContentText("L'avversario ha abbandonato la partita");
-						alert.show();
-						Settings.partita.fine();
-					});
-					Settings.threadAccetta.close();
+					if (Settings.scacchieraOnlineController != null)
+						Platform.runLater(() ->
+						{
+							Settings.scacchieraOnlineController.disattivaBottoni();
+							Alert alert = new Alert(Alert.AlertType.INFORMATION);
+							if (Settings.partita.getTurno() == null || Settings.partita.getMosse().isEmpty())
+								alert.setTitle("Info");
+							else
+								alert.setTitle("Hai vinto!");
+							alert.setContentText("L'avversario ha abbandonato la partita");
+							alert.show();
+							Settings.partita.fine();
+						});
+					if (Settings.threadAccetta != null)
+						Settings.threadAccetta.close();
+					else
+						Platform.runLater(() ->
+						{
+							FunctionsController.alertInfo("Fine partita!", "Il " + Settings.schieramento.notThis().toString().toLowerCase() + " ha vinto per resa");
+							Settings.partita.fine();
+							Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
+						});
 					return;
 				}
 				if (line.equals("resa"))
@@ -98,10 +107,10 @@ public class ThreadRicevi extends Thread implements Closeable {
 					{
 						Alert alert = new Alert(Alert.AlertType.INFORMATION);
 						alert.setTitle("Fine partita!");
-						if (line2.equals("null"))
+						if (line2 == null || line2.equals("null"))
 							alert.setContentText("Partita finita per patta");
 						else
-							alert.setContentText("Vincitore: " + line2);
+							alert.setContentText("Vincitore: " + line2.toLowerCase());
 						alert.show();
 						Settings.partita.fine();
 						Settings.scacchieraOnlineSpettatoriController.mostraScacchi();

@@ -128,7 +128,8 @@ public class ThreadAccetta extends Thread implements Closeable {
 						bw.write("aspetta");
 					else
 					{
-						bw.write("iniziata");
+						bw.write("iniziata\n");
+						bw.flush();
 						oos.writeObject(Settings.partita);
 						bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
 					}
