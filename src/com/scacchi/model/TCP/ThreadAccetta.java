@@ -14,7 +14,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -89,7 +88,7 @@ public class ThreadAccetta extends Thread implements Closeable {
 					{
 						bw.write("richiesta accettata\n");
 						bw.flush();
-						if(Settings.schieramento == null)
+						if (Settings.schieramento == null)
 						{
 							bw.write("richiesta colore\n");
 							bw.flush();
@@ -109,6 +108,8 @@ public class ThreadAccetta extends Thread implements Closeable {
 						Settings.playerReader = br;
 						Settings.playerWriter = bw;
 						threadRicevi.start();
+						ThreadRicevi.sendToSpettatori("iniziata");
+						ThreadRicevi.sendToSpettatori(Settings.schieramento.toString().toLowerCase());
 					}
 					else
 					{
@@ -123,27 +124,40 @@ public class ThreadAccetta extends Thread implements Closeable {
 					bw.write("richiesta accettata spettatore\n");
 					bw.flush();
 					ObjectOutputStream oos = new ObjectOutputStream(os);
-					oos.writeObject(Settings.partita);
-					bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
+					if(Settings.partita == null)
+						bw.write("aspetta");
+					else
+					{
+						bw.write("iniziata");
+						oos.writeObject(Settings.partita);
+						bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
+					}
 					bw.newLine();
 					bw.flush();
-					if(Settings.spettatori == null)
+					if (Settings.spettatori == null)
 						Settings.spettatori = new ArrayList<>();
-					if(Settings.spettatoriReaders == null)
+					if (Settings.spettatoriReaders == null)
 						Settings.spettatoriReaders = new ArrayList<>();
-					if(Settings.spettatoriWriters == null)
+					if (Settings.spettatoriWriters == null)
 						Settings.spettatoriWriters = new ArrayList<>();
-					if(Settings.spettatoriOOS == null)
+					if (Settings.spettatoriOOS == null)
 						Settings.spettatoriOOS = new ArrayList<>();
 					Settings.spettatori.add(socket);
 					Settings.spettatoriReaders.add(br);
 					Settings.spettatoriWriters.add(bw);
 					Settings.spettatoriOOS.add(oos);
 				}
+				else
+				{
+					bw.write(line);
+					bw.newLine();
+					bw.flush();
+					socket.close();
+				}
 			}
 			catch (IOException ex)
 			{
-				if(isFinito)
+				if (isFinito)
 					return;
 				Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
 			}
@@ -172,8 +186,9 @@ public class ThreadAccetta extends Thread implements Closeable {
 		Settings.spettatoriOOS = null;
 		Settings.schieramento = null;
 		Settings.threadAccetta = null;
-		Platform.runLater(() -> {
-			if(Settings.scacchieraOnlineController == null)
+		Platform.runLater(() ->
+		{
+			if (Settings.scacchieraOnlineController == null)
 				return;
 			Settings.partita.fine();
 			Settings.scacchieraOnlineController.mostraScacchi();

@@ -6,6 +6,7 @@ bianco/nero = Invio del colore che sarà del destinatario
 richiesta spettatore = Richiesta di vedere una partita
 richiesta accettata = Richiesta di entrare in partita accettata
 richiesta accettata spettatore = Richiesta di vedere la partita accettata
+niente = domanda e risposta per vedere se il pc è online
 //MOSSA
 mossa xxxxx = Invio di una mossa con posizione iniziale, finale e la trasformazione (0 se non è successo nulla; 1,2,3,4 rispettivamente per regina, alfiere, cavallo, torre)
 //RESA
@@ -19,6 +20,8 @@ richiesta restart = Richiesta di ricominciare la partita
 conferma restart = Accetta di ricominciare la partita
 rifiuto restart = Rifiuto di ricominciare la partita
 //SPETTATORI
+aspetta = connesso a partita non iniziata
+iniziata = la partita è iniziata / invio la partita e tutto quello che serve
 'invio partita' = Invio della partita serializzata
 bianco/nero = Lo schieramento del giocatore
 //Caricamento file

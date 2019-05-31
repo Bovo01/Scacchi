@@ -10,8 +10,10 @@ import com.scacchi.model.TCP.Settings;
 import com.scacchi.model.TCP.ThreadAccetta;
 import com.scacchi.model.TCP.ThreadSend;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -24,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -69,6 +72,8 @@ public class OnlineController implements Initializable {
 	@FXML
 	private Button btnHost2;
 	@FXML
+	private Button btnSpect;
+	@FXML
 	private Button btnSpect1;
 	@FXML
 	private Button btnSpect2;
@@ -79,6 +84,7 @@ public class OnlineController implements Initializable {
 		btnCerca3.setDisable(true);
 		btnHost1.setDisable(true);
 		btnHost2.setDisable(true);
+		btnSpect.setDisable(true);
 		btnSpect1.setDisable(true);
 		btnSpect2.setDisable(true);
 	}
@@ -95,7 +101,7 @@ public class OnlineController implements Initializable {
 //		{
 //			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
 //			server.close();
-			new ThreadSend(ipv4_1.getText(), Settings.DEFAULTPORT, this, "richiesta").start();
+		new ThreadSend(ipv4_1.getText(), Settings.DEFAULTPORT, this, "richiesta").start();
 //		}
 //		catch (IOException ex)
 //		{
@@ -133,7 +139,7 @@ public class OnlineController implements Initializable {
 		try
 		{
 			Parent root = (Parent) fxmlLoader.load();
-			if(Settings.threadAccetta != null)
+			if (Settings.threadAccetta != null)
 			{
 				Settings.threadAccetta.close();
 				Settings.threadAccetta = null;
@@ -186,10 +192,69 @@ public class OnlineController implements Initializable {
 		Settings.threadAccetta = new ThreadAccetta(Settings.DEFAULTPORT, this);
 		Settings.threadAccetta.start();
 	}
-	
+
 	@FXML
-	private void cerca(ActionEvent event) {//TODO cerca in tutta la rete
-		FunctionsController.alertInfo("TODO", "TODO");
+	private void cerca(ActionEvent event) {
+		disattivaTutto();
+		try
+		{
+			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
+			server.close();
+		}
+		catch (IOException ex)
+		{
+			sbloccaTutto();
+			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+			return;
+		}
+		String net = getReteOfMe();
+		ListView<String> listView = new ListView<>();
+		listView.setPrefHeight(300);
+		for (int i = 1; i <= 254; i++)
+		{
+			new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
+		}
+		Alert alert = new Alert(Alert.AlertType.NONE);
+		ButtonType OK = new ButtonType("Ok");
+		ButtonType ANNULLA = new ButtonType("Annulla");
+		alert.getButtonTypes().addAll(OK, ANNULLA);
+		alert.setTitle("Connettiti");
+		alert.setContentText("Seleziona un giocatore");
+		alert.getDialogPane().setContent(listView);
+		Optional<ButtonType> scelta = alert.showAndWait();
+		if (scelta.get() == ANNULLA)
+		{
+			FunctionsController.alertInfo("Operazione annullata", "Hai annullato l'operazione");
+			return;
+		}
+		if (listView.getSelectionModel().getSelectedIndex() == -1)
+		{
+			FunctionsController.alertErrore("Non è stato selezionato un avversario");
+			return;
+		}
+		new ThreadSend(listView.getSelectionModel().getSelectedItem(), Settings.DEFAULTPORT, this, "richiesta").start();
+	}
+
+	private static String getReteOfMe() {
+		String line;
+		try
+		{
+			line = InetAddress.getLocalHost().toString();
+		}
+		catch (UnknownHostException ex)
+		{
+			return "";
+		}
+		line = line.substring(line.indexOf('/') + 1);
+		int punti = 0, counter = 0;
+		for (char c : line.toCharArray())
+		{
+			if (punti != 3)
+				counter++;
+			if (c == '.')
+				punti++;
+		}
+		return line.substring(0, counter);
 	}
 
 	@FXML
@@ -204,10 +269,56 @@ public class OnlineController implements Initializable {
 		{
 			new ThreadSend(ipv4_1_spect.getText(), Settings.DEFAULTPORT, this, "richiesta spettatore").start();
 		}
-		catch(NumberFormatException ex)
+		catch (NumberFormatException ex)
 		{
 			FunctionsController.alertErrore("La porta deve essere un numero");
 		}
+	}
+
+	@FXML
+	private void guarda(ActionEvent event) {
+		disattivaTutto();
+		if (btnSpect.getText().equals("Guarda"))
+			btnSpect.setText("Annulla");
+		else
+			btnSpect.setText("Guarda");
+//		try
+//		{
+//			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
+//			server.close();
+//		}
+//		catch (IOException ex)
+//		{
+//			sbloccaTutto();
+//			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+//			return;
+//		}
+		String net = getReteOfMe();
+		ListView<String> listView = new ListView<>();
+		listView.setPrefHeight(300);
+		for (int i = 1; i <= 254; i++)
+		{
+			new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
+		}
+		Alert alert = new Alert(Alert.AlertType.NONE);
+		ButtonType OK = new ButtonType("Ok");
+		ButtonType ANNULLA = new ButtonType("Annulla");
+		alert.getButtonTypes().addAll(OK, ANNULLA);
+		alert.setTitle("Guarda");
+		alert.setContentText("Seleziona un giocatore");
+		alert.getDialogPane().setContent(listView);
+		Optional<ButtonType> scelta = alert.showAndWait();
+		if (scelta.get() == ANNULLA)
+		{
+			FunctionsController.alertInfo("Operazione annullata", "Hai annullato l'operazione");
+			return;
+		}
+		if (listView.getSelectionModel().getSelectedIndex() == -1)
+		{
+			FunctionsController.alertErrore("Non è stato selezionato un giocatore");
+			return;
+		}
+		new ThreadSend(listView.getSelectionModel().getSelectedItem(), Settings.DEFAULTPORT, this, "richiesta spettatore").start();
 	}
 
 	@FXML
@@ -222,7 +333,7 @@ public class OnlineController implements Initializable {
 		{
 			new ThreadSend(ipv4_1_spect.getText(), Integer.parseInt(ipv4_2_port_spect.getText()), this, "richiesta spettatore").start();
 		}
-		catch(NumberFormatException ex)
+		catch (NumberFormatException ex)
 		{
 			FunctionsController.alertErrore("La porta deve essere un numero");
 		}
@@ -257,7 +368,7 @@ public class OnlineController implements Initializable {
 		{
 			Settings.threadAccetta = new ThreadAccetta(Integer.parseInt(host_port.getText()), this);
 		}
-		catch(NumberFormatException ex)
+		catch (NumberFormatException ex)
 		{
 			FunctionsController.alertErrore("La porta deve essere un numero");
 			return;
@@ -290,6 +401,7 @@ public class OnlineController implements Initializable {
 		btnCerca3.setDisable(false);
 		btnHost1.setDisable(false);
 		btnHost2.setDisable(false);
+		btnSpect.setDisable(false);
 		btnSpect1.setDisable(false);
 		btnSpect2.setDisable(false);
 	}

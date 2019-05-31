@@ -133,6 +133,20 @@
                <content>
                   <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                      <children>
+                        <VBox alignment="CENTER" layoutX="10.0" layoutY="134.0" prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <Label prefHeight="55.0" prefWidth="308.0" text="Guarda partita all' indirizzo inserito">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Button fx:id="btnSpect" mnemonicParsing="false" onAction="#guarda" text="Guarda">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                            <children>
                               <Label text="Guarda partita all' indirizzo inserito">

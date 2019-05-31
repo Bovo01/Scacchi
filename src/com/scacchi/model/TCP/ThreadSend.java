@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
 import javafx.application.Platform;
+import javafx.scene.control.ListView;
 
 /**
  *
@@ -34,12 +35,21 @@ public class ThreadSend extends Thread {
 		private final int port;
 		private final OnlineController controller;
 		private final String message;
+		private ListView<String> listView;
 
 		public ThreadSend(String address, int port, OnlineController controller, String message) {
 			this.address = address;
 			this.port = port;
 			this.controller = controller;
 			this.message = message;
+		}
+		
+		public ThreadSend(String address, int port, OnlineController controller, String message, ListView<String> listView) {
+			this.address = address;
+			this.port = port;
+			this.controller = controller;
+			this.message = message;
+			this.listView = listView;
 		}
 
 		@Override
@@ -60,7 +70,7 @@ public class ThreadSend extends Thread {
 				bw.write(message);
 				bw.newLine();
 				bw.flush();
-
+				
 				String line = br.readLine();
 				if(line.equals("richiesta accettata"))
 				{
@@ -103,14 +113,26 @@ public class ThreadSend extends Thread {
 				}
 				else if(line.equals("richiesta accettata spettatore"))
 				{
-					ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-					Settings.partita = (Partita) ois.readObject();
-					Settings.schieramento = br.readLine().equals("bianco") ? BIANCO : NERO;
+					Settings.playerOIS = new ObjectInputStream(socket.getInputStream());
 					Settings.player = socket;
 					Settings.playerReader = br;
 					Settings.playerWriter = bw;
-					Settings.threadRicevi = new ThreadRicevi();
-					Platform.runLater(() -> controller.inizioSpettatore());
+					Settings.threadRicevi = new ThreadRicevi(controller, true);
+					if(br.readLine().equals("aspetta"))
+					{
+						Settings.threadRicevi.start();
+						Platform.runLater(() -> FunctionsController.alertInfo("Partita non iniziata", "La partita non è ancora iniziata, attendi"));
+					}
+					else
+					{
+						Settings.partita = (Partita) Settings.playerOIS.readObject();
+						Settings.schieramento = br.readLine().equals("bianco") ? BIANCO : NERO;
+						Platform.runLater(() -> controller.inizioSpettatore());
+					}
+				}
+				else if(line.equals("niente"))
+				{
+					listView.getItems().add(socket.getInetAddress().getHostAddress());
 				}
 				else
 				{
@@ -121,7 +143,8 @@ public class ThreadSend extends Thread {
 			}
 			catch (IOException ex)
 			{
-				Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
+				if(!message.equals("niente"))
+					Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
 			}
 			catch (ClassNotFoundException ex)
 			{

@@ -9,11 +9,14 @@ import com.scacchi.controller.FunctionsController;
 import com.scacchi.controller.OnlineController;
 import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
+import static com.scacchi.model.Pezzo.Colore.BIANCO;
+import static com.scacchi.model.Pezzo.Colore.NERO;
 import com.scacchi.model.Posizione;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -29,18 +32,25 @@ public class ThreadRicevi extends Thread implements Closeable {
 
 	private OnlineController controller;
 	private boolean isFinito;
+	private final boolean isSpettatore;
 
 	public ThreadRicevi(OnlineController controller) {
 		this.controller = controller;
+		this.isSpettatore = false;
+	}
+	
+	public ThreadRicevi(OnlineController controller, boolean isSpettatore) {
+		this.controller = controller;
+		this.isSpettatore = isSpettatore;
 	}
 
 	public ThreadRicevi() {
-
+		this.isSpettatore = false;
 	}
 
 	@Override
 	public void run() {
-		if (controller != null)
+		if (controller != null && !isSpettatore)
 			Platform.runLater(() -> controller.inizioPartita());
 		while (true)
 		{
@@ -162,14 +172,14 @@ public class ThreadRicevi extends Thread implements Closeable {
 							try
 							{
 								Settings.spettatori.get(index).close();
+								Settings.spettatoriWriters.remove(index.intValue());
+								Settings.spettatori.remove(index.intValue());
+								Settings.spettatoriReaders.remove(index.intValue());
+								Settings.spettatoriOOS.remove(index.intValue());
 							}
 							catch (IOException ex1)
 							{
 							}
-							Settings.spettatoriWriters.remove(index.intValue());
-							Settings.spettatori.remove(index.intValue());
-							Settings.spettatoriReaders.remove(index.intValue());
-							Settings.spettatoriOOS.remove(index.intValue());
 						}
 					}
 				}
@@ -235,7 +245,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 				{
 					try
 					{
-						if(Settings.playerOIS == null)
+						if (Settings.playerOIS == null)
 							Settings.playerOIS = new ObjectInputStream(Settings.player.getInputStream());
 						Settings.partitaDaCaricare = (Partita) Settings.playerOIS.readObject();
 					}
@@ -245,17 +255,19 @@ public class ThreadRicevi extends Thread implements Closeable {
 					catch (IOException ex)
 					{
 						String temp;
-						while((temp = Settings.playerReader.readLine()) != null)
-						{
+						while ((temp = Settings.playerReader.readLine()) != null)
+						{//Svuoto il buffer buggato dell'oggetto partita in stringhe
 						}
 						Settings.playerWriter.write("rifiuta caricamento\n");
 						Settings.playerWriter.flush();
 					}
-					if(Settings.partitaDaCaricare != null)
+					if (Settings.partitaDaCaricare != null)
 						Platform.runLater(() ->
 						{
 							boolean isCaricato = Settings.scacchieraOnlineController.richiestaCaricamento();
 							Settings.scacchieraOnlineController.confermaCaricamento(isCaricato);
+							if (isCaricato)
+								sendObjectToSpettatori(Settings.partitaDaCaricare);
 						});
 					else
 						Platform.runLater(() -> FunctionsController.alertErrore("C'è stato un problema nel caricamento"));
@@ -283,6 +295,12 @@ public class ThreadRicevi extends Thread implements Closeable {
 					Settings.partitaDaCaricare = null;
 					Settings.scacchieraOnlineController.attivaBottoni();
 				}
+				else if (line.equals("iniziata")) //Messaggio per spettatori
+				{
+					Settings.partita = new Partita();
+					Settings.schieramento = Settings.playerReader.readLine().equals("bianco") ? BIANCO : NERO;
+					Platform.runLater(() -> controller.inizioSpettatore());
+				}
 			}
 			catch (IOException ex)
 			{
@@ -296,6 +314,8 @@ public class ThreadRicevi extends Thread implements Closeable {
 
 	public static void sendToSpettatori(String message) {
 		if (Settings.spettatoriWriters != null)
+		{
+			ArrayList<Integer> indexesToRemove = new ArrayList<>();
 			for (BufferedWriter bw : Settings.spettatoriWriters)
 			{
 				try
@@ -306,8 +326,24 @@ public class ThreadRicevi extends Thread implements Closeable {
 				}
 				catch (IOException ex)
 				{
+					indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
 				}
 			}
+			for (Integer index : indexesToRemove)
+			{
+				try
+				{
+					Settings.spettatori.get(index).close();
+					Settings.spettatoriWriters.remove(index.intValue());
+					Settings.spettatori.remove(index.intValue());
+					Settings.spettatoriReaders.remove(index.intValue());
+					Settings.spettatoriOOS.remove(index.intValue());
+				}
+				catch (IOException ex)
+				{
+				}
+			}
+		}
 	}
 
 	@Override
@@ -320,5 +356,38 @@ public class ThreadRicevi extends Thread implements Closeable {
 		Settings.playerWriter = null;
 		Settings.playerOOS = null;
 		Settings.playerOIS = null;
+	}
+
+	public static void sendObjectToSpettatori(Partita partita) {
+		if (Settings.spettatoriWriters != null)
+		{
+			ArrayList<Integer> indexesToRemove = new ArrayList<>();
+			for (ObjectOutputStream oos : Settings.spettatoriOOS)
+			{
+				try
+				{
+					oos.writeObject(partita);
+					oos.flush();
+				}
+				catch (IOException ex)
+				{
+					indexesToRemove.add(Settings.spettatoriWriters.indexOf(oos));
+				}
+			}
+			for (Integer index : indexesToRemove)
+			{
+				try
+				{
+					Settings.spettatori.get(index).close();
+					Settings.spettatoriWriters.remove(index.intValue());
+					Settings.spettatori.remove(index.intValue());
+					Settings.spettatoriReaders.remove(index.intValue());
+					Settings.spettatoriOOS.remove(index.intValue());
+				}
+				catch (IOException ex)
+				{
+				}
+			}
+		}
 	}
 }

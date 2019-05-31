@@ -42,7 +42,8 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		versoScacchiera = Settings.schieramento;
 		if(versoScacchiera == NERO)
 			scacchiera.setImage(SCACCHIERA_INV);
-		Settings.threadRicevi.start();
+		if(!Settings.threadRicevi.isAlive())
+			Settings.threadRicevi.start();
 		Settings.scacchieraOnlineSpettatoriController = this;
 		mostraScacchi();
 	}
