@@ -22,7 +22,7 @@ import java.util.ArrayList;
  */
 public class Settings {//SPORCO
 	//Costanti
-	public static final int DEFAULTPORT = 9800;
+	public static final int DEFAULTPORT = 25560;
 	//Connessione
 	public static Socket player;
 	public static BufferedReader playerReader;

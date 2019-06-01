@@ -29,170 +29,170 @@ import javafx.application.Platform;
  */
 public class ThreadAccetta extends Thread implements Closeable {
 
-	private final int port;
-	private final ThreadRicevi threadRicevi;
-	private final OnlineController controller;
-	private boolean isFinito;
-	private ServerSocket server;
+    private final int port;
+    private final ThreadRicevi threadRicevi;
+    private final OnlineController controller;
+    private boolean isFinito;
+    private ServerSocket server;
 
-	public ThreadAccetta(int port, OnlineController controller) {
-		this.port = port;
-		this.controller = controller;
-		threadRicevi = new ThreadRicevi(controller);
-	}
+    public ThreadAccetta(int port, OnlineController controller) {
+        this.port = port;
+        this.controller = controller;
+        threadRicevi = new ThreadRicevi(controller);
+    }
 
-	@Override
-	public void run() {
-		if (Settings.player != null)
-			threadRicevi.start();
-		try
-		{
-			server = new ServerSocket(port);
-		}
-		catch (IOException ex)
-		{
-			Platform.runLater(() ->
-			{
-				FunctionsController.alertErrore("Porta già in uso da un altro processo");
-				controller.sbloccaTutto();
-			});
-			return;
-		}
-		if (Settings.schieramento == null)
-			Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento("Non cambia nulla"));
-		while (true)
-		{
-			try
-			{
-				Socket socket = server.accept();
-				if (isFinito)
-				{
-					socket.close();
-					server.close();
-					Settings.schieramento = null;
-					return;
-				}
+    @Override
+    public void run() {
+        if (Settings.player != null)
+            threadRicevi.start();
+        try
+        {
+            server = new ServerSocket(port);
+        }
+        catch (IOException ex)
+        {
+            Platform.runLater(() ->
+            {
+                FunctionsController.alertErrore("Porta già in uso da un altro processo");
+                controller.sbloccaTutto();
+            });
+            return;
+        }
+        if (Settings.schieramento == null)
+            Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento("Non cambia nulla"));
+        while (true)
+        {
+            try
+            {
+                Socket socket = server.accept();
+                if (isFinito)
+                {
+                    socket.close();
+                    server.close();
+                    Settings.schieramento = null;
+                    return;
+                }
 
-				InputStream is = socket.getInputStream();
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
+                InputStream is = socket.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
 
-				String line = br.readLine();
+                String line = br.readLine();
 
-				OutputStream os = socket.getOutputStream();
-				OutputStreamWriter osw = new OutputStreamWriter(os);
-				BufferedWriter bw = new BufferedWriter(osw);
+                OutputStream os = socket.getOutputStream();
+                OutputStreamWriter osw = new OutputStreamWriter(os);
+                BufferedWriter bw = new BufferedWriter(osw);
 
-				if (line.equals("richiesta"))
-					if (Settings.player == null)
-					{
-						bw.write("richiesta accettata\n");
-						bw.flush();
-						if (Settings.schieramento == null)
-						{
-							bw.write("richiesta colore\n");
-							bw.flush();
-							line = br.readLine();
-							if (line.equals("bianco"))
-								Settings.schieramento = Pezzo.Colore.BIANCO;
-							else
-								Settings.schieramento = Pezzo.Colore.NERO;
-						}
-						else
-						{
-							bw.write(Settings.schieramento.notThis().toString().toLowerCase());
-							bw.newLine();
-							bw.flush();
-						}
-						Settings.player = socket;
-						Settings.playerReader = br;
-						Settings.playerWriter = bw;
-						threadRicevi.start();
-						ThreadRicevi.sendToSpettatori("iniziata");
-						ThreadRicevi.sendToSpettatori(Settings.schieramento.toString().toLowerCase());
-					}
-					else
-					{
-						bw.write("richiesta rifiutata\n");
-						bw.flush();
-						bw.close();
-						br.close();
-						socket.close();
-					}
-				else if (line.equals("richiesta spettatore"))
-				{
-					bw.write("richiesta accettata spettatore\n");
-					bw.flush();
-					ObjectOutputStream oos = new ObjectOutputStream(os);
-					if(Settings.partita == null)
-						bw.write("aspetta");
-					else
-					{
-						bw.write("iniziata\n");
-						bw.flush();
-						oos.writeObject(Settings.partita);
-						bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
-					}
-					bw.newLine();
-					bw.flush();
-					if (Settings.spettatori == null)
-						Settings.spettatori = new ArrayList<>();
-					if (Settings.spettatoriReaders == null)
-						Settings.spettatoriReaders = new ArrayList<>();
-					if (Settings.spettatoriWriters == null)
-						Settings.spettatoriWriters = new ArrayList<>();
-					if (Settings.spettatoriOOS == null)
-						Settings.spettatoriOOS = new ArrayList<>();
-					Settings.spettatori.add(socket);
-					Settings.spettatoriReaders.add(br);
-					Settings.spettatoriWriters.add(bw);
-					Settings.spettatoriOOS.add(oos);
-				}
-				else
-				{
-					bw.write(line);
-					bw.newLine();
-					bw.flush();
-					socket.close();
-				}
-			}
-			catch (IOException ex)
-			{
-				if (isFinito)
-					return;
-				Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
-			}
-		}
-	}
+                if (line.equals("richiesta"))
+                    if (Settings.player == null)
+                    {
+                        bw.write("richiesta accettata\n");
+                        bw.flush();
+                        if (Settings.schieramento == null)
+                        {
+                            bw.write("richiesta colore\n");
+                            bw.flush();
+                            line = br.readLine();
+                            if (line.equals("bianco"))
+                                Settings.schieramento = Pezzo.Colore.BIANCO;
+                            else
+                                Settings.schieramento = Pezzo.Colore.NERO;
+                        }
+                        else
+                        {
+                            bw.write(Settings.schieramento.notThis().toString().toLowerCase());
+                            bw.newLine();
+                            bw.flush();
+                        }
+                        Settings.player = socket;
+                        Settings.playerReader = br;
+                        Settings.playerWriter = bw;
+                        threadRicevi.start();
+                        ThreadRicevi.sendToSpettatori("iniziata");
+                        ThreadRicevi.sendToSpettatori(Settings.schieramento.toString().toLowerCase());
+                    }
+                    else
+                    {
+                        bw.write("richiesta rifiutata\n");
+                        bw.flush();
+                        bw.close();
+                        br.close();
+                        socket.close();
+                    }
+                else if (line.equals("richiesta spettatore"))
+                {
+                    bw.write("richiesta accettata spettatore\n");
+                    bw.flush();
+                    ObjectOutputStream oos = new ObjectOutputStream(os);
+                    if (Settings.partita == null)
+                        bw.write("aspetta");
+                    else
+                    {
+                        bw.write("iniziata\n");
+                        bw.flush();
+                        oos.writeObject(Settings.partita);
+                        bw.write(Settings.schieramento.toString().toLowerCase());//Invio schieramento
+                    }
+                    bw.newLine();
+                    bw.flush();
+                    if (Settings.spettatori == null)
+                        Settings.spettatori = new ArrayList<>();
+                    if (Settings.spettatoriReaders == null)
+                        Settings.spettatoriReaders = new ArrayList<>();
+                    if (Settings.spettatoriWriters == null)
+                        Settings.spettatoriWriters = new ArrayList<>();
+                    if (Settings.spettatoriOOS == null)
+                        Settings.spettatoriOOS = new ArrayList<>();
+                    Settings.spettatori.add(socket);
+                    Settings.spettatoriReaders.add(br);
+                    Settings.spettatoriWriters.add(bw);
+                    Settings.spettatoriOOS.add(oos);
+                }
+                else
+                {
+                    bw.write(line);
+                    bw.newLine();
+                    bw.flush();
+                    socket.close();
+                }
+            }
+            catch (IOException ex)
+            {
+                if (isFinito)
+                    return;
+                Platform.runLater(() -> FunctionsController.alertErrore(ex.getMessage()));
+            }
+        }
+    }
 
-	@Override
-	public void close() throws IOException {
-		isFinito = true;
-		if (threadRicevi != null && threadRicevi.isAlive())
-			threadRicevi.close();
-		server.close();
-		if (Settings.player != null && !Settings.player.isClosed())
-			Settings.player.close();
-		if (Settings.spettatori != null)
-			for (Socket socket : Settings.spettatori)
-			{
-				socket.close();
-			}
-		Settings.player = null;
-		Settings.playerReader = null;
-		Settings.playerWriter = null;
-		Settings.spettatori = null;
-		Settings.spettatoriReaders = null;
-		Settings.spettatoriWriters = null;
-		Settings.spettatoriOOS = null;
-		Settings.schieramento = null;
-		Settings.threadAccetta = null;
-		Platform.runLater(() ->
-		{
-			if (Settings.scacchieraOnlineController == null)
-				return;
-			Settings.partita.fine();
-			Settings.scacchieraOnlineController.mostraScacchi();
-		});
-	}
+    @Override
+    public void close() throws IOException {
+        isFinito = true;
+        if (threadRicevi != null && threadRicevi.isAlive())
+            threadRicevi.close();
+        server.close();
+        if (Settings.player != null && !Settings.player.isClosed())
+            Settings.player.close();
+        if (Settings.spettatori != null)
+            for (Socket socket : Settings.spettatori)
+            {
+                socket.close();
+            }
+        Settings.player = null;
+        Settings.playerReader = null;
+        Settings.playerWriter = null;
+        Settings.spettatori = null;
+        Settings.spettatoriReaders = null;
+        Settings.spettatoriWriters = null;
+        Settings.spettatoriOOS = null;
+        Settings.schieramento = null;
+        Settings.threadAccetta = null;
+        Platform.runLater(() ->
+        {
+            if (Settings.scacchieraOnlineController == null)
+                return;
+            Settings.partita.fine();
+            Settings.scacchieraOnlineController.mostraScacchi();
+        });
+    }
 }

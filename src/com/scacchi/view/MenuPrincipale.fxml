@@ -16,7 +16,7 @@
          <center>
             <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                <children>
-                  <RadioButton mnemonicParsing="false" onAction="#modalita" prefHeight="53.0" prefWidth="410.0" text="Multigiocatore locale">
+                  <RadioButton mnemonicParsing="false" prefHeight="53.0" prefWidth="410.0" text="Multigiocatore locale">
                      <font>
                         <Font size="36.0" />
                      </font>
@@ -24,7 +24,7 @@
                         <ToggleGroup fx:id="gioco" />
                      </toggleGroup>
                   </RadioButton>
-                  <RadioButton mnemonicParsing="false" onAction="#modalita" text="Multigiocatore in rete" toggleGroup="$gioco">
+                  <RadioButton mnemonicParsing="false" text="Multigiocatore in rete" toggleGroup="$gioco">
                      <font>
                         <Font size="36.0" />
                      </font>
