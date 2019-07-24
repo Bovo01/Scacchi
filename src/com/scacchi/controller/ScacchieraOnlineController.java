@@ -632,37 +632,9 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		{
 			System.out.println(ex.getMessage());
 		}
-		if ((message.length() > 5 && message.substring(0, 5).equals("mossa")) && Settings.spettatoriWriters != null)
+		if (message.length() > 5 && message.substring(0, 5).equals("mossa"))
 		{
-			ArrayList<Integer> indexesToRemove = new ArrayList<>();
-			Iterator<BufferedWriter> it = Settings.spettatoriWriters.iterator();
-			while (it.hasNext())
-			{
-				BufferedWriter bw = it.next();
-				try
-				{
-					bw.write(message);
-					bw.newLine();
-					bw.flush();
-				}
-				catch (IOException ex)
-				{
-					indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
-				}
-			}
-			for (Integer index : indexesToRemove)
-			{
-				try
-				{
-					Settings.spettatori.get(index).close();
-				}
-				catch (IOException ex1)
-				{
-				}
-				Settings.spettatoriWriters.remove(index.intValue());
-				Settings.spettatori.remove(index.intValue());
-				Settings.spettatoriReaders.remove(index.intValue());
-			}
+			ThreadRicevi.sendToSpettatori(message);
 		}
 	}
 }

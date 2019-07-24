@@ -9,6 +9,7 @@ import com.scacchi.controller.ScacchieraOnlineController;
 import com.scacchi.controller.ScacchieraOnlineSpettatoriController;
 import com.scacchi.model.Partita;
 import com.scacchi.model.Pezzo;
+import com.scacchi.model.Traduzioni.ListaLingue;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ObjectInputStream;
@@ -43,4 +44,7 @@ public class Settings {//SPORCO
 	public static ThreadRicevi threadRicevi;//Serve solo agli spettatori
 	//Caricamento partita
 	public static Partita partitaDaCaricare;
+	//Traduzioni
+	public static ListaLingue lingue;
+	public static final String DEFAULT_LANGUAGE = "it-IT";
 }

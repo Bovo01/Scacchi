@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -125,6 +124,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 					if (temp.charAt(4) != '0')
 						Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
 					if (Settings.scacchieraOnlineController != null)
+					{
 						Platform.runLater(() ->
 						{
 							Settings.scacchieraOnlineController.mostraScacchi();
@@ -148,49 +148,10 @@ public class ThreadRicevi extends Thread implements Closeable {
 								sendToSpettatori(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase());
 							}
 						});
+						sendToSpettatori(line);
+					}
 					else if (Settings.scacchieraOnlineSpettatoriController != null)
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
-					if (Settings.spettatoriWriters != null)
-					{
-						ArrayList<Integer> indexesToRemove = new ArrayList<>();
-						Iterator<BufferedWriter> it = Settings.spettatoriWriters.iterator();
-						while (it.hasNext())
-						{
-							BufferedWriter bw = it.next();
-							try
-							{
-								bw.write(line);
-								bw.newLine();
-								bw.flush();
-								if (Settings.partita.isFinita())
-								{
-									bw.write("fine\n");
-									bw.flush();
-									bw.write(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase());
-									bw.newLine();
-									bw.flush();
-								}
-							}
-							catch (IOException ex)
-							{
-								indexesToRemove.add(Settings.spettatoriWriters.indexOf(bw));
-							}
-						}
-						for (Integer index : indexesToRemove)
-						{
-							try
-							{
-								Settings.spettatori.get(index).close();
-								Settings.spettatoriWriters.remove(index.intValue());
-								Settings.spettatori.remove(index.intValue());
-								Settings.spettatoriReaders.remove(index.intValue());
-								Settings.spettatoriOOS.remove(index.intValue());
-							}
-							catch (IOException ex1)
-							{
-							}
-						}
-					}
 				}
 				else if (line.equals("richiesta patta"))
 					Platform.runLater(() ->

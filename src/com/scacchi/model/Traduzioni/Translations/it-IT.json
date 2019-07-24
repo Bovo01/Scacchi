@@ -1,0 +1,11 @@
+{
+	"menu": {
+		"scacchi": "SCACCHI",
+		"multigiocatoreOffline": "Multigiocatore locale",
+		"multigiocatoreOnline": "Multigiocatore in rete"
+	},
+	"lingue": {
+		"it-IT": "Italiano",
+		"en-US": "Inglese"
+	}
+}

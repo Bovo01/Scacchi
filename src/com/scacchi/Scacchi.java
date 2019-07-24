@@ -7,6 +7,7 @@ package com.scacchi;
 
 import com.scacchi.controller.FunctionsController;
 import com.scacchi.model.TCP.Settings;
+import com.scacchi.model.Traduzioni.ListaLingue;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -54,6 +55,7 @@ public class Scacchi extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+		Settings.lingue = new ListaLingue();
         launch(args);
     }
 }

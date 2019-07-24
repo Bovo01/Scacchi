@@ -5,9 +5,13 @@
  */
 package com.scacchi.controller;
 
+import com.scacchi.model.TCP.Settings;
+import com.scacchi.model.Traduzioni.Lingua;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,9 +20,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * FXML Controller class
@@ -29,6 +37,14 @@ public class MenuPrincipaleController implements Initializable {
 
 	@FXML
 	private ToggleGroup gioco;
+	@FXML
+	private Label scacchiLabel;
+	@FXML
+	private RadioButton multigiocatoreOfflineLabel;
+	@FXML
+	private RadioButton multigiocatoreOnlineLabel;
+	@FXML
+	private ComboBox<Lingua> lingueCombo;
 
 	@FXML
 	private void modalita(ActionEvent event) {
@@ -73,12 +89,34 @@ public class MenuPrincipaleController implements Initializable {
 		}
 	}
 
+	@FXML
+	private void cambiaLingua(ActionEvent event) {
+		Settings.lingue.setLinguaCaricata(lingueCombo.getSelectionModel().getSelectedItem());
+		traduciTutto();
+	}
+
+	private void traduciTutto() {
+		try
+		{
+			JSONObject jsonObj = (JSONObject) Settings.lingue.getLinguaCaricata().getJsonObj().get("menu");
+			scacchiLabel.setText((String) jsonObj.get("scacchi"));
+			multigiocatoreOfflineLabel.setText((String) jsonObj.get("multigiocatoreOffline"));
+			multigiocatoreOnlineLabel.setText((String) jsonObj.get("multigiocatoreOnline"));
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
 	/**
 	 * Initializes the controller class.
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		
+		lingueCombo.getItems().addAll(Settings.lingue.getLingue());
+		lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
+		traduciTutto();
 	}
 
 }

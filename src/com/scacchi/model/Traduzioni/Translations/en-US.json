@@ -1,0 +1,12 @@
+{
+	"menu": {
+		"scacchi": "CHESS",
+		"multigiocatoreOffline": "Offline multiplayer",
+		"multigiocatoreOnline": "Online multiplayer"
+	},
+	"lingue": {
+		"it-IT": "Italian",
+		"en-US": "English"
+	}
+}
+
