@@ -3,7 +3,8 @@
 		"scacchi": "CHESS",
 		"multigiocatoreOffline": "Offline multiplayer",
 		"multigiocatoreOnline": "Online multiplayer",
-		"gioca": "PLAY"
+		"gioca": "PLAY",
+		"selezionaOpzione": "Select an option"
 	},
 	"lingue": {
 		"it-IT": "Italian",
@@ -34,7 +35,13 @@
 		"esci": "Return to main menu",
 		"ricominciaPartita": "Restart game",
 		"invertiScacchiera":  "Reverse chessboard",
-		"salvaCaricaElimina": "Save/Load/Delete"
+		"salvaCaricaElimina": "Save/Load/Delete",
+		"trasformare": "Choose what you want your pawn becomes",
+		"cambioPezzo": "Change piece",
+		"regina": "Queen",
+		"alfiere": "Bishop",
+		"cavallo": "Knight",
+		"torre": "Rook"
 	},
 	"partita": {
 		"colore": {
@@ -55,7 +62,8 @@
 			"caricato": "Loaded",
 			"eliminato": "Deleted",
 			"ricercaAnnullata": "Search canceled",
-			"operazioneAnnullata": "Operation canceled"
+			"operazioneAnnullata": "Operation canceled",
+			"finePartita": "Game finished!"
 		},
 		"contenuto": {
 			"ripetizioneMosse": "Threefold repetition",
@@ -80,7 +88,15 @@
 			"riempiCampi": "Fill al the fields!",
 			"nonPuoiConneterti": "You can't connect to this port",
 			"operazioneAnnullata": "You canceled the operation",
-			"noAvversarioSelezionato": "No enemy has been selected"
+			"noAvversarioSelezionato": "No enemy has been selected",
+			"noGiocatoreSelezionato": "No player has been selected",
+			"inserisciIndirizzo": "Enter the player's address",
+			"portaNumero": "The port must be a number",
+			"nonSeiConnesso": "You are not connected to a net",
+			"portaDaAprire": "Enter the port where you want to open the game",
+			"vincitore": "\nWinner: ",
+			"bianco": "White",
+			"nero": "Black"
 		},
 		"salvaCaricaElimina": {
 			"salvaCaricaElimina": "Do you want to save or load a game?",

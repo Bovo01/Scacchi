@@ -119,7 +119,7 @@ public class OnlineController implements Initializable {
 
 	@FXML
 	private void cercaConIp(ActionEvent event) {
-		JSONObject translator = (JSONObject) Settings.lingue.getKey("onlineMenu");
+		JSONObject translator = Settings.lingue.getJSONObject("onlineMenu");
 		if (ipv4_1.getText().equals(""))
 		{
 			FunctionsController.alertErrore("riempiCampi");
@@ -184,16 +184,17 @@ public class OnlineController implements Initializable {
 	public Colore scegliSchieramento(String message) {
 		try
 		{
-			JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("messaggi");
-			JSONObject titolo = (JSONObject) jsonObj.get("titolo");
-			JSONObject contenuto = (JSONObject) jsonObj.get("contenuto");
+			JSONObject jsonObj = Settings.lingue.getJSONObject("messaggi");
+			JSONObject titolo = jsonObj.getJSONObject("titolo");
+			JSONObject contenuto = jsonObj.getJSONObject("contenuto");
+			JSONObject colori = Settings.lingue.getJSONObject("partita").getJSONObject("colore");
 
 			Alert alert = new Alert(Alert.AlertType.NONE);
-			alert.setTitle((String) titolo.get("scegli"));
-			alert.setContentText((String) contenuto.get("schieramentoPreferito"));
-			ButtonType BIANCHI = new ButtonType("Bianchi");
-			ButtonType NERI = new ButtonType("Neri");
-			ButtonType NIENTE = new ButtonType((String) contenuto.get(message));
+			alert.setTitle(titolo.getString("scegli"));
+			alert.setContentText(contenuto.getString("schieramentoPreferito"));
+			ButtonType BIANCHI = new ButtonType(colori.getString("bianco"));
+			ButtonType NERI = new ButtonType(colori.getString("nero"));
+			ButtonType NIENTE = new ButtonType(contenuto.getString(message));
 			alert.getButtonTypes().clear();
 			alert.getButtonTypes().addAll(BIANCHI, NERI, NIENTE);
 			Optional<ButtonType> option = alert.showAndWait();
@@ -211,12 +212,12 @@ public class OnlineController implements Initializable {
 
 	@FXML
 	private void host(ActionEvent event) {
-		JSONObject translator = (JSONObject) Settings.lingue.getKey("onlineMenu");
+		JSONObject translator = Settings.lingue.getJSONObject("onlineMenu");
 		if (Settings.threadAccetta != null)
 			try
 			{
 				Settings.threadAccetta.close();
-				btnHost1.setText((String) translator.get("host"));
+				btnHost1.setText(translator.getString("host"));
 				Settings.threadAccetta = null;
 				sbloccaTutto();
 				FunctionsController.alertInfo("ricercaAnnullata", "haiAnnullatoRicerca");
@@ -231,7 +232,7 @@ public class OnlineController implements Initializable {
 		btnHost1.setDisable(false);
 		try
 		{
-			btnHost1.setText((String) translator.get("annullaRicerca"));
+			btnHost1.setText(translator.getString("annullaRicerca"));
 		}
 		catch (JSONException ex)
 		{
@@ -245,7 +246,7 @@ public class OnlineController implements Initializable {
 	private void cerca(ActionEvent event) {
 		try
 		{
-			JSONObject translator = (JSONObject) Settings.lingue.getKey("onlineMenu");
+			JSONObject translator = Settings.lingue.getJSONObject("onlineMenu");
 			disattivaTutto();
 			try
 			{
@@ -266,11 +267,11 @@ public class OnlineController implements Initializable {
 				new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
 			}
 			Alert alert = new Alert(Alert.AlertType.NONE);
-			ButtonType OK = new ButtonType((String) Settings.lingue.getKey("ok"));
-			ButtonType ANNULLA = new ButtonType((String) Settings.lingue.getKey("annulla"));
+			ButtonType OK = new ButtonType(Settings.lingue.getString("ok"));
+			ButtonType ANNULLA = new ButtonType(Settings.lingue.getString("annulla"));
 			alert.getButtonTypes().addAll(OK, ANNULLA);
-			alert.setTitle((String) translator.get("connettiti"));
-			alert.setContentText((String) translator.get("selezionaGiocatore"));
+			alert.setTitle(translator.getString("connettiti"));
+			alert.setContentText(translator.getString("selezionaGiocatore"));
 			alert.getDialogPane().setContent(listView);
 			Optional<ButtonType> scelta = alert.showAndWait();
 			if (scelta.get() == ANNULLA)
@@ -314,10 +315,10 @@ public class OnlineController implements Initializable {
 	}
 
 	@FXML
-	public void guardaConIp(ActionEvent event) {//TODO Traduzioni
+	public void guardaConIp(ActionEvent event) {
 		if (ipv4_1_spect.getText().equals(""))
 		{
-			FunctionsController.alertErrore("Inserisci l'indirizzo del giocatore");
+			FunctionsController.alertErrore("inserisciIndirizzo");
 			return;
 		}
 		disattivaTutto();
@@ -327,15 +328,17 @@ public class OnlineController implements Initializable {
 		}
 		catch (NumberFormatException ex)
 		{
-			FunctionsController.alertErrore("La porta deve essere un numero");
+			FunctionsController.alertErrore("portaNumero");
 			sbloccaTutto();
 		}
 	}
 
 	@FXML
 	public void guarda(ActionEvent event) {
-		disattivaTutto();
-		btnSpect.setDisable(false);//TODO togli il commento
+		try
+		{
+			disattivaTutto();
+			btnSpect.setDisable(false);//TODO togli il commento
 //		try
 //		{
 //			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
@@ -344,47 +347,53 @@ public class OnlineController implements Initializable {
 //		catch (IOException ex)
 //		{
 //			sbloccaTutto();
-//			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+//			FunctionsController.alertErrore("nonPuoiConneterti");
 //			return;
 //		}
-		String net = getReteOfMe();
-		if (net.equals("127.0.0."))
-		{
-			FunctionsController.alertErrore("Non sei connesso ad una rete");
-			return;
+			String net = getReteOfMe();
+			if (net.equals("127.0.0."))
+			{
+				FunctionsController.alertErrore("nonSeiConnesso");
+				return;
+			}
+			ListView<String> listView = new ListView<>();
+			listView.setPrefHeight(300);
+			for (int i = 1; i <= 254; i++)
+			{
+				new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
+			}
+			JSONObject onlineMenu = Settings.lingue.getJSONObject("onlineMenu");
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			ButtonType OK = new ButtonType(Settings.lingue.getString("ok"));
+			ButtonType ANNULLA = new ButtonType(Settings.lingue.getString("annulla"));
+			alert.getButtonTypes().addAll(OK, ANNULLA);
+			alert.setTitle(onlineMenu.getString("guarda"));
+			alert.setContentText(onlineMenu.getString("selezionaGiocatore"));
+			alert.getDialogPane().setContent(listView);
+			Optional<ButtonType> scelta = alert.showAndWait();
+			if (scelta.get() == ANNULLA)
+			{
+				FunctionsController.alertInfo("operazioneAnnullata", "operazioneAnnullata");
+				return;
+			}
+			if (listView.getSelectionModel().getSelectedIndex() == -1)
+			{
+				FunctionsController.alertErrore("noGiocatoreSelezionato");
+				return;
+			}
+			new ThreadSend(listView.getSelectionModel().getSelectedItem(), Settings.DEFAULTPORT, this, "richiesta spettatore", btnSpect).start();
 		}
-		ListView<String> listView = new ListView<>();
-		listView.setPrefHeight(300);
-		for (int i = 1; i <= 254; i++)
+		catch (JSONException ex)
 		{
-			new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
+			Logger.getLogger(OnlineController.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
 		}
-		Alert alert = new Alert(Alert.AlertType.NONE);
-		ButtonType OK = new ButtonType("Ok");
-		ButtonType ANNULLA = new ButtonType("Annulla");
-		alert.getButtonTypes().addAll(OK, ANNULLA);
-		alert.setTitle("Guarda");
-		alert.setContentText("Seleziona un giocatore");
-		alert.getDialogPane().setContent(listView);
-		Optional<ButtonType> scelta = alert.showAndWait();
-		if (scelta.get() == ANNULLA)
-		{
-			FunctionsController.alertInfo("Operazione annullata", "Hai annullato l'operazione");
-			return;
-		}
-		if (listView.getSelectionModel().getSelectedIndex() == -1)
-		{
-			FunctionsController.alertErrore("Non è stato selezionato un giocatore");
-			return;
-		}
-		new ThreadSend(listView.getSelectionModel().getSelectedItem(), Settings.DEFAULTPORT, this, "richiesta spettatore", btnSpect).start();
 	}
 
 	@FXML
 	public void guardaConPorta(ActionEvent event) {
 		if (ipv4_2_spect.getText().equals("") || ipv4_2_port_spect.getText().equals(""))
 		{
-			FunctionsController.alertErrore("Riempi tutti i campi");
+			FunctionsController.alertErrore("riempiCampi");
 			return;
 		}
 		disattivaTutto();
@@ -394,7 +403,7 @@ public class OnlineController implements Initializable {
 		}
 		catch (NumberFormatException ex)
 		{
-			FunctionsController.alertErrore("La porta deve essere un numero");
+			FunctionsController.alertErrore("portaNumero");
 			sbloccaTutto();
 		}
 	}
@@ -403,23 +412,24 @@ public class OnlineController implements Initializable {
 	private void hostConPorta(ActionEvent event) {
 		if (host_port.getText().equals(""))
 		{
-			FunctionsController.alertErrore("Inserisci la porta su cui aprire la partita");
+			FunctionsController.alertErrore("portaDaAprire");
 			return;
 		}
+		JSONObject onlineMenu = Settings.lingue.getJSONObject("onlineMenu");
 		if (Settings.threadAccetta != null)
 			try
 			{
 				Settings.threadAccetta.close();
-				btnHost2.setText("Host partita");
+				btnHost2.setText(onlineMenu.getString("host"));
 				Settings.threadAccetta = null;
 				sbloccaTutto();
-				FunctionsController.alertInfo("Ricerca annullata", "Hai annullato la ricerca.\nOra nessuno può più connettersi a te");
+				FunctionsController.alertInfo("ricercaAnnullata", "haiAnnullatoRicerca");
 				anchorPane.getScene().getWindow().setOnCloseRequest((event2) ->
 				{
 				});
 				return;
 			}
-			catch (IOException ex)
+			catch (IOException|JSONException ex)
 			{
 				FunctionsController.alertErrore("Errore");
 				return;
@@ -430,12 +440,19 @@ public class OnlineController implements Initializable {
 		}
 		catch (NumberFormatException ex)
 		{
-			FunctionsController.alertErrore("La porta deve essere un numero");
+			FunctionsController.alertErrore("portaNumero");
 			return;
 		}
 		disattivaTutto();
 		btnHost2.setDisable(false);
-		btnHost2.setText("Annulla ricerca");
+		try
+		{
+			btnHost2.setText(onlineMenu.getString("annullaRicerca"));
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(OnlineController.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
+		}
 		Settings.threadAccetta.start();
 	}
 
@@ -482,38 +499,38 @@ public class OnlineController implements Initializable {
 	}
 
 	private void traduciTutto() throws JSONException {
-		JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("onlineMenu");
+		JSONObject jsonObj = Settings.lingue.getJSONObject("onlineMenu");
 		//Tab "Cerca partita"
-		tabCerca.setText((String) jsonObj.get("cerca"));
-		btnCerca1.setText((String) jsonObj.get("cerca"));
-		btnCerca2.setText((String) jsonObj.get("cerca"));
-		btnCerca3.setText((String) jsonObj.get("cerca"));
-		cercaIntelligente.setText((String) jsonObj.get("cercaIntelligente"));
-		cercaConIndirizzo.setText((String) jsonObj.get("cercaConIndirizzo"));
-		cercaConPort.setText((String) jsonObj.get("cercaConPort"));
-		ipv4_1.setPromptText((String) jsonObj.get("cercaConIndirizzoPlaceholder"));
-		ipv4_2.setPromptText((String) jsonObj.get("cercaConIndirizzoPlaceholder"));
-		ipv4_2_port.setPromptText((String) jsonObj.get("porta"));
+		tabCerca.setText(jsonObj.getString("cerca"));
+		btnCerca1.setText(jsonObj.getString("cerca"));
+		btnCerca2.setText(jsonObj.getString("cerca"));
+		btnCerca3.setText(jsonObj.getString("cerca"));
+		cercaIntelligente.setText(jsonObj.getString("cercaIntelligente"));
+		cercaConIndirizzo.setText(jsonObj.getString("cercaConIndirizzo"));
+		cercaConPort.setText(jsonObj.getString("cercaConPort"));
+		ipv4_1.setPromptText(jsonObj.getString("cercaConIndirizzoPlaceholder"));
+		ipv4_2.setPromptText(jsonObj.getString("cercaConIndirizzoPlaceholder"));
+		ipv4_2_port.setPromptText(jsonObj.getString("porta"));
 		//Tab "Host partita"
-		tabHost.setText((String) jsonObj.get("host"));
-		btnHost1.setText((String) jsonObj.get("host"));
-		btnHost2.setText((String) jsonObj.get("host"));
-		hostIntelligente.setText((String) jsonObj.get("hostIntelligente"));
-		hostConPort.setText((String) jsonObj.get("hostConPorta"));
-		host_port.setPromptText((String) jsonObj.get("porta"));
+		tabHost.setText(jsonObj.getString("host"));
+		btnHost1.setText(jsonObj.getString("host"));
+		btnHost2.setText(jsonObj.getString("host"));
+		hostIntelligente.setText(jsonObj.getString("hostIntelligente"));
+		hostConPort.setText(jsonObj.getString("hostConPorta"));
+		host_port.setPromptText(jsonObj.getString("porta"));
 		//Tab "Spettatore"
-		tabSpect.setText((String) jsonObj.get("spect"));
-		btnSpect.setText((String) jsonObj.get("guarda"));
-		btnSpect1.setText((String) jsonObj.get("guarda"));
-		btnSpect2.setText((String) jsonObj.get("guarda"));
-		guardaIntelligente.setText((String) jsonObj.get("guardaIntelligente"));
-		guardaConIndirizzo.setText((String) jsonObj.get("guardaConIndirizzo"));
-		guardaConPort.setText((String) jsonObj.get("guardaConPorta"));
-		ipv4_1_spect.setPromptText((String) jsonObj.get("guardaPlaceholder"));
-		ipv4_2_spect.setPromptText((String) jsonObj.get("guardaPlaceholder"));
-		ipv4_2_port_spect.setPromptText((String) jsonObj.get("porta"));
+		tabSpect.setText(jsonObj.getString("spect"));
+		btnSpect.setText(jsonObj.getString("guarda"));
+		btnSpect1.setText(jsonObj.getString("guarda"));
+		btnSpect2.setText(jsonObj.getString("guarda"));
+		guardaIntelligente.setText(jsonObj.getString("guardaIntelligente"));
+		guardaConIndirizzo.setText(jsonObj.getString("guardaConIndirizzo"));
+		guardaConPort.setText(jsonObj.getString("guardaConPorta"));
+		ipv4_1_spect.setPromptText(jsonObj.getString("guardaPlaceholder"));
+		ipv4_2_spect.setPromptText(jsonObj.getString("guardaPlaceholder"));
+		ipv4_2_port_spect.setPromptText(jsonObj.getString("porta"));
 		//Tab "Torna al menu"
-		tabEsci.setText((String) jsonObj.get("esci"));
+		tabEsci.setText(jsonObj.getString("esci"));
 	}
 
 	public void inizioSpettatore() {

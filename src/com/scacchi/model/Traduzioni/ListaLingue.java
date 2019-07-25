@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -99,10 +100,34 @@ public class ListaLingue {
 		return lingue;
 	}
 
-	public Object getKey(String key) {
+	public Object get(String key) {
 		try
 		{
 			return this.linguaCaricata.getJsonObj().get(key);
+		}
+		catch (JSONException ex)
+		{
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	public String getString(String key) {
+		try
+		{
+			return this.linguaCaricata.getJsonObj().getString(key);
+		}
+		catch (JSONException ex)
+		{
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	public JSONObject getJSONObject(String key) {
+		try
+		{
+			return this.linguaCaricata.getJsonObj().getJSONObject(key);
 		}
 		catch (JSONException ex)
 		{

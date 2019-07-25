@@ -113,7 +113,7 @@ public class ThreadSend extends Thread {
 					{
 						try
 						{
-							Settings.schieramento = controller.scegliSchieramento("Casuale");
+							Settings.schieramento = controller.scegliSchieramento("casuale");
 							if (Settings.schieramento == null)
 								Settings.schieramento = Pezzo.Colore.values()[Math.abs(new Random().nextInt()) % 2];
 							bw.write(Settings.schieramento.notThis().toString().toLowerCase());

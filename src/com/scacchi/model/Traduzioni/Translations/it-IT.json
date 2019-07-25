@@ -3,7 +3,8 @@
 		"scacchi": "SCACCHI",
 		"multigiocatoreOffline": "Multigiocatore locale",
 		"multigiocatoreOnline": "Multigiocatore in rete",
-		"gioca": "GIOCA"
+		"gioca": "GIOCA",
+		"selezionaOpzione": "Seleziona un'opzione"
 	},
 	"lingue": {
 		"it-IT": "Italiano",
@@ -34,7 +35,13 @@
 		"esci": "Torna al menu principale",
 		"ricominciaPartita": "Ricomincia partita",
 		"invertiScacchiera":  "Inverti scacchiera",
-		"salvaCaricaElimina": "Salva/Carica/Elimina"
+		"salvaCaricaElimina": "Salva/Carica/Elimina",
+		"trasformare": "Scegli in cosa vuoi transformare il tuo pedone",
+		"cambioPezzo": "Cambio pezzo",
+		"regina": "Regina",
+		"alfiere": "Alfiere",
+		"cavallo": "Cavallo",
+		"torre": "Torre"
 	},
 	"partita": {
 		"colore": {
@@ -55,7 +62,8 @@
 			"caricato": "Caricato",
 			"eliminato": "Eliminato",
 			"ricercaAnnullata": "Ricerca annullata",
-			"operazioneAnnullata": "Operazione annullata"
+			"operazioneAnnullata": "Operazione annullata",
+			"finePartita": "Fine partita!"
 		},
 		"contenuto": {
 			"ripetizioneMosse": "Ripetizione di mosse",
@@ -80,7 +88,15 @@
 			"riempiCampi": "Riempi tutti i campi!",
 			"nonPuoiConneterti": "Non puoi connetterti a questa porta",
 			"operazioneAnnullata": "Hai annullato l'operazione",
-			"noAvversarioSelezionato": "Non è stato selezionato un avversario"
+			"noAvversarioSelezionato": "Non è stato selezionato un avversario",
+			"noGiocatoreSelezionato": "Non è stato selezionato un giocatore",
+			"inserisciIndirizzo": "Inserisci l'indirizzo del giocatore",
+			"portaNumero": "La porta deve essere un numero",
+			"nonSeiConnesso": "Non sei connesso ad una rete",
+			"portaDaAprire": "Inserisci la porta su cui aprire la partita",
+			"vincitore": "\nVincitore: ",
+			"bianco": "Bianco",
+			"nero": "Nero"
 		},
 		"salvaCaricaElimina": {
 			"salvaCaricaElimina": "Vuoi salvare o caricare una partita?",

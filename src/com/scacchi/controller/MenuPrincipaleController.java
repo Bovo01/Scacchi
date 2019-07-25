@@ -54,7 +54,14 @@ public class MenuPrincipaleController implements Initializable {
 		if (gioco.getSelectedToggle() == null)
 		{
 			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setContentText("Seleziona un'opzione");
+			try
+			{
+				alert.setContentText(Settings.lingue.getJSONObject("menu").getString("selezionaOpzione"));
+			}
+			catch (JSONException ex)
+			{
+				Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
+			}
 			alert.showAndWait();
 			return;
 		}
@@ -107,11 +114,11 @@ public class MenuPrincipaleController implements Initializable {
 	}
 
 	private void traduciTutto() throws JSONException {
-		JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("menu");
-		scacchiLabel.setText((String) jsonObj.get("scacchi"));
-		multigiocatoreOfflineLabel.setText((String) jsonObj.get("multigiocatoreOffline"));
-		multigiocatoreOnlineLabel.setText((String) jsonObj.get("multigiocatoreOnline"));
-		giocaButton.setText((String) jsonObj.get("gioca"));
+		JSONObject jsonObj = Settings.lingue.getJSONObject("menu");
+		scacchiLabel.setText(jsonObj.getString("scacchi"));
+		multigiocatoreOfflineLabel.setText(jsonObj.getString("multigiocatoreOffline"));
+		multigiocatoreOnlineLabel.setText(jsonObj.getString("multigiocatoreOnline"));
+		giocaButton.setText(jsonObj.getString("gioca"));
 	}
 
 	/**

@@ -7,6 +7,7 @@ package com.scacchi.controller;
 
 import com.scacchi.model.TCP.Settings;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,12 +24,13 @@ public class FunctionsController {
 	public static void alertInfo(String title, String message) {
 		try
 		{
-			JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("messaggi");
-			JSONObject titolo = (JSONObject) jsonObj.get("titolo");
-			JSONObject contenuto = (JSONObject) jsonObj.get("contenuto");
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle((String) titolo.get(title));
-			alert.setContentText((String) contenuto.get(message));
+			JSONObject messaggi = Settings.lingue.getJSONObject("messaggi");
+			JSONObject titolo = messaggi.getJSONObject("titolo");
+			JSONObject contenuto = messaggi.getJSONObject("contenuto");
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			alert.getButtonTypes().add(new ButtonType(Settings.lingue.getString("ok")));
+			alert.setTitle(titolo.getString(title));
+			alert.setContentText(contenuto.getString(message));
 			alert.show();
 		}
 		catch (JSONException ex)
@@ -38,32 +40,30 @@ public class FunctionsController {
 	}
 
 	/**
-	 * Fa comparire un alert con il titolo e il messaggio inseriti, entrambe
-	 * parole chiave per una traduzione
+	 * Fa comparire un alert con il titolo e il messaggio inseriti, quest'ultimo
+	 * diviso in 3 parole chiave
 	 */
 	public static void alertInfo(String title, String message, String coseDaAggiungere, String messageDaAggiungere) {
 		try
 		{
-			JSONObject titolo = (JSONObject) Settings.lingue.getKey("titolo");
-			JSONObject contenuto = (JSONObject) Settings.lingue.getKey("contenuto");
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle((String) titolo.get(title));
-			alert.setContentText((String) contenuto.get(message) + coseDaAggiungere + (String) contenuto.get(messageDaAggiungere));
+			JSONObject messaggi = Settings.lingue.getJSONObject("messaggi");
+			JSONObject titolo = messaggi.getJSONObject("titolo");
+			JSONObject contenuto = messaggi.getJSONObject("contenuto");
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			alert.getButtonTypes().add(new ButtonType(Settings.lingue.getString("ok")));
+			alert.setTitle(titolo.getString(title));
+			alert.setContentText(contenuto.getString(message) + contenuto.getString(coseDaAggiungere) + contenuto.getString(messageDaAggiungere));
 			alert.show();
 		}
 		catch (JSONException ex)
 		{
-			alertErrore("Titolo: " + title + "\nMessaggio: " + message, false);
+			alertErrore("Titolo: " + title + "\nMessaggio: " + message + ", " + coseDaAggiungere + ", " + messageDaAggiungere, false);
 		}
 	}
 
-	/**
-	 * Fa comparire un alert d'errore con il messaggio che identifica una parola
-	 * chiave delle traduzioni
-	 */
 	public static void alertErrore(String message, boolean isErrore) {//TODO Togli funzione test
 		Alert alert = new Alert(Alert.AlertType.ERROR);
-		if(isErrore)
+		if (isErrore)
 			alert.setTitle("Errore");
 		else
 			alert.setTitle("Info");
@@ -78,9 +78,10 @@ public class FunctionsController {
 	public static void alertErrore(String message) {
 		try
 		{
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle((String) Settings.lingue.getKey("errore"));
-			alert.setContentText((String) ((JSONObject) ((JSONObject) Settings.lingue.getKey("messaggi")).get("contenuto")).get(message));
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			alert.getButtonTypes().add(new ButtonType(Settings.lingue.getString("ok")));
+			alert.setTitle(Settings.lingue.getString("errore"));
+			alert.setContentText(Settings.lingue.getJSONObject("messaggi").getJSONObject("contenuto").getString(message));
 			alert.show();
 		}
 		catch (JSONException ex)

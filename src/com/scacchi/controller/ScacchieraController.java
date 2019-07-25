@@ -138,33 +138,39 @@ public class ScacchieraController implements Initializable {
 				if (!partita.muovi(pezzo, pos2))
 					return;
 				if (pezzo.getSimbolo() == Pezzo.Simbolo.PEDONE && (pezzo.getPosizione().getRiga() == Posizione.Riga.R1 || pezzo.getPosizione().getRiga() == Posizione.Riga.R8))
-				{
-					Alert alert = new Alert(Alert.AlertType.NONE);
-					alert.setContentText("Scegli in cosa vuoi trasformare il tuo pedone");
-					alert.setTitle("Cambio pezzo");
-					ButtonType REGINA = new ButtonType("Regina");
-					ButtonType ALFIERE = new ButtonType("Alfiere");
-					ButtonType CAVALLO = new ButtonType("Cavallo");
-					ButtonType TORRE = new ButtonType("Torre");
-					alert.getButtonTypes().addAll(REGINA, ALFIERE, CAVALLO, TORRE);
-					Optional<ButtonType> option = alert.showAndWait();
-					if (option.get() == REGINA)
-						partita.promozione(pezzo, Pezzo.Simbolo.REGINA);
-					else if (option.get() == ALFIERE)
-						partita.promozione(pezzo, Pezzo.Simbolo.ALFIERE);
-					else if (option.get() == TORRE)
-						partita.promozione(pezzo, Pezzo.Simbolo.TORRE);
-					else if (option.get() == CAVALLO)
-						partita.promozione(pezzo, Pezzo.Simbolo.CAVALLO);
-					partita.getMosse().get(partita.getMosse().size() - 1).setSimbolo(pezzo.getSimbolo());
-				}
+					try
+					{
+						JSONObject translator = Settings.lingue.getJSONObject("scacchiera");
+						Alert alert = new Alert(Alert.AlertType.NONE);
+						alert.setContentText(translator.getString("trasformare"));
+						alert.setTitle(translator.getString("cambioPezzo"));
+						ButtonType REGINA = new ButtonType(translator.getString("regina"));
+						ButtonType ALFIERE = new ButtonType(translator.getString("alfiere"));
+						ButtonType CAVALLO = new ButtonType(translator.getString("cavallo"));
+						ButtonType TORRE = new ButtonType(translator.getString("torre"));
+						alert.getButtonTypes().addAll(REGINA, ALFIERE, CAVALLO, TORRE);
+						Optional<ButtonType> option = alert.showAndWait();
+						if (option.get() == REGINA)
+							partita.promozione(pezzo, Pezzo.Simbolo.REGINA);
+						else if (option.get() == ALFIERE)
+							partita.promozione(pezzo, Pezzo.Simbolo.ALFIERE);
+						else if (option.get() == TORRE)
+							partita.promozione(pezzo, Pezzo.Simbolo.TORRE);
+						else if (option.get() == CAVALLO)
+							partita.promozione(pezzo, Pezzo.Simbolo.CAVALLO);
+						partita.getMosse().get(partita.getMosse().size() - 1).setSimbolo(pezzo.getSimbolo());
+					}
+					catch (JSONException ex)
+					{
+						//Non servirà
+					}
 				if (partita.getTurno() == null)//Se c'è un vincitore il metodo "muovi" imposta il turno a null
 				{
 					String line = partita.comeEFinita();
 					if (partita.vincitore() == null)
 						FunctionsController.alertInfo("patta", line);
 					else
-						FunctionsController.alertInfo("finePartita", line, "\nVincitore: ", partita.vincitore().toString().toLowerCase());
+						FunctionsController.alertInfo("finePartita", line, "vincitore", partita.vincitore().toString().toLowerCase());
 				}
 				mostraScacchi();
 			}
@@ -203,8 +209,8 @@ public class ScacchieraController implements Initializable {
 	private void salvaCaricaElimina(ActionEvent event) {
 		try
 		{
-			JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("messaggi");
-			JSONObject translator = (JSONObject) jsonObj.get("salvaCaricaElimina");
+			JSONObject jsonObj = Settings.lingue.getJSONObject("messaggi");
+			JSONObject translator = jsonObj.getJSONObject("salvaCaricaElimina");
 
 			String userName = System.getProperty("user.name");
 			File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
@@ -215,12 +221,12 @@ public class ScacchieraController implements Initializable {
 				folder.mkdirs();
 			folder = new File(folder, "Singleplayer");
 			Alert alert = new Alert(Alert.AlertType.NONE);
-			alert.setContentText((String) translator.get("salvaCaricaElimina"));
-			ButtonType SALVA = new ButtonType((String) translator.get("salva"));
-			ButtonType CARICA = new ButtonType((String) translator.get("carica"));
-			ButtonType ELIMINA = new ButtonType((String) translator.get("elimina"));
-			ButtonType OK = new ButtonType((String) Settings.lingue.getKey("ok"));
-			ButtonType ANNULLA = new ButtonType((String) Settings.lingue.getKey("annulla"));
+			alert.setContentText(translator.getString("salvaCaricaElimina"));
+			ButtonType SALVA = new ButtonType(translator.getString("salva"));
+			ButtonType CARICA = new ButtonType(translator.getString("carica"));
+			ButtonType ELIMINA = new ButtonType(translator.getString("elimina"));
+			ButtonType OK = new ButtonType(Settings.lingue.getString("ok"));
+			ButtonType ANNULLA = new ButtonType(Settings.lingue.getString("annulla"));
 			alert.getButtonTypes().addAll(SALVA, CARICA, ELIMINA, ANNULLA);
 			Optional<ButtonType> scelta = alert.showAndWait();
 			if (scelta.get() == ANNULLA)
@@ -239,12 +245,12 @@ public class ScacchieraController implements Initializable {
 					ripeti = false;
 					TextField textField = new TextField();
 					textField.setId("nomeFile");
-					textField.setPromptText((String) translator.get("inserisciNomePartita"));
-					Label label = new Label((String) translator.get("inserisciNomePartita"));
+					textField.setPromptText(translator.getString("inserisciNomePartita"));
+					Label label = new Label(translator.getString("inserisciNomePartita"));
 					do
 					{
 						alert = new Alert(Alert.AlertType.NONE);
-						alert.setTitle((String) translator.get("nomePartita"));
+						alert.setTitle(translator.getString("nomePartita"));
 						alert.getDialogPane().setContent(new VBox(label, textField));
 						alert.getButtonTypes().addAll(OK, ANNULLA);
 						scelta = alert.showAndWait();
@@ -262,8 +268,8 @@ public class ScacchieraController implements Initializable {
 					if (file.exists())
 					{
 						alert = new Alert(Alert.AlertType.NONE);
-						alert.setTitle((String) translator.get("partitaEsistente"));
-						alert.setContentText((String) translator.get("sovrascrivere"));
+						alert.setTitle(translator.getString("partitaEsistente"));
+						alert.setContentText(translator.getString("sovrascrivere"));
 						alert.getButtonTypes().addAll(OK, ANNULLA);
 						scelta = alert.showAndWait();
 						if (scelta.get() != OK)
@@ -313,7 +319,7 @@ public class ScacchieraController implements Initializable {
 				GraphicsContext context = c.getGraphicsContext2D();
 				context.setTextAlign(TextAlignment.CENTER);
 				context.setTextBaseline(VPos.CENTER);
-				context.fillText((String) translator.get("canvasAnteprimaAlt"), c.getWidth() / 2, c.getHeight() / 2);
+				context.fillText(translator.getString("canvasAnteprimaAlt"), c.getWidth() / 2, c.getHeight() / 2);
 				listaFileDaCaricare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
 				{
 					try (FileInputStream fis = new FileInputStream(files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()]))
@@ -331,7 +337,7 @@ public class ScacchieraController implements Initializable {
 						{
 							context.clearRect(0, 0, c.getWidth(), c.getHeight());
 							context.setFill(Color.BLACK);
-							context.fillText((String) translator.get("canvasAnteprimaCorrotta"), c.getWidth() / 2, c.getHeight() / 2);
+							context.fillText(translator.getString("canvasAnteprimaCorrotta"), c.getWidth() / 2, c.getHeight() / 2);
 						}
 						catch (JSONException ex1)
 						{
@@ -392,7 +398,7 @@ public class ScacchieraController implements Initializable {
 				GraphicsContext context = c.getGraphicsContext2D();
 				context.setTextAlign(TextAlignment.CENTER);
 				context.setTextBaseline(VPos.CENTER);
-				context.fillText((String) translator.get("canvasAnteprimaAlt"), c.getWidth() / 2, c.getHeight() / 2);
+				context.fillText(translator.getString("canvasAnteprimaAlt"), c.getWidth() / 2, c.getHeight() / 2);
 				listaFileDaCancellare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
 				{
 					try (FileInputStream fis = new FileInputStream(files[listaFileDaCancellare.getSelectionModel().getSelectedIndex()]))
@@ -407,7 +413,7 @@ public class ScacchieraController implements Initializable {
 						{
 							context.clearRect(0, 0, c.getWidth(), c.getHeight());
 							context.setFill(Color.BLACK);
-							context.fillText((String) translator.get("canvasAnteprimaCorrotta"), c.getWidth() / 2, c.getHeight() / 2);
+							context.fillText(translator.getString("canvasAnteprimaCorrotta"), c.getWidth() / 2, c.getHeight() / 2);
 						}
 						catch (JSONException ex1)
 						{
@@ -479,11 +485,11 @@ public class ScacchieraController implements Initializable {
 	}
 
 	protected void traduciTutto() throws JSONException {
-		JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("scacchiera");
-		tornaAlMenu.setText((String) jsonObj.get("esci"));
-		ricominciaPartita.setText((String) jsonObj.get("ricominciaPartita"));
-		invertiScacchiera.setText((String) jsonObj.get("invertiScacchiera"));
-		salvaCaricaEliminaBottone.setText((String) jsonObj.get("salvaCaricaElimina"));
+		JSONObject jsonObj = Settings.lingue.getJSONObject("scacchiera");
+		tornaAlMenu.setText(jsonObj.getString("esci"));
+		ricominciaPartita.setText(jsonObj.getString("ricominciaPartita"));
+		invertiScacchiera.setText(jsonObj.getString("invertiScacchiera"));
+		salvaCaricaEliminaBottone.setText(jsonObj.getString("salvaCaricaElimina"));
 	}
 
 	public void mostraScacchi() {
@@ -503,7 +509,7 @@ public class ScacchieraController implements Initializable {
 			if (partita.getTurno() == null)
 				try
 				{
-					turno.setText((String) ((JSONObject) Settings.lingue.getKey("partita")).get("finePartita"));
+					turno.setText(Settings.lingue.getJSONObject("partita").getString("finePartita"));
 				}
 				catch (JSONException ex)
 				{
@@ -512,7 +518,7 @@ public class ScacchieraController implements Initializable {
 			else
 				try
 				{
-					turno.setText((String) ((JSONObject) ((JSONObject) Settings.lingue.getKey("partita")).get("colore")).get(partita.getTurno().toString().toLowerCase()));
+					turno.setText(Settings.lingue.getJSONObject("partita").getJSONObject("colore").getString(partita.getTurno().toString().toLowerCase()));
 				}
 				catch (JSONException ex)
 				{
