@@ -16,6 +16,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -26,11 +28,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * FXML Controller class
@@ -38,6 +43,29 @@ import javafx.stage.Stage;
  * @author Pietro
  */
 public class OnlineController implements Initializable {
+
+	@FXML
+	private Tab tabCerca;
+	@FXML
+	private Tab tabHost;
+	@FXML
+	private Tab tabSpect;
+	@FXML
+	private Label cercaIntelligente;
+	@FXML
+	private Label cercaConIndirizzo;
+	@FXML
+	private Label cercaConPort;
+	@FXML
+	private Label hostIntelligente;
+	@FXML
+	private Label hostConPort;
+	@FXML
+	private Label guardaIntelligente;
+	@FXML
+	private Label guardaConIndirizzo;
+	@FXML
+	private Label guardaConPort;
 
 	@FXML
 	private AnchorPane anchorPane;
@@ -91,9 +119,10 @@ public class OnlineController implements Initializable {
 
 	@FXML
 	private void cercaConIp(ActionEvent event) {
+		JSONObject translator = (JSONObject) Settings.lingue.getKey("onlineMenu");
 		if (ipv4_1.getText().equals(""))
 		{
-			FunctionsController.alertErrore("Riempi tutti i campi!");
+			FunctionsController.alertErrore("riempiCampi");
 			return;
 		}
 		disattivaTutto();//TODO togli il commento
@@ -106,7 +135,7 @@ public class OnlineController implements Initializable {
 //		catch (IOException ex)
 //		{
 //			sbloccaTutto();
-//			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+//			FunctionsController.alertErrore("nonPuoiConnetterti");
 //		}
 	}
 
@@ -114,7 +143,7 @@ public class OnlineController implements Initializable {
 	private void cercaConPorta(ActionEvent event) throws IOException {
 		if (ipv4_2.getText().equals("") || ipv4_2_port.getText().equals(""))
 		{
-			FunctionsController.alertErrore("Riempi tutti i campi!");
+			FunctionsController.alertErrore("riempiCampi");
 			return;
 		}
 		disattivaTutto();
@@ -127,7 +156,7 @@ public class OnlineController implements Initializable {
 		catch (IOException ex)
 		{
 			sbloccaTutto();
-			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
+			FunctionsController.alertErrore("nonPuoiConnetterti");
 		}
 	}
 
@@ -153,86 +182,113 @@ public class OnlineController implements Initializable {
 	}
 
 	public Colore scegliSchieramento(String message) {
-		Alert alert = new Alert(Alert.AlertType.NONE);
-		alert.setTitle("Scegli");
-		alert.setContentText("Quale schieramento preferisci?");
-		ButtonType BIANCHI = new ButtonType("Bianchi");
-		ButtonType NERI = new ButtonType("Neri");
-		ButtonType NIENTE = new ButtonType(message);
-		alert.getButtonTypes().clear();
-		alert.getButtonTypes().addAll(BIANCHI, NERI, NIENTE);
-		Optional<ButtonType> option = alert.showAndWait();
-		if (option.get() == BIANCHI)
-			return Colore.BIANCO;
-		if (option.get() == NERI)
-			return Colore.NERO;
+		try
+		{
+			JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("messaggi");
+			JSONObject titolo = (JSONObject) jsonObj.get("titolo");
+			JSONObject contenuto = (JSONObject) jsonObj.get("contenuto");
+
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			alert.setTitle((String) titolo.get("scegli"));
+			alert.setContentText((String) contenuto.get("schieramentoPreferito"));
+			ButtonType BIANCHI = new ButtonType("Bianchi");
+			ButtonType NERI = new ButtonType("Neri");
+			ButtonType NIENTE = new ButtonType((String) contenuto.get(message));
+			alert.getButtonTypes().clear();
+			alert.getButtonTypes().addAll(BIANCHI, NERI, NIENTE);
+			Optional<ButtonType> option = alert.showAndWait();
+			if (option.get() == BIANCHI)
+				return Colore.BIANCO;
+			if (option.get() == NERI)
+				return Colore.NERO;
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(OnlineController.class.getName()).log(Level.SEVERE, null, ex); //Tanto è inutile
+		}
 		return null;
 	}
 
 	@FXML
 	private void host(ActionEvent event) {
+		JSONObject translator = (JSONObject) Settings.lingue.getKey("onlineMenu");
 		if (Settings.threadAccetta != null)
 			try
 			{
 				Settings.threadAccetta.close();
-				btnHost1.setText("Host partita");
+				btnHost1.setText((String) translator.get("host"));
 				Settings.threadAccetta = null;
 				sbloccaTutto();
-				FunctionsController.alertInfo("Ricerca annullata", "Hai annullato la ricerca.\nOra nessuno può più connettersi a te");
+				FunctionsController.alertInfo("ricercaAnnullata", "haiAnnullatoRicerca");
 				return;
 			}
-			catch (IOException ex)
+			catch (IOException | JSONException ex)
 			{
-				FunctionsController.alertErrore("Errore");
+				FunctionsController.alertErrore("errore");
 				return;
 			}
 		disattivaTutto();
 		btnHost1.setDisable(false);
-		btnHost1.setText("Annulla ricerca");
+		try
+		{
+			btnHost1.setText((String) translator.get("annullaRicerca"));
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(OnlineController.class.getName()).log(Level.SEVERE, null, ex);//Non darà problemi
+		}
 		Settings.threadAccetta = new ThreadAccetta(Settings.DEFAULTPORT, this);
 		Settings.threadAccetta.start();
 	}
 
 	@FXML
 	private void cerca(ActionEvent event) {
-		disattivaTutto();
 		try
 		{
-			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
-			server.close();
+			JSONObject translator = (JSONObject) Settings.lingue.getKey("onlineMenu");
+			disattivaTutto();
+			try
+			{
+				ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
+				server.close();
+			}
+			catch (IOException ex)
+			{
+				sbloccaTutto();
+				FunctionsController.alertErrore("nonPuoiConnetterti");
+				return;
+			}
+			String net = getReteOfMe();
+			ListView<String> listView = new ListView<>();
+			listView.setPrefHeight(300);
+			for (int i = 1; i <= 254; i++)
+			{
+				new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
+			}
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			ButtonType OK = new ButtonType((String) Settings.lingue.getKey("ok"));
+			ButtonType ANNULLA = new ButtonType((String) Settings.lingue.getKey("annulla"));
+			alert.getButtonTypes().addAll(OK, ANNULLA);
+			alert.setTitle((String) translator.get("connettiti"));
+			alert.setContentText((String) translator.get("selezionaGiocatore"));
+			alert.getDialogPane().setContent(listView);
+			Optional<ButtonType> scelta = alert.showAndWait();
+			if (scelta.get() == ANNULLA)
+			{
+				FunctionsController.alertInfo("operazioneAnnullata", "operazioneAnnullata");
+				return;
+			}
+			if (listView.getSelectionModel().getSelectedIndex() == -1)
+			{
+				FunctionsController.alertErrore("noAvversarioSelezionato");
+				return;
+			}
+			new ThreadSend(listView.getSelectionModel().getSelectedItem(), Settings.DEFAULTPORT, this, "richiesta").start();
 		}
-		catch (IOException ex)
+		catch (JSONException ex)
 		{
-			sbloccaTutto();
-			FunctionsController.alertErrore("Non puoi connetterti a questa porta");
-			return;
+			//Non passerà mai
 		}
-		String net = getReteOfMe();
-		ListView<String> listView = new ListView<>();
-		listView.setPrefHeight(300);
-		for (int i = 1; i <= 254; i++)
-		{
-			new ThreadSend(net + i, Settings.DEFAULTPORT, this, "niente", listView).start();
-		}
-		Alert alert = new Alert(Alert.AlertType.NONE);
-		ButtonType OK = new ButtonType("Ok");
-		ButtonType ANNULLA = new ButtonType("Annulla");
-		alert.getButtonTypes().addAll(OK, ANNULLA);
-		alert.setTitle("Connettiti");
-		alert.setContentText("Seleziona un giocatore");
-		alert.getDialogPane().setContent(listView);
-		Optional<ButtonType> scelta = alert.showAndWait();
-		if (scelta.get() == ANNULLA)
-		{
-			FunctionsController.alertInfo("Operazione annullata", "Hai annullato l'operazione");
-			return;
-		}
-		if (listView.getSelectionModel().getSelectedIndex() == -1)
-		{
-			FunctionsController.alertErrore("Non è stato selezionato un avversario");
-			return;
-		}
-		new ThreadSend(listView.getSelectionModel().getSelectedItem(), Settings.DEFAULTPORT, this, "richiesta").start();
 	}
 
 	private static String getReteOfMe() {
@@ -258,7 +314,7 @@ public class OnlineController implements Initializable {
 	}
 
 	@FXML
-	public void guardaConIp(ActionEvent event) {
+	public void guardaConIp(ActionEvent event) {//TODO Traduzioni
 		if (ipv4_1_spect.getText().equals(""))
 		{
 			FunctionsController.alertErrore("Inserisci l'indirizzo del giocatore");
@@ -415,7 +471,49 @@ public class OnlineController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		try
+		{
+			traduciTutto(); //Non avrà mai problemi
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(OnlineController.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
 
+	private void traduciTutto() throws JSONException {
+		JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("onlineMenu");
+		//Tab "Cerca partita"
+		tabCerca.setText((String) jsonObj.get("cerca"));
+		btnCerca1.setText((String) jsonObj.get("cerca"));
+		btnCerca2.setText((String) jsonObj.get("cerca"));
+		btnCerca3.setText((String) jsonObj.get("cerca"));
+		cercaIntelligente.setText((String) jsonObj.get("cercaIntelligente"));
+		cercaConIndirizzo.setText((String) jsonObj.get("cercaConIndirizzo"));
+		cercaConPort.setText((String) jsonObj.get("cercaConPort"));
+		ipv4_1.setPromptText((String) jsonObj.get("cercaConIndirizzoPlaceholder"));
+		ipv4_2.setPromptText((String) jsonObj.get("cercaConIndirizzoPlaceholder"));
+		ipv4_2_port.setPromptText((String) jsonObj.get("porta"));
+		//Tab "Host partita"
+		tabHost.setText((String) jsonObj.get("host"));
+		btnHost1.setText((String) jsonObj.get("host"));
+		btnHost2.setText((String) jsonObj.get("host"));
+		hostIntelligente.setText((String) jsonObj.get("hostIntelligente"));
+		hostConPort.setText((String) jsonObj.get("hostConPorta"));
+		host_port.setPromptText((String) jsonObj.get("porta"));
+		//Tab "Spettatore"
+		tabSpect.setText((String) jsonObj.get("spect"));
+		btnSpect.setText((String) jsonObj.get("guarda"));
+		btnSpect1.setText((String) jsonObj.get("guarda"));
+		btnSpect2.setText((String) jsonObj.get("guarda"));
+		guardaIntelligente.setText((String) jsonObj.get("guardaIntelligente"));
+		guardaConIndirizzo.setText((String) jsonObj.get("guardaConIndirizzo"));
+		guardaConPort.setText((String) jsonObj.get("guardaConPorta"));
+		ipv4_1_spect.setPromptText((String) jsonObj.get("guardaPlaceholder"));
+		ipv4_2_spect.setPromptText((String) jsonObj.get("guardaPlaceholder"));
+		ipv4_2_port_spect.setPromptText((String) jsonObj.get("porta"));
+		//Tab "Torna al menu"
+		tabEsci.setText((String) jsonObj.get("esci"));
 	}
 
 	public void inizioSpettatore() {

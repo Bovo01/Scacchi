@@ -22,7 +22,7 @@
                      <children>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="20.0">
                            <children>
-                              <Label text="Cerca partita all'interno della tua rete locale">
+                              <Label fx:id="cercaIntelligente" alignment="CENTER" prefHeight="30.0" prefWidth="486.0" text="Cerca partita all'interno della tua rete locale">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -36,14 +36,14 @@
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label text="Cerca partita all'indirizzo inserito">
+                              <Label fx:id="cercaConIndirizzo" alignment="CENTER" prefHeight="30.0" prefWidth="412.0" text="Cerca partita all'indirizzo inserito">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="30.0">
                                  <children>
-                                    <TextField fx:id="ipv4_1" alignment="CENTER" prefHeight="40.0" prefWidth="239.0" promptText="Inserisci l'indirizzo ipv4 del tuo avversario" />
+                                    <TextField fx:id="ipv4_1" alignment="CENTER" prefHeight="40.0" prefWidth="288.0" promptText="Inserisci l'indirizzo ipv4 del tuo avversario" />
                                     <Button fx:id="btnCerca2" mnemonicParsing="false" onAction="#cercaConIp" prefHeight="40.0" text="Cerca partita">
                                        <font>
                                           <Font size="20.0" />
@@ -55,14 +55,14 @@
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label text="Cerca partita all'indirizzo e alla porta inseriti">
+                              <Label fx:id="cercaConPort" alignment="CENTER" prefHeight="30.0" prefWidth="468.0" text="Cerca partita all'indirizzo e alla porta inseriti">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <TextField fx:id="ipv4_2" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="236.0" promptText="Inserisci l'indirizzo ipv4 del tuo avversario" />
+                                    <TextField fx:id="ipv4_2" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="253.0" promptText="Inserisci l'indirizzo ipv4 del tuo avversario" />
                                     <Label text=":">
                                        <font>
                                           <Font size="25.0" />
@@ -94,7 +94,7 @@
                      <children>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="20.0">
                            <children>
-                              <Label text="Host partita sulla porta dedicata">
+                              <Label fx:id="hostIntelligente" alignment="CENTER" prefHeight="30.0" prefWidth="432.0" text="Host partita sulla porta dedicata">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -108,14 +108,14 @@
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label text="Host partita nella porta inserita">
+                              <Label fx:id="hostConPort" alignment="CENTER" prefHeight="30.0" prefWidth="441.0" text="Host partita nella porta inserita">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="30.0">
                                  <children>
-                                    <TextField fx:id="host_port" alignment="CENTER" prefHeight="40.0" prefWidth="114.0" promptText="Inserisci porta" />
+                                    <TextField fx:id="host_port" alignment="CENTER" prefHeight="40.0" prefWidth="114.0" promptText="Porta" />
                                     <Button fx:id="btnHost2" mnemonicParsing="false" onAction="#hostConPorta" prefHeight="40.0" text="Host partita">
                                        <font>
                                           <Font size="20.0" />
@@ -135,7 +135,7 @@
                      <children>
                         <VBox alignment="CENTER" layoutX="10.0" layoutY="134.0" prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label prefHeight="55.0" prefWidth="308.0" text="Guarda partita all' indirizzo inserito">
+                              <Label fx:id="guardaIntelligente" alignment="CENTER" prefHeight="55.0" prefWidth="428.0" text="Guarda partita all' indirizzo inserito">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -149,14 +149,14 @@
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label text="Guarda partita all' indirizzo inserito">
+                              <Label fx:id="guardaConIndirizzo" alignment="CENTER" prefHeight="30.0" prefWidth="464.0" text="Guarda partita all' indirizzo inserito">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="30.0">
                                  <children>
-                                    <TextField fx:id="ipv4_1_spect" alignment="CENTER" prefHeight="40.0" prefWidth="182.0" promptText="Inserisci l'indirizzo della partita" />
+                                    <TextField fx:id="ipv4_1_spect" alignment="CENTER" prefHeight="40.0" prefWidth="243.0" promptText="Inserisci l'indirizzo della partita" />
                                     <Button fx:id="btnSpect1" mnemonicParsing="false" onAction="#guardaConIp" text="Guarda">
                                        <font>
                                           <Font size="20.0" />
@@ -168,14 +168,14 @@
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label text="Guarda partita alla porta dell' indirizzo inserito">
+                              <Label fx:id="guardaConPort" alignment="CENTER" prefHeight="30.0" prefWidth="520.0" text="Guarda partita alla porta dell' indirizzo inserito">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <TextField fx:id="ipv4_2_spect" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="177.0" promptText="Inserisci l'indirizzo della partita" />
+                                    <TextField fx:id="ipv4_2_spect" alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="229.0" promptText="Inserisci l'indirizzo della partita" />
                                     <Label text=":">
                                        <font>
                                           <Font size="25.0" />
@@ -184,7 +184,7 @@
                                           <Insets bottom="2.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField fx:id="ipv4_2_port_spect" prefHeight="40.0" prefWidth="106.0" promptText="Inserisci la porta" />
+                                    <TextField fx:id="ipv4_2_port_spect" prefHeight="40.0" prefWidth="79.0" promptText="Porta" />
                                     <Button fx:id="btnSpect2" mnemonicParsing="false" onAction="#guardaConPorta" text="Guarda">
                                        <HBox.margin>
                                           <Insets left="30.0" />

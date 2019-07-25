@@ -53,13 +53,13 @@ public class ThreadAccetta extends Thread implements Closeable {
         {
             Platform.runLater(() ->
             {
-                FunctionsController.alertErrore("Porta già in uso da un altro processo");
+                FunctionsController.alertErrore("portaInUso");
                 controller.sbloccaTutto();
             });
             return;
         }
         if (Settings.schieramento == null)
-            Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento("Non cambia nulla"));
+            Platform.runLater(() -> Settings.schieramento = controller.scegliSchieramento("nonCambia"));
         while (true)
         {
             try

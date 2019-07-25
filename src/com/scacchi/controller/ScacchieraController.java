@@ -11,6 +11,7 @@ import static com.scacchi.model.Pezzo.Colore.BIANCO;
 import static com.scacchi.model.Pezzo.Colore.NERO;
 import com.scacchi.model.Posizione.Colonna;
 import com.scacchi.model.Posizione.Riga;
+import com.scacchi.model.TCP.Settings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,7 +22,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.beans.value.ChangeListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,6 +36,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -46,12 +49,23 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
  * @author Pietro
  */
 public class ScacchieraController implements Initializable {
+
+	@FXML
+	protected Button tornaAlMenu;
+	@FXML
+	protected Button ricominciaPartita;
+	@FXML
+	private Button invertiScacchiera;
+	@FXML
+	private Button salvaCaricaEliminaBottone;
 
 	@FXML
 	protected Label turno;
@@ -146,17 +160,11 @@ public class ScacchieraController implements Initializable {
 				}
 				if (partita.getTurno() == null)//Se c'è un vincitore il metodo "muovi" imposta il turno a null
 				{
-					Alert alert = new Alert(Alert.AlertType.INFORMATION);
 					String line = partita.comeEFinita();
 					if (partita.vincitore() == null)
-						alert.setTitle("Patta!");
+						FunctionsController.alertInfo("patta", line);
 					else
-					{
-						alert.setTitle("Fine partita!");
-						line += "\nVincitore: " + partita.vincitore();
-					}
-					alert.setContentText(line);
-					alert.show();
+						FunctionsController.alertInfo("finePartita", line, "\nVincitore: ", partita.vincitore().toString().toLowerCase());
 				}
 				mostraScacchi();
 			}
@@ -193,222 +201,245 @@ public class ScacchieraController implements Initializable {
 
 	@FXML
 	private void salvaCaricaElimina(ActionEvent event) {
-		String userName = System.getProperty("user.name");
-		File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
-		if (!folder.exists())
-			folder.mkdirs();
-		folder = new File(folder, "Scacchi");
-		if (!folder.exists())
-			folder.mkdirs();
-		folder = new File(folder, "Singleplayer");
-		Alert alert = new Alert(Alert.AlertType.NONE);
-		alert.setContentText("Vuoi salvare o caricare una partita?");
-		ButtonType SALVA = new ButtonType("Salva");
-		ButtonType CARICA = new ButtonType("Carica");
-		ButtonType ELIMINA = new ButtonType("Elimina");
-		ButtonType OK = new ButtonType("Ok");
-		ButtonType ANNULLA = new ButtonType("Annulla");
-		alert.getButtonTypes().addAll(SALVA, CARICA, ELIMINA, ANNULLA);
-		Optional<ButtonType> scelta = alert.showAndWait();
-		if (scelta.get() == ANNULLA)
+		try
 		{
-			FunctionsController.alertInfo("Annullato", "Hai annullato la procedura");
-			return;
-		}
-		if (scelta.get() == SALVA)
-		{
-			boolean ripeti;
-			File file = null;
+			JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("messaggi");
+			JSONObject translator = (JSONObject) jsonObj.get("salvaCaricaElimina");
+
+			String userName = System.getProperty("user.name");
+			File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
 			if (!folder.exists())
 				folder.mkdirs();
-			do
+			folder = new File(folder, "Scacchi");
+			if (!folder.exists())
+				folder.mkdirs();
+			folder = new File(folder, "Singleplayer");
+			Alert alert = new Alert(Alert.AlertType.NONE);
+			alert.setContentText((String) translator.get("salvaCaricaElimina"));
+			ButtonType SALVA = new ButtonType((String) translator.get("salva"));
+			ButtonType CARICA = new ButtonType((String) translator.get("carica"));
+			ButtonType ELIMINA = new ButtonType((String) translator.get("elimina"));
+			ButtonType OK = new ButtonType((String) Settings.lingue.getKey("ok"));
+			ButtonType ANNULLA = new ButtonType((String) Settings.lingue.getKey("annulla"));
+			alert.getButtonTypes().addAll(SALVA, CARICA, ELIMINA, ANNULLA);
+			Optional<ButtonType> scelta = alert.showAndWait();
+			if (scelta.get() == ANNULLA)
 			{
-				ripeti = false;
-				TextField textField = new TextField();
-				textField.setId("nomeFile");
-				textField.setPromptText("Inserisci il nome della partita");
-				Label label = new Label("Inserisci il nome della partita");
+				FunctionsController.alertInfo("annullato", "annullato");
+				return;
+			}
+			if (scelta.get() == SALVA)
+			{
+				boolean ripeti;
+				File file = null;
+				if (!folder.exists())
+					folder.mkdirs();
+				do
+				{
+					ripeti = false;
+					TextField textField = new TextField();
+					textField.setId("nomeFile");
+					textField.setPromptText((String) translator.get("inserisciNomePartita"));
+					Label label = new Label((String) translator.get("inserisciNomePartita"));
+					do
+					{
+						alert = new Alert(Alert.AlertType.NONE);
+						alert.setTitle((String) translator.get("nomePartita"));
+						alert.getDialogPane().setContent(new VBox(label, textField));
+						alert.getButtonTypes().addAll(OK, ANNULLA);
+						scelta = alert.showAndWait();
+						if (scelta.get() == ANNULLA)
+						{
+							FunctionsController.alertInfo("annullatoSalvataggio", "annullatoSalvataggio");
+							return;
+						}
+					}
+					while (textField.getText().equals(""));
+
+					String nomeFile = textField.getText();
+					file = new File(folder, nomeFile + ".sca");
+
+					if (file.exists())
+					{
+						alert = new Alert(Alert.AlertType.NONE);
+						alert.setTitle((String) translator.get("partitaEsistente"));
+						alert.setContentText((String) translator.get("sovrascrivere"));
+						alert.getButtonTypes().addAll(OK, ANNULLA);
+						scelta = alert.showAndWait();
+						if (scelta.get() != OK)
+							ripeti = true;
+					}
+					if (!ripeti)
+						try
+						{
+							file.createNewFile();
+						}
+						catch (IOException ex)
+						{
+						}
+				}
+				while (ripeti);
+
+				try
+				{
+					FileOutputStream fos = new FileOutputStream(file);
+					ObjectOutputStream foos = new ObjectOutputStream(fos);
+					foos.writeObject(partita);
+					foos.close();
+				}
+				catch (IOException ex)
+				{
+				}
+
+				FunctionsController.alertInfo("salvato", "partitaSalvata");
+			}
+			else if (scelta.get() == CARICA)
+			{
+				ListView<String> listaFileDaCaricare = new ListView<>();
+				File[] files = folder.listFiles();
+				if (files == null || files.length == 0)
+				{
+					FunctionsController.alertErrore("noSalvataggi");
+					return;
+				}
+				ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
+				for (File file : files)
+				{
+					nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
+				}
+				listaFileDaCaricare.getItems().addAll(nomiFilesDaCaricare);
+				listaFileDaCaricare.setPrefHeight(300);
+				Canvas c = new Canvas(300, 300);
+				GraphicsContext context = c.getGraphicsContext2D();
+				context.setTextAlign(TextAlignment.CENTER);
+				context.setTextBaseline(VPos.CENTER);
+				context.fillText((String) translator.get("canvasAnteprimaAlt"), c.getWidth() / 2, c.getHeight() / 2);
+				listaFileDaCaricare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+				{
+					try (FileInputStream fis = new FileInputStream(files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()]))
+					{
+						String line = files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()].getName();
+						if (!line.substring(line.length() - 4, line.length()).equals(".sca"))
+							throw new ClassNotFoundException();
+						ObjectInputStream fois = new ObjectInputStream(fis);
+						Partita p = (Partita) fois.readObject();
+						ScacchieraController.mostraScacchi(c, p);
+					}
+					catch (ClassNotFoundException | IOException ex)
+					{
+						try
+						{
+							context.clearRect(0, 0, c.getWidth(), c.getHeight());
+							context.setFill(Color.BLACK);
+							context.fillText((String) translator.get("canvasAnteprimaCorrotta"), c.getWidth() / 2, c.getHeight() / 2);
+						}
+						catch (JSONException ex1)
+						{
+							Logger.getLogger(ScacchieraController.class.getName()).log(Level.SEVERE, null, ex1);//Non servirà mai
+						}
+					}
+				});
+
+				int selectedIndex = -1;
+
 				do
 				{
 					alert = new Alert(Alert.AlertType.NONE);
-					alert.setTitle("Nome partita");
-					alert.getDialogPane().setContent(new VBox(label, textField));
 					alert.getButtonTypes().addAll(OK, ANNULLA);
+					alert.getDialogPane().setContent(new HBox(c, listaFileDaCaricare));
 					scelta = alert.showAndWait();
+					selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
 					if (scelta.get() == ANNULLA)
 					{
-						FunctionsController.alertInfo("Salvataggio annullato", "Hai annullato il salvataggio della partita");
+						FunctionsController.alertInfo("annullatoCaricamento", "annullatoCaricamento");
 						return;
 					}
 				}
-				while (textField.getText().equals(""));
+				while (selectedIndex == -1);
 
-				String nomeFile = textField.getText();
-				file = new File(folder, nomeFile + ".sca");
-
-				if (file.exists())
-				{
-					alert = new Alert(Alert.AlertType.NONE);
-					alert.setTitle("Partita presente");
-					alert.setContentText("Vuoi sovrascrivere?");
-					alert.getButtonTypes().addAll(OK, ANNULLA);
-					scelta = alert.showAndWait();
-					if (scelta.get() != OK)
-						ripeti = true;
-				}
-				if (!ripeti)
-					try
-					{
-						file.createNewFile();
-					}
-					catch (IOException ex)
-					{
-					}
-			}
-			while (ripeti);
-
-			try
-			{
-				FileOutputStream fos = new FileOutputStream(file);
-				ObjectOutputStream foos = new ObjectOutputStream(fos);
-				foos.writeObject(partita);
-				foos.close();
-			}
-			catch (IOException ex)
-			{
-			}
-
-			FunctionsController.alertInfo("Salvato", "Partita salvata!");
-		}
-		else if (scelta.get() == CARICA)
-		{
-			ListView<String> listaFileDaCaricare = new ListView<>();
-			File[] files = folder.listFiles();
-			if (files == null || files.length == 0)
-			{
-				FunctionsController.alertErrore("Non sono presenti salvataggi");
-				return;
-			}
-			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
-			for (File file : files)
-			{
-				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
-			}
-			listaFileDaCaricare.getItems().addAll(nomiFilesDaCaricare);
-			listaFileDaCaricare.setPrefHeight(300);
-			Canvas c = new Canvas(300, 300);
-			GraphicsContext context = c.getGraphicsContext2D();
-			context.setTextAlign(TextAlignment.CENTER);
-			context.setTextBaseline(VPos.CENTER);
-			context.fillText("Seleziona un'opzione\nper vedere l'anteprima", c.getWidth() / 2, c.getHeight() / 2);
-			listaFileDaCaricare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
-			{
-				try (FileInputStream fis = new FileInputStream(files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()]))
+				try (FileInputStream fis = new FileInputStream(files[selectedIndex]))
 				{
 					String line = files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()].getName();
-					if(!line.substring(line.length()-4, line.length()).equals(".sca"))
+					if (!line.substring(line.length() - 4, line.length()).equals(".sca"))
 						throw new ClassNotFoundException();
-					ObjectInputStream fois = new ObjectInputStream(fis);
-					Partita p = (Partita) fois.readObject();
-					ScacchieraController.mostraScacchi(c, p);
+					ObjectInputStream ois = new ObjectInputStream(fis);
+					this.partita = (Partita) ois.readObject();
+					mostraScacchi();
+					FunctionsController.alertInfo("caricato", "partitaCaricata");
 				}
 				catch (ClassNotFoundException | IOException ex)
 				{
-					context.clearRect(0, 0, c.getWidth(), c.getHeight());
-					context.setFill(Color.BLACK);
-					context.fillText("File corrotto\nAnteprima non disponibile", c.getWidth() / 2, c.getHeight() / 2);
+					FunctionsController.alertErrore("fileCorrotto");
 				}
-			});
-
-			int selectedIndex = -1;
-
-			do
+			}
+			else
 			{
-				alert = new Alert(Alert.AlertType.NONE);
-				alert.getButtonTypes().addAll(OK, ANNULLA);
-				alert.getDialogPane().setContent(new HBox(c, listaFileDaCaricare));
-				scelta = alert.showAndWait();
-				selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
-				if (scelta.get() == ANNULLA)
+				ListView<String> listaFileDaCancellare = new ListView<>();
+				File[] files = folder.listFiles();
+				if (files == null || files.length == 0)
 				{
-					FunctionsController.alertInfo("Caricamento annullato", "Hai annullato il caricamento della partita");
+					FunctionsController.alertErrore("noSalvataggi");
 					return;
 				}
-			}
-			while (selectedIndex == -1);
+				ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
+				for (File file : files)
+				{
+					nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
+				}
+				listaFileDaCancellare.getItems().addAll(nomiFilesDaCaricare);
+				listaFileDaCancellare.setPrefHeight(300);
+				Canvas c = new Canvas(300, 300);
+				GraphicsContext context = c.getGraphicsContext2D();
+				context.setTextAlign(TextAlignment.CENTER);
+				context.setTextBaseline(VPos.CENTER);
+				context.fillText((String) translator.get("canvasAnteprimaAlt"), c.getWidth() / 2, c.getHeight() / 2);
+				listaFileDaCancellare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+				{
+					try (FileInputStream fis = new FileInputStream(files[listaFileDaCancellare.getSelectionModel().getSelectedIndex()]))
+					{
+						ObjectInputStream fois = new ObjectInputStream(fis);
+						Partita p = (Partita) fois.readObject();
+						ScacchieraController.mostraScacchi(c, p);
+					}
+					catch (ClassNotFoundException | IOException ex)
+					{
+						try
+						{
+							context.clearRect(0, 0, c.getWidth(), c.getHeight());
+							context.setFill(Color.BLACK);
+							context.fillText((String) translator.get("canvasAnteprimaCorrotta"), c.getWidth() / 2, c.getHeight() / 2);
+						}
+						catch (JSONException ex1)
+						{
+							Logger.getLogger(ScacchieraController.class.getName()).log(Level.SEVERE, null, ex1);//Non è necessario
+						}
+					}
+				});
+				int selectedIndex = -1;
 
-			try (FileInputStream fis = new FileInputStream(files[selectedIndex]))
-			{
-				String line = files[listaFileDaCaricare.getSelectionModel().getSelectedIndex()].getName();
-				if(!line.substring(line.length()-4, line.length()).equals(".sca"))
-					throw new ClassNotFoundException();
-				ObjectInputStream ois = new ObjectInputStream(fis);
-				this.partita = (Partita) ois.readObject();
-				mostraScacchi();
-				FunctionsController.alertInfo("Successo", "Partita caricata con successo");
-			}
-			catch (ClassNotFoundException | IOException ex)
-			{
-				FunctionsController.alertErrore("Il file è corrotto");
+				do
+				{
+					alert = new Alert(Alert.AlertType.NONE);
+					alert.getButtonTypes().addAll(OK, ANNULLA);
+					alert.getDialogPane().setContent(new HBox(c, listaFileDaCancellare));
+					scelta = alert.showAndWait();
+					selectedIndex = listaFileDaCancellare.getSelectionModel().getSelectedIndex();
+					if (scelta.get() == ANNULLA)
+					{
+						FunctionsController.alertInfo("annullatoEliminazione", "annullatoEliminazione");
+						return;
+					}
+				}
+				while (selectedIndex == -1);
+
+				if (files[selectedIndex].delete())
+					FunctionsController.alertInfo("eliminato", "partitaEliminata");
+				else
+					FunctionsController.alertErrore("erroreEliminazione");//Non dovrebbe mai succedere
 			}
 		}
-		else
+		catch (JSONException ex)
 		{
-			ListView<String> listaFileDaCancellare = new ListView<>();
-			File[] files = folder.listFiles();
-			if (files == null || files.length == 0)
-			{
-				FunctionsController.alertErrore("Non sono presenti salvataggi");
-				return;
-			}
-			ArrayList<String> nomiFilesDaCaricare = new ArrayList<>();
-			for (File file : files)
-			{
-				nomiFilesDaCaricare.add(file.getName().substring(0, file.getName().length() - 4));
-			}
-			listaFileDaCancellare.getItems().addAll(nomiFilesDaCaricare);
-			listaFileDaCancellare.setPrefHeight(300);
-			Canvas c = new Canvas(300, 300);
-			GraphicsContext context = c.getGraphicsContext2D();
-			context.setTextAlign(TextAlignment.CENTER);
-			context.setTextBaseline(VPos.CENTER);
-			context.fillText("Seleziona un'opzione\nper vedere l'anteprima", c.getWidth() / 2, c.getHeight() / 2);
-			listaFileDaCancellare.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) ->
-			{
-				try (FileInputStream fis = new FileInputStream(files[listaFileDaCancellare.getSelectionModel().getSelectedIndex()]))
-				{
-					ObjectInputStream fois = new ObjectInputStream(fis);
-					Partita p = (Partita) fois.readObject();
-					ScacchieraController.mostraScacchi(c, p);
-				}
-				catch (ClassNotFoundException | IOException ex)
-				{
-					context.clearRect(0, 0, c.getWidth(), c.getHeight());
-					context.setFill(Color.BLACK);
-					context.fillText("File corrotto\nAnteprima non disponibile", c.getWidth() / 2, c.getHeight() / 2);
-				}
-			});
-			int selectedIndex = -1;
-
-			do
-			{
-				alert = new Alert(Alert.AlertType.NONE);
-				alert.getButtonTypes().addAll(OK, ANNULLA);
-				alert.getDialogPane().setContent(new HBox(c, listaFileDaCancellare));
-				scelta = alert.showAndWait();
-				selectedIndex = listaFileDaCancellare.getSelectionModel().getSelectedIndex();
-				if (scelta.get() == ANNULLA)
-				{
-					FunctionsController.alertInfo("Eliminazione annullato", "Hai annullato l'eliminazione della partita");
-					return;
-				}
-			}
-			while (selectedIndex == -1);
-
-			if (files[selectedIndex].delete())
-				FunctionsController.alertInfo("Successo", "Partita eliminata con successo");
-			else
-				FunctionsController.alertErrore("Non è stato possibile eliminare la partita");//Non dovrebbe mai succedere
 		}
 	}
 
@@ -437,6 +468,22 @@ public class ScacchieraController implements Initializable {
 		scala = SCACCHIERA_DIM / canvas.getWidth();
 		versoScacchiera = BIANCO;
 		mostraScacchi();
+		try
+		{
+			traduciTutto();
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(ScacchieraController.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+	protected void traduciTutto() throws JSONException {
+		JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("scacchiera");
+		tornaAlMenu.setText((String) jsonObj.get("esci"));
+		ricominciaPartita.setText((String) jsonObj.get("ricominciaPartita"));
+		invertiScacchiera.setText((String) jsonObj.get("invertiScacchiera"));
+		salvaCaricaEliminaBottone.setText((String) jsonObj.get("salvaCaricaElimina"));
 	}
 
 	public void mostraScacchi() {
@@ -454,9 +501,23 @@ public class ScacchieraController implements Initializable {
 	private static void mostraScacchi(GraphicsContext graphics, Canvas canvas, Partita partita, Label turno, Colore versoScacchiera, double scala, Mossa ultimaMossa) {
 		if (turno != null)
 			if (partita.getTurno() == null)
-				turno.setText("PARTITA CONCLUSA!");
+				try
+				{
+					turno.setText((String) ((JSONObject) Settings.lingue.getKey("partita")).get("finePartita"));
+				}
+				catch (JSONException ex)
+				{
+					Logger.getLogger(ScacchieraController.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
+				}
 			else
-				turno.setText(partita.getTurno().toString());
+				try
+				{
+					turno.setText((String) ((JSONObject) ((JSONObject) Settings.lingue.getKey("partita")).get("colore")).get(partita.getTurno().toString().toLowerCase()));
+				}
+				catch (JSONException ex)
+				{
+					Logger.getLogger(Pezzo.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
+				}
 		ArrayList<Pezzo> unione = new ArrayList<>();
 		unione.addAll(partita.getBianchi());
 		unione.addAll(partita.getNeri());
@@ -613,16 +674,5 @@ public class ScacchieraController implements Initializable {
 
 	protected void disegnaPezzo(Pezzo pezzo) {
 		disegnaPezzo(pezzo, this.scala, this.graphics, this.versoScacchiera);
-	}
-
-	private static class ChangeListenerImpl implements ChangeListener<String> {
-
-		public ChangeListenerImpl() {
-		}
-
-		@Override
-		public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-		}
 	}
 }

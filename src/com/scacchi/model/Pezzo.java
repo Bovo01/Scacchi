@@ -5,8 +5,13 @@
  */
 package com.scacchi.model;
 
+import com.scacchi.model.TCP.Settings;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *

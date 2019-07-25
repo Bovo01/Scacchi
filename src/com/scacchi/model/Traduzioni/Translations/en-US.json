@@ -2,11 +2,100 @@
 	"menu": {
 		"scacchi": "CHESS",
 		"multigiocatoreOffline": "Offline multiplayer",
-		"multigiocatoreOnline": "Online multiplayer"
+		"multigiocatoreOnline": "Online multiplayer",
+		"gioca": "PLAY"
 	},
 	"lingue": {
 		"it-IT": "Italian",
 		"en-US": "English"
-	}
+	},
+	"onlineMenu": {
+		"cerca": "Search game",
+		"cercaIntelligente": "Search game inside of your local network",
+		"cercaConIndirizzo": "Search game at the entered address",
+		"cercaConPort": "Search game at the entered address and port",
+		"cercaConIndirizzoPlaceholder": "Insert the enemy ipv4 address",
+		"porta": "Port",
+		"host": "Host game",
+		"hostIntelligente": "Host game on the default port",
+		"hostConPorta": "Host game on the entered port",
+		"spect": "Spectator",
+		"guarda": "Watch game",
+		"guardaIntelligente": "Watch game inside of your local network",
+		"guardaConIndirizzo": "Watch Game at the entered address",
+		"guardaConPorta": "Watch game at the entered address and port",
+		"guardaPlaceholder": "Insert the address of the game",
+		"esci": "Return to main menu",
+		"annullaRicerca": "Cancel search",
+		"connettiti": "Connect",
+		"selezionaGiocatore": "Select a player"
+	},
+	"scacchiera": {
+		"esci": "Return to main menu",
+		"ricominciaPartita": "Restart game",
+		"invertiScacchiera":  "Reverse chessboard",
+		"salvaCaricaElimina": "Save/Load/Delete"
+	},
+	"partita": {
+		"colore": {
+			"bianco": "White",
+			"nero": "Black"
+		},
+		"finePartita": "Game Finished!"
+	},
+	"messaggi": {
+		"titolo": {
+			"patta": "Draw!",
+			"scegli": "Choose",
+			"annullato": "Canceled",
+			"annullatoSalvataggio": "Save canceled",
+			"annullatoCaricamento": "Load canceled",
+			"annullatoEliminazione": "Delete canceled",
+			"salvato": "Saved",
+			"caricato": "Loaded",
+			"eliminato": "Deleted",
+			"ricercaAnnullata": "Search canceled",
+			"operazioneAnnullata": "Operation canceled"
+		},
+		"contenuto": {
+			"ripetizioneMosse": "Threefold repetition",
+			"stallo": "Stalemate",
+			"scaccoMatto": "Checkmate",
+			"50Mosse": "Fifty-move rule",
+			"portaInUso": "This port is already in use",
+			"nonCambia": "Doesn't matter",
+			"schieramentoPreferito": "Which field do you prefer?",
+			"casuale": "Random",
+			"annullato": "You have canceled the procedure",
+			"annullatoSalvataggio": "You have canceled the game save",
+			"annullatoCaricamento": "You have canceled the loading of the game",
+			"annullatoEliminazione": "You have canceled the deletion of the game",
+			"partitaSalvata": "Game saved succesfully!",
+			"partitaCaricata": "Game loaded succesfully!",
+			"partitaEliminata": "Game deleted succesfully!",
+			"erroreEliminazione": "The game could not be deleted",
+			"noSalvataggi": "There are no rescues",
+			"fileCorrotto": "The file is corrupted",
+			"haiAnnullatoRicerca": "You canceled your search.\nNobody can now connect to you",
+			"riempiCampi": "Fill al the fields!",
+			"nonPuoiConneterti": "You can't connect to this port",
+			"operazioneAnnullata": "You canceled the operation",
+			"noAvversarioSelezionato": "No enemy has been selected"
+		},
+		"salvaCaricaElimina": {
+			"salvaCaricaElimina": "Do you want to save or load a game?",
+			"salva": "Save",
+			"carica": "Load",
+			"elimina": "Delete",
+			"inserisciNomePartita": "Enter the name of the match",
+			"nomePartita": "Game name",
+			"partitaEsistente": "The game already exists",
+			"sovrascrivere": "Do you want to overwrite?",
+			"canvasAnteprimaAlt": "Select an option\nto see the preview",
+			"canvasAnteprimaCorrotta": "Corrupted file\nPreview not available"
+		}
+	},
+	"errore": "Error",
+	"ok": "Ok",
+	"annulla": "Cancel"
 }
-

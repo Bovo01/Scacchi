@@ -5,12 +5,17 @@
  */
 package com.scacchi.model.Traduzioni;
 
+import com.scacchi.Scacchi;
 import com.scacchi.model.TCP.Settings;
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.json.JSONException;
 
 /**
@@ -21,24 +26,40 @@ public class ListaLingue {
 
 	private ArrayList<Lingua> lingue;
 	private Lingua linguaCaricata;
-	private final File translationsFolder;
+	private static final String TRANSLATIONS_DIR = "com/scacchi/model/Traduzioni/Translations/";
 
-	public ListaLingue() {
+	public ListaLingue() throws IOException {
 		this.lingue = new ArrayList<>();
-		ClassLoader cl = getClass().getClassLoader();
-		this.translationsFolder = new File(cl.getResource("./com/scacchi/model/Traduzioni/Translations").getFile());
-		for (File file : this.translationsFolder.listFiles())
+		CodeSource src = Scacchi.class.getProtectionDomain().getCodeSource();
+		if (src != null)
 		{
-			this.lingue.add(new Lingua(file.getName().substring(0, file.getName().length() - 5)));
+			URL jar = src.getLocation();
+			ZipInputStream zip = new ZipInputStream(jar.openStream());
+			while (true)
+			{
+				ZipEntry e = zip.getNextEntry();
+				if (e == null)
+					break;
+				String name = e.getName();
+				if (name.startsWith(TRANSLATIONS_DIR) && !name.equals(TRANSLATIONS_DIR))
+				{
+					this.lingue.add(new Lingua(name.substring(42, name.length() - 5)));
+					try
+					{
+						this.lingue.get(this.lingue.size() - 1).crea(zip);
+					}
+					catch (FileNotFoundException | JSONException ex)
+					{
+						Logger.getLogger(ListaLingue.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+			}
+			zip.close();
+			this.linguaCaricata = getLinguaByName(Settings.DEFAULT_LANGUAGE);
 		}
-		this.linguaCaricata = getLinguaByName(Settings.DEFAULT_LANGUAGE);
-		try
+		else
 		{
-			this.linguaCaricata.crea(this.translationsFolder); //Non dovrebbe dare problemi ma non si sa mai
-		}
-		catch (IOException | JSONException ex)
-		{
-			Logger.getLogger(ListaLingue.class.getName()).log(Level.SEVERE, null, ex);
+			/* Fail... */
 		}
 	}
 
@@ -57,14 +78,6 @@ public class ListaLingue {
 			if (lingua.getLingua().equals(name))
 			{
 				this.linguaCaricata = lingua;
-				try
-				{
-					this.linguaCaricata.crea(this.translationsFolder); //Non dovrebbe dare problemi ma non si sa mai
-				}
-				catch (IOException | JSONException ex)
-				{
-					Logger.getLogger(ListaLingue.class.getName()).log(Level.SEVERE, null, ex);
-				}
 				return true;
 			}
 		}
@@ -72,17 +85,9 @@ public class ListaLingue {
 	}
 
 	public boolean setLinguaCaricata(Lingua lingua) {
-		if(!this.lingue.contains(lingua))
+		if (!this.lingue.contains(lingua))
 			return false;
 		this.linguaCaricata = lingua;
-		try
-		{
-			this.linguaCaricata.crea(this.translationsFolder);
-		}
-		catch (IOException | JSONException ex)
-		{
-			Logger.getLogger(ListaLingue.class.getName()).log(Level.SEVERE, null, ex);
-		}
 		return true;
 	}
 
@@ -92,5 +97,17 @@ public class ListaLingue {
 
 	public ArrayList<Lingua> getLingue() {
 		return lingue;
+	}
+
+	public Object getKey(String key) {
+		try
+		{
+			return this.linguaCaricata.getJsonObj().get(key);
+		}
+		catch (JSONException ex)
+		{
+			ex.printStackTrace();
+		}
+		return null;
 	}
 }

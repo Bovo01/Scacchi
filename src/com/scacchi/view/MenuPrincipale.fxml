@@ -44,7 +44,7 @@
             </VBox>
          </center>
          <bottom>
-            <Button mnemonicParsing="false" onAction="#modalita" text="GIOCA" BorderPane.alignment="CENTER">
+            <Button fx:id="giocaButton" mnemonicParsing="false" onAction="#modalita" text="GIOCA" BorderPane.alignment="CENTER">
                <font>
                   <Font size="40.0" />
                </font>

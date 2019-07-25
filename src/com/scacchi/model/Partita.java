@@ -451,13 +451,13 @@ public class Partita implements Serializable {
 	 */
 	public String comeEFinita() {
 		if (isStallo(NERO) || isStallo(BIANCO))
-			return "Stallo";
+			return "stallo";
 		if (isScaccoMatto(NERO) || isScaccoMatto(BIANCO))
-			return "Scacco matto";
+			return "scaccoMatto";
 		if (regola50Mosse == 100)
-			return "Regola delle 50 mosse";
+			return "50Mosse";
 		if (isRipezioneMosse())
-			return "Ripetizione di mosse";
+			return "ripetizioneMosse";
 		return null;
 	}
 

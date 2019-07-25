@@ -20,6 +20,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
@@ -45,6 +46,8 @@ public class MenuPrincipaleController implements Initializable {
 	private RadioButton multigiocatoreOnlineLabel;
 	@FXML
 	private ComboBox<Lingua> lingueCombo;
+	@FXML
+	private Button giocaButton;
 
 	@FXML
 	private void modalita(ActionEvent event) {
@@ -55,7 +58,7 @@ public class MenuPrincipaleController implements Initializable {
 			alert.showAndWait();
 			return;
 		}
-		if (((RadioButton) gioco.getSelectedToggle()).getText().equals("Multigiocatore locale"))
+		if ((RadioButton) gioco.getSelectedToggle() == multigiocatoreOfflineLabel)
 		{
 			Node node = (Node) event.getSource();
 			Stage stage = (Stage) node.getScene().getWindow();
@@ -91,22 +94,24 @@ public class MenuPrincipaleController implements Initializable {
 
 	@FXML
 	private void cambiaLingua(ActionEvent event) {
-		Settings.lingue.setLinguaCaricata(lingueCombo.getSelectionModel().getSelectedItem());
-		traduciTutto();
-	}
-
-	private void traduciTutto() {
+		if (!Settings.lingue.setLinguaCaricata(lingueCombo.getSelectionModel().getSelectedItem()))
+			return;
 		try
 		{
-			JSONObject jsonObj = (JSONObject) Settings.lingue.getLinguaCaricata().getJsonObj().get("menu");
-			scacchiLabel.setText((String) jsonObj.get("scacchi"));
-			multigiocatoreOfflineLabel.setText((String) jsonObj.get("multigiocatoreOffline"));
-			multigiocatoreOnlineLabel.setText((String) jsonObj.get("multigiocatoreOnline"));
+			traduciTutto();
 		}
 		catch (JSONException ex)
 		{
 			Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
 		}
+	}
+
+	private void traduciTutto() throws JSONException {
+		JSONObject jsonObj = (JSONObject) Settings.lingue.getKey("menu");
+		scacchiLabel.setText((String) jsonObj.get("scacchi"));
+		multigiocatoreOfflineLabel.setText((String) jsonObj.get("multigiocatoreOffline"));
+		multigiocatoreOnlineLabel.setText((String) jsonObj.get("multigiocatoreOnline"));
+		giocaButton.setText((String) jsonObj.get("gioca"));
 	}
 
 	/**
@@ -116,7 +121,14 @@ public class MenuPrincipaleController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		lingueCombo.getItems().addAll(Settings.lingue.getLingue());
 		lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
-		traduciTutto();
+		try
+		{
+			traduciTutto();
+		}
+		catch (JSONException ex)
+		{
+			Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 }

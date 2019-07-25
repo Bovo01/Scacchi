@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.scacchi.controller.ScacchieraController">
+<AnchorPane id="AnchorPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.scacchi.controller.ScacchieraController">
    <children>
       <BorderPane prefHeight="598.0" prefWidth="748.0">
          <center>
@@ -29,15 +29,15 @@
          <right>
             <VBox alignment="CENTER" prefHeight="598.0" prefWidth="150.0" spacing="50.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" onAction="#menu" text="Torna al menu principale" />
+                  <Button fx:id="tornaAlMenu" mnemonicParsing="false" onAction="#menu" text="Torna al menu principale" />
                   <Label fx:id="turno" alignment="CENTER" prefHeight="82.0" prefWidth="150.0" textAlignment="CENTER" wrapText="true">
                      <font>
                         <Font size="25.0" />
                      </font>
                   </Label>
-                  <Button mnemonicParsing="false" onAction="#restart" text="Ricomincia partita" />
-                  <Button mnemonicParsing="false" onAction="#inverti" text="Inverti scacchiera" />
-                  <Button mnemonicParsing="false" onAction="#salvaCaricaElimina" text="Salva/Carica/Elimina" />
+                  <Button fx:id="ricominciaPartita" mnemonicParsing="false" onAction="#restart" text="Ricomincia partita" />
+                  <Button fx:id="invertiScacchiera" mnemonicParsing="false" onAction="#inverti" text="Inverti scacchiera" />
+                  <Button fx:id="salvaCaricaEliminaBottone" mnemonicParsing="false" onAction="#salvaCaricaElimina" text="Salva/Carica/Elimina" />
                </children>
             </VBox>
          </right>

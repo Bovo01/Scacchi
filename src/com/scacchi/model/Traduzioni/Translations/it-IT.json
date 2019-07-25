@@ -2,10 +2,100 @@
 	"menu": {
 		"scacchi": "SCACCHI",
 		"multigiocatoreOffline": "Multigiocatore locale",
-		"multigiocatoreOnline": "Multigiocatore in rete"
+		"multigiocatoreOnline": "Multigiocatore in rete",
+		"gioca": "GIOCA"
 	},
 	"lingue": {
 		"it-IT": "Italiano",
 		"en-US": "Inglese"
-	}
+	},
+	"onlineMenu": {
+		"cerca": "Cerca partita",
+		"cercaIntelligente": "Cerca partita all'interno della tua rete locale",
+		"cercaConIndirizzo": "Cerca partita all'indirizzo inserito",
+		"cercaConPort": "Cerca partita all'indirizzo e alla porta inseriti",
+		"cercaConIndirizzoPlaceholder": "Inserisci l'indirizzo ipv4 del tuo avversario",
+		"porta": "Porta",
+		"host": "Host partita",
+		"hostIntelligente": "Host partita sulla porta dedicata",
+		"hostConPorta": "Host partita nella porta inserita",
+		"spect": "Spettatore",
+		"guarda": "Guarda partita",
+		"guardaIntelligente": "Guarda partita all'interno della tua rete locale",
+		"guardaConIndirizzo": "Guarda partita all'indirizzo inserito",
+		"guardaConPorta": "Guarda partita all'indirizzo e alla porta inseriti",
+		"guardaPlaceholder": "Inserisci l'indirizzo della partita",
+		"esci": "Torna al menu principale",
+		"annullaRicerca": "Annulla ricerca",
+		"connettiti": "Connettiti",
+		"selezionaGiocatore": "Seleziona un giocatore"
+	},
+	"scacchiera": {
+		"esci": "Torna al menu principale",
+		"ricominciaPartita": "Ricomincia partita",
+		"invertiScacchiera":  "Inverti scacchiera",
+		"salvaCaricaElimina": "Salva/Carica/Elimina"
+	},
+	"partita": {
+		"colore": {
+			"bianco": "Bianco",
+			"nero": "Nero"
+		},
+		"finePartita": "Partita Conclusa!"
+	},
+	"messaggi": {
+		"titolo": {
+			"patta": "Patta!",
+			"scegli": "Scegli",
+			"annullato": "Annullato",
+			"annullatoSalvataggio": "Salvataggio annullato",
+			"annullatoCaricamento": "Caricamento annullato",
+			"annullatoEliminazione": "Eliminazione annullata",
+			"salvato": "Salvato",
+			"caricato": "Caricato",
+			"eliminato": "Eliminato",
+			"ricercaAnnullata": "Ricerca annullata",
+			"operazioneAnnullata": "Operazione annullata"
+		},
+		"contenuto": {
+			"ripetizioneMosse": "Ripetizione di mosse",
+			"stallo": "Stallo",
+			"scaccoMatto": "Scacco matto",
+			"50Mosse": "Regola delle 50 mosse",
+			"portaInUso": "Porta già in uso da un altro processo",
+			"nonCambia": "Non cambia nulla",
+			"schieramentoPreferito": "Quale schieramento preferisci?",
+			"casuale": "Casuale",
+			"annullato": "Hai annullato la procedura",
+			"annullatoSalvataggio": "Hai annullato il salvataggio della partita",
+			"annullatoCaricamento": "Hai annullato il caricamento della partita",
+			"annullatoEliminazione": "Hai annullato l'eliminazione della partita",
+			"partitaSalvata": "Partita salvata con successo!",
+			"partitaCaricata": "Partita caricata con successo!",
+			"partitaEliminata": "Partita eliminata con successo!",
+			"erroreEliminazione": "Non è stato possibile eliminare la partita",
+			"noSalvataggi": "Non sono presenti salvataggi",
+			"fileCorrotto": "Il file è corrotto",
+			"haiAnnullatoRicerca": "Hai annullato la ricerca.\nOra nessuno può più connettersi a te",
+			"riempiCampi": "Riempi tutti i campi!",
+			"nonPuoiConneterti": "Non puoi connetterti a questa porta",
+			"operazioneAnnullata": "Hai annullato l'operazione",
+			"noAvversarioSelezionato": "Non è stato selezionato un avversario"
+		},
+		"salvaCaricaElimina": {
+			"salvaCaricaElimina": "Vuoi salvare o caricare una partita?",
+			"salva": "Salva",
+			"carica": "Carica",
+			"elimina": "Elimina",
+			"inserisciNomePartita": "Inserisci il nome della partita",
+			"nomePartita": "Nome partita",
+			"partitaEsistente": "La partita esiste già",
+			"sovrascrivere": "Vuoi sovrascrivere?",
+			"canvasAnteprimaAlt": "Seleziona un'opzione\nper vedere l'anteprima",
+			"canvasAnteprimaCorrotta": "File corrotto\nAnteprima non disponibile"
+		}
+	},
+	"errore": "Errore",
+	"ok": "Ok",
+	"annulla": "Annulla"
 }
