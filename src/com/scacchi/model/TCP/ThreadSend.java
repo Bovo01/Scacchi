@@ -28,6 +28,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import org.json.JSONException;
 
 /**
  *
@@ -124,7 +125,14 @@ public class ThreadSend extends Thread {
 						}
 						catch (IOException ex)
 						{
-							FunctionsController.alertErrore("È avvenuto un problema nella connessione");
+							try
+							{
+								FunctionsController.alertErrore(Settings.lingue.getJSONObject("messaggi").getJSONObject("contenuto").getString("problemaConnessione"));
+							}
+							catch (JSONException ex1)
+							{
+								Logger.getLogger(ThreadSend.class.getName()).log(Level.SEVERE, null, ex1);//Non passerà mai
+							}
 						}
 					});
 				}
@@ -144,11 +152,18 @@ public class ThreadSend extends Thread {
 						{
 							controller.disattivaTutto();
 							btn.setDisable(false);
-							btn.setText("Annulla");
+							btn.setText(Settings.lingue.getString("annulla"));
 							btn.setOnAction((ActionEvent event) ->
 							{
 								Platform.runLater(() -> controller.sbloccaTutto());
-								btn.setText("Guarda");
+								try
+								{
+									btn.setText(Settings.lingue.getJSONObject("onlineMenu").getString("guarda"));
+								}
+								catch (JSONException ex)
+								{
+									Logger.getLogger(ThreadSend.class.getName()).log(Level.SEVERE, null, ex);//Non passerà mai
+								}
 								try
 								{
 									Settings.player.close();
@@ -169,7 +184,7 @@ public class ThreadSend extends Thread {
 								else if (btn == controller.btnSpect2)
 									btn.setOnAction((e) -> controller.guardaConPorta(e));
 							});
-							FunctionsController.alertInfo("Partita non iniziata", "La partita non è ancora iniziata, attendi");
+							FunctionsController.alertInfo("noIniziata", "noIniziata");
 						});
 				}
 				else
@@ -183,7 +198,7 @@ public class ThreadSend extends Thread {
 				listView.getItems().add(socket.getInetAddress().getHostAddress());
 			else
 			{
-				Platform.runLater(() -> FunctionsController.alertErrore("Non è stato possibile connettersi"));
+				Platform.runLater(() -> FunctionsController.alertErrore("impossibileConnettersi"));
 				controller.sbloccaTutto();
 				return;
 			}
@@ -191,7 +206,7 @@ public class ThreadSend extends Thread {
 		catch (IOException ex)
 		{
 			if (!message.equals("niente"))
-				Platform.runLater(() -> FunctionsController.alertErrore("È avvenuto un problema nella connessione"));
+				Platform.runLater(() -> FunctionsController.alertErrore("problemaConnessione"));
 		}
 		catch (ClassNotFoundException ex)
 		{

@@ -29,7 +29,7 @@
          <right>
             <VBox alignment="CENTER" prefHeight="598.0" prefWidth="150.0" spacing="50.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" onAction="#menu" text="Torna al menu principale" />
+                  <Button fx:id="tornaAlMenu" mnemonicParsing="false" onAction="#menu" text="Torna al menu principale" />
                   <Label fx:id="turno" alignment="CENTER" prefHeight="82.0" prefWidth="150.0" textAlignment="CENTER" wrapText="true">
                      <font>
                         <Font size="25.0" />

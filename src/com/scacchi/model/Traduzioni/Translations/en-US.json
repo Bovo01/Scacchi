@@ -43,6 +43,22 @@
 		"cavallo": "Knight",
 		"torre": "Rook"
 	},
+	"scacchieraOnline": {
+		"sicuro": "Are you sure?",
+		"sicuroUscire": "Are you sure you want to exit? Doing it you will lose the game.",
+		"richiestaRestartTitle": "Request restart",
+		"richiestaRestartBody": "The enemy requested to restart the game",
+		"richiestaCaricamentoTitle": "Loading request",
+		"richiestaCaricamentoBody": "The enemy requested to load a game",
+		"sicuroResa": "Are you sure you want to surrender?",
+		"richiestaPattaTitle": "Draw request",
+		"richiestaPattaBody": "The enemy has requested draw",
+		"esci": "Return to main menu",
+		"resa": "Resign",
+		"patta": "Draw request",
+		"restart": "Restart request",
+		"salvaCaricaElimina": "Save/Load/Delete"
+	},
 	"partita": {
 		"colore": {
 			"bianco": "White",
@@ -63,13 +79,21 @@
 			"eliminato": "Deleted",
 			"ricercaAnnullata": "Search canceled",
 			"operazioneAnnullata": "Operation canceled",
-			"finePartita": "Game finished!"
+			"finePartita": "Game finished!",
+			"richiestaInviata": "Request sent",
+			"restart": "Restart",
+			"caricamentoPartita": "Loading",
+			"pattaRifiutata": "Draw refused",
+			"info": "Info",
+			"vinto": "You won!",
+			"noIniziata": "Match not yet started"
 		},
 		"contenuto": {
 			"ripetizioneMosse": "Threefold repetition",
 			"stallo": "Stalemate",
 			"scaccoMatto": "Checkmate",
 			"50Mosse": "Fifty-move rule",
+			"accordo": "Mutual agreement",
 			"portaInUso": "This port is already in use",
 			"nonCambia": "Doesn't matter",
 			"schieramentoPreferito": "Which field do you prefer?",
@@ -96,7 +120,21 @@
 			"portaDaAprire": "Enter the port where you want to open the game",
 			"vincitore": "\nWinner: ",
 			"bianco": "White",
-			"nero": "Black"
+			"nero": "Black",
+			"erroreTornoMenu": "It hasn't been possible to return to main menu. Please retry",
+			"richiestaInviata": "Game loading request sent to the enemy",
+			"restartAccettato": "Restart accepted",
+			"restartRifiutato": "Restart refused",
+			"caricamentoAccettato": "Loading accepted",
+			"caricamentoRifiutato": "Loading refused",
+			"resaNERO": "White wins for resign",
+			"resaBIANCO": "Black wins for resign",
+			"pattaRifiutata": "Your draw request has been refused",
+			"haiRifiutatoPatta": "You refused the draw",
+			"abbandonato": "The enemy quitted",
+			"problemaConnessione": "There was a problem with the connection",
+			"noIniziata": "The match has not started yet, wait a moment",
+			"impossibileConnettersi": "It was not possible to connect"
 		},
 		"salvaCaricaElimina": {
 			"salvaCaricaElimina": "Do you want to save or load a game?",
@@ -113,5 +151,9 @@
 	},
 	"errore": "Error",
 	"ok": "Ok",
-	"annulla": "Cancel"
+	"annulla": "Cancel",
+	"si": "Yes",
+	"no": "No",
+	"accetta": "Accept",
+	"rifiuta": "Refuse"
 }

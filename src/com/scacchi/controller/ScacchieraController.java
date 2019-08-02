@@ -209,8 +209,7 @@ public class ScacchieraController implements Initializable {
 	private void salvaCaricaElimina(ActionEvent event) {
 		try
 		{
-			JSONObject jsonObj = Settings.lingue.getJSONObject("messaggi");
-			JSONObject translator = jsonObj.getJSONObject("salvaCaricaElimina");
+			JSONObject translator = Settings.lingue.getJSONObject("messaggi").getJSONObject("salvaCaricaElimina");
 
 			String userName = System.getProperty("user.name");
 			File folder = new File("C:" + File.separator + "Users" + File.separator + userName + File.separator + "Documents" + File.separator + "My Games");
@@ -484,7 +483,7 @@ public class ScacchieraController implements Initializable {
 		}
 	}
 
-	protected void traduciTutto() throws JSONException {
+	private void traduciTutto() throws JSONException {
 		JSONObject jsonObj = Settings.lingue.getJSONObject("scacchiera");
 		tornaAlMenu.setText(jsonObj.getString("esci"));
 		ricominciaPartita.setText(jsonObj.getString("ricominciaPartita"));

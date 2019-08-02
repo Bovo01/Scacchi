@@ -19,7 +19,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -64,6 +63,7 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 		Settings.player = null;
 		Settings.playerReader = null;
 		Settings.playerWriter = null;
+		Settings.schieramento = null;
 		
 		Stage stage = (Stage) anchorPane.getScene().getWindow();
 		Scene scene = stage.getScene();
@@ -88,13 +88,14 @@ public class ScacchieraOnlineSpettatoriController extends ScacchieraController i
 	}
 
 	public void finePartita(String come, Pezzo.Colore vincitore) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Fine partita!");
-		String line = "Partita finita per " + come;
-		if (vincitore != null)
-			line += "\nVincitore: " + vincitore.toString();
-		alert.setContentText(line);
-		alert.show();
+		if (vincitore == null)
+		{
+			if (come.equals("patta"))
+				FunctionsController.alertInfo("patta", "accordo");
+		}
+		else
+			if (come.equals("resa"))
+				FunctionsController.alertInfo("finePartita", "resa" + vincitore.notThis().toString());
 		Settings.partita.fine();
 		mostraScacchi();
 	}

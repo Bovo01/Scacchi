@@ -62,21 +62,28 @@ public class ThreadRicevi extends Thread implements Closeable {
 						Platform.runLater(() ->
 						{
 							Settings.scacchieraOnlineController.disattivaBottoni();
-							Alert alert = new Alert(Alert.AlertType.INFORMATION);
 							if (Settings.partita.getTurno() == null || Settings.partita.getMosse().isEmpty())
-								alert.setTitle("Info");
+								FunctionsController.alertInfo("info", "abbandonato");
 							else
-								alert.setTitle("Hai vinto!");
-							alert.setContentText("L'avversario ha abbandonato la partita");
-							alert.show();
+								FunctionsController.alertInfo("vinto", "abbandonato");
 							Settings.partita.fine();
+							if (Settings.threadAccetta != null)
+								try
+								{
+									Settings.threadAccetta.close();
+								}
+								catch (IOException ex)
+								{
+									Logger.getLogger(ThreadRicevi.class.getName()).log(Level.SEVERE, null, ex);
+								}
+							ThreadRicevi.sendToSpettatori("fine");
+							ThreadRicevi.sendToSpettatori(Settings.schieramento.toString());
+							ThreadRicevi.sendToSpettatori("resa" + Settings.schieramento.notThis().toString());
 						});
-					if (Settings.threadAccetta != null)
-						Settings.threadAccetta.close();
-					else
+					if (Settings.threadAccetta == null)
 						Platform.runLater(() ->
 						{
-							FunctionsController.alertInfo("Fine partita!", "Il " + Settings.schieramento.notThis().toString().toLowerCase() + " ha vinto per resa");
+							FunctionsController.alertInfo("finePartita", "resa" + Settings.schieramento.toString());
 							Settings.partita.fine();
 							Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
 						});
@@ -101,19 +108,18 @@ public class ThreadRicevi extends Thread implements Closeable {
 				}
 				else if (line.equals("fine"))//Messaggio solo per gli spettatori
 				{
-					String line2 = Settings.playerReader.readLine();
-					Platform.runLater(() ->
-					{
-						Alert alert = new Alert(Alert.AlertType.INFORMATION);
-						alert.setTitle("Fine partita!");
-						if (line2 == null || line2.equals("null"))
-							alert.setContentText("Partita finita per patta");
-						else
-							alert.setContentText("Vincitore: " + line2.toLowerCase());
-						alert.show();
-						Settings.partita.fine();
-						Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
-					});
+					String vincitore = Settings.playerReader.readLine();
+					String comeEFinita = Settings.playerReader.readLine();
+					if (!Settings.partita.isFinita())
+						Platform.runLater(() ->
+						{
+							if (vincitore == null || vincitore.equals("null"))
+								FunctionsController.alertInfo("patta", comeEFinita);
+							else
+								FunctionsController.alertInfo("finePartita", comeEFinita, "vincitore", vincitore.toLowerCase());
+							Settings.partita.fine();
+							Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
+						});
 				}
 				else if (line.substring(0, 5).equals("mossa"))
 				{
@@ -125,6 +131,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 						Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
 					if (Settings.scacchieraOnlineController != null)
 					{
+						sendToSpettatori(line);
 						Platform.runLater(() ->
 						{
 							Settings.scacchieraOnlineController.mostraScacchi();
@@ -132,26 +139,25 @@ public class ThreadRicevi extends Thread implements Closeable {
 							{
 								Settings.scacchieraOnlineController.resa.setDisable(true);
 								Settings.scacchieraOnlineController.patta.setDisable(true);
-								Alert alert = new Alert(Alert.AlertType.INFORMATION);
 								if (Settings.partita.vincitore() == null)
-								{
-									alert.setTitle("Patta!");
-									alert.setContentText("Partita finita per " + Settings.partita.comeEFinita());
-								}
+									FunctionsController.alertInfo("patta", Settings.partita.comeEFinita());
 								else
-								{
-									alert.setTitle("Fine partita!");
-									alert.setContentText(Settings.partita.comeEFinita() + "\nVincitore: " + Settings.partita.vincitore().toString().toLowerCase());
-								}
-								alert.show();
+									FunctionsController.alertInfo("finePartita", Settings.partita.comeEFinita(), "vincitore", Settings.partita.vincitore().toString().toLowerCase());
 								sendToSpettatori("fine");
-								sendToSpettatori(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase());
+								sendToSpettatori(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString());
+								sendToSpettatori(Settings.partita.comeEFinita());
 							}
 						});
-						sendToSpettatori(line);
 					}
 					else if (Settings.scacchieraOnlineSpettatoriController != null)
+					{
+						if (Settings.partita.isFinita())
+							if (Settings.partita.vincitore() == null)
+								FunctionsController.alertInfo("patta", Settings.partita.comeEFinita());
+							else
+								FunctionsController.alertInfo("finePartita", Settings.partita.comeEFinita(), "vincitore", Settings.partita.vincitore().toString().toLowerCase());
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
+					}
 				}
 				else if (line.equals("richiesta patta"))
 					Platform.runLater(() ->
@@ -253,11 +259,12 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.scacchieraOnlineController.partita = Settings.partita;
 							Settings.scacchieraOnlineController.mostraScacchi();
 							Settings.scacchieraOnlineController.attivaBottoni();
+							FunctionsController.alertInfo("caricato", "partitaCaricata");
 						}
 						else if (Settings.scacchieraOnlineSpettatoriController != null)
 						{
 							Settings.scacchieraOnlineSpettatoriController.ricomincia();
-							FunctionsController.alertInfo("Caricamento", "La partita è stata caricata");
+							FunctionsController.alertInfo("caricato", "partitaCaricata");
 						}
 					});
 				else if (line.equals("rifiuto caricamento"))
