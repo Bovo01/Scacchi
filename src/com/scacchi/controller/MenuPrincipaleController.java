@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -115,6 +116,11 @@ public class MenuPrincipaleController implements Initializable {
 
 	private void traduciTutto() throws JSONException {
 		JSONObject jsonObj = Settings.lingue.getJSONObject("menu");
+		Platform.runLater(() ->
+		{
+			lingueCombo.getItems().setAll(Settings.lingue.getLingue());
+			lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
+		});
 		scacchiLabel.setText(jsonObj.getString("scacchi"));
 		multigiocatoreOfflineLabel.setText(jsonObj.getString("multigiocatoreOffline"));
 		multigiocatoreOnlineLabel.setText(jsonObj.getString("multigiocatoreOnline"));
