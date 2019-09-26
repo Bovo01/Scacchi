@@ -376,12 +376,12 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 					alert.getButtonTypes().addAll(OK, ANNULLA);
 					alert.getDialogPane().setContent(new HBox(c, listaFileDaCaricare));
 					scelta = alert.showAndWait();
-					selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
 					if (scelta.get() == ANNULLA)
 					{
 						FunctionsController.alertInfo("annullatoCaricamento", "annullatoCaricamento");
 						return;
 					}
+					selectedIndex = listaFileDaCaricare.getSelectionModel().getSelectedIndex();
 				}
 				while (selectedIndex == -1);
 
@@ -400,7 +400,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 				}
 				catch (IOException | ClassNotFoundException ex)
 				{
-					FunctionsController.alertErrore(translator.getString("fileCorrotto"));
+					FunctionsController.alertErrore("fileCorrotto");
 				}
 			}
 			else
@@ -446,13 +446,14 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 						}
 					}
 				});
+
 				int selectedIndex = -1;
 
 				do
 				{
 					alert = new Alert(Alert.AlertType.NONE);
 					alert.getButtonTypes().addAll(OK, ANNULLA);
-					alert.getDialogPane().setContent(listaFileDaCancellare);
+					alert.getDialogPane().setContent(new HBox(c, listaFileDaCancellare));
 					scelta = alert.showAndWait();
 					selectedIndex = listaFileDaCancellare.getSelectionModel().getSelectedIndex();
 					if (scelta.get() == ANNULLA)
@@ -501,7 +502,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		}
 		else
 		{
-			FunctionsController.alertInfo("restart", "restartRifiutato");
+			FunctionsController.alertInfo("restart", "haiRifiutatoRestart");
 			sendMessage("rifiuto restart");
 		}
 	}
@@ -509,7 +510,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 	public void confermaCaricamento(boolean isCaricamento) {
 		if (isCaricamento)
 		{
-			FunctionsController.alertInfo("caricamentoPartita", "caricamentoAccettato");
+			FunctionsController.alertInfo("caricamentoPartita", "partitaCaricata");
 			sendMessage("conferma caricamento");
 			attivaBottoni();
 			partita = Settings.partitaDaCaricare;
@@ -517,10 +518,11 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			Settings.partitaDaCaricare = null;
 			mostraScacchi();
 			ThreadRicevi.sendToSpettatori("conferma caricamento");
+			ThreadRicevi.sendObjectToSpettatori(Settings.partitaDaCaricare);
 		}
 		else
 		{
-			FunctionsController.alertInfo("caricamentoPartita", "caricamentoRifiutato");
+			FunctionsController.alertInfo("caricamentoPartita", "haiRifiutatoCaricamento");
 			sendMessage("rifiuto caricamento");
 			Settings.partitaDaCaricare = null;
 		}
@@ -633,9 +635,8 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			if (come.equals("patta"))
 				FunctionsController.alertInfo("patta", "accordo");
 		}
-		else
-			if (come.equals("resa"))
-				FunctionsController.alertInfo("finePartita", "resa" + vincitore.notThis().toString());
+		else if (come.equals("resa"))
+			FunctionsController.alertInfo("finePartita", "resa" + vincitore.notThis().toString());
 		Settings.partita.fine();
 		mostraScacchi();
 	}
@@ -661,7 +662,7 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 			sendMessage("rifiuto patta");
 		}
 	}
-	
+
 	private void traduciTutto() throws JSONException {
 		JSONObject scacchieraOnline = Settings.lingue.getJSONObject("scacchieraOnline");
 		tornaAlMenu.setText(scacchieraOnline.getString("esci"));
@@ -692,20 +693,24 @@ public class ScacchieraOnlineController extends ScacchieraController implements 
 		mostraScacchi();
 	}
 
-	private void sendMessage(String message) {
+	private static void sendMessage(String message) {
 		try
 		{
 			Settings.playerWriter.write(message);
 			Settings.playerWriter.newLine();
 			Settings.playerWriter.flush();
+			if (message.length() > 5 && message.substring(0, 5).equals("mossa"))
+				ThreadRicevi.sendToSpettatori(message);
 			if (Settings.partita.isFinita() && !message.equals("richiesta restart") && !message.equals("conferma restart"))
+			{
 				ThreadRicevi.sendToSpettatori("fine");
+				ThreadRicevi.sendToSpettatori(Settings.partita.vincitore() == null ? "null" : Settings.partita.vincitore().toString().toLowerCase());
+				ThreadRicevi.sendToSpettatori(Settings.partita.comeEFinita());
+			}
 		}
 		catch (IOException ex)
 		{
 			System.out.println(ex.getMessage());
 		}
-		if (message.length() > 5 && message.substring(0, 5).equals("mossa"))
-			ThreadRicevi.sendToSpettatori(message);
 	}
 }

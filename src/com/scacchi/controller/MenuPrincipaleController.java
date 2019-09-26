@@ -37,111 +37,99 @@ import org.json.JSONObject;
  */
 public class MenuPrincipaleController implements Initializable {
 
-	@FXML
-	private ToggleGroup gioco;
-	@FXML
-	private Label scacchiLabel;
-	@FXML
-	private RadioButton multigiocatoreOfflineLabel;
-	@FXML
-	private RadioButton multigiocatoreOnlineLabel;
-	@FXML
-	private ComboBox<Lingua> lingueCombo;
-	@FXML
-	private Button giocaButton;
+    @FXML
+    private ToggleGroup gioco;
+    @FXML
+    private Label scacchiLabel;
+    @FXML
+    private RadioButton multigiocatoreOfflineLabel;
+    @FXML
+    private RadioButton multigiocatoreOnlineLabel;
+    @FXML
+    private ComboBox<Lingua> lingueCombo;
+    @FXML
+    private Button giocaButton;
 
-	@FXML
-	private void modalita(ActionEvent event) {
-		if (gioco.getSelectedToggle() == null)
-		{
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			try
-			{
-				alert.setContentText(Settings.lingue.getJSONObject("menu").getString("selezionaOpzione"));
-			}
-			catch (JSONException ex)
-			{
-				Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
-			}
-			alert.showAndWait();
-			return;
-		}
-		if ((RadioButton) gioco.getSelectedToggle() == multigiocatoreOfflineLabel)
-		{
-			Node node = (Node) event.getSource();
-			Stage stage = (Stage) node.getScene().getWindow();
-			Scene scene = stage.getScene();
-			FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/Scacchiera.fxml"));
-			try
-			{
-				Parent root = (Parent) fxmlLoader.load();
-				node.getScene().getWindow().setHeight(598 + 39);//height + 39
-				node.getScene().getWindow().setWidth(748 + 16);//width + 16
-				scene.setRoot(root);
-			}
-			catch (IOException ex)
-			{
-			}
-		}
-		else
-		{
-			Node node = (Node) event.getSource();
-			Stage stage = (Stage) node.getScene().getWindow();
-			Scene scene = stage.getScene();
-			FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/Online.fxml"));
-			try
-			{
-				Parent root = (Parent) fxmlLoader.load();
-				scene.setRoot(root);
-			}
-			catch (IOException ex)
-			{
-			}
-		}
-	}
+    @FXML
+    private void modalita(ActionEvent event) {
+        if (gioco.getSelectedToggle() == null)
+        {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            try
+            {
+                alert.setContentText(Settings.lingue.getJSONObject("menu").getString("selezionaOpzione"));
+            }
+            catch (JSONException ex)
+            {
+                Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);//Non servirà
+            }
+            alert.showAndWait();
+            return;
+        }
+        Node node = (Node) event.getSource();
+        Stage stage = (Stage) node.getScene().getWindow();
+        Scene scene = stage.getScene();
+        FXMLLoader fxmlLoader = null;
+        if ((RadioButton) gioco.getSelectedToggle() == multigiocatoreOfflineLabel)
+        {
+            fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/Scacchiera.fxml"));
+            node.getScene().getWindow().setHeight(598 + 39);//height + 39
+            node.getScene().getWindow().setWidth(748 + 16);//width + 16
+        }
+        else if ((RadioButton) gioco.getSelectedToggle() == multigiocatoreOnlineLabel)
+            fxmlLoader = new FXMLLoader(getClass().getResource("/com/scacchi/view/Online.fxml"));
+        try
+        {
+            Parent root = (Parent) fxmlLoader.load();
+            scene.setRoot(root);
+        }
+        catch (IOException ex)
+        {
+        }
+    }
 
-	@FXML
-	private void cambiaLingua(ActionEvent event) {
-		if (!Settings.lingue.setLinguaCaricata(lingueCombo.getSelectionModel().getSelectedItem()))
-			return;
-		try
-		{
-			traduciTutto();
-		}
-		catch (JSONException ex)
-		{
-			Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
+    @FXML
+    private void cambiaLingua(ActionEvent event) {
+        if (!Settings.lingue.setLinguaCaricata(lingueCombo.getSelectionModel().getSelectedItem()))
+            return;
+        try
+        {
+            traduciTutto();
+        }
+        catch (JSONException ex)
+        {
+            Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
-	private void traduciTutto() throws JSONException {
-		JSONObject jsonObj = Settings.lingue.getJSONObject("menu");
-		Platform.runLater(() ->
-		{
-			lingueCombo.getItems().setAll(Settings.lingue.getLingue());
-			lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
-		});
-		scacchiLabel.setText(jsonObj.getString("scacchi"));
-		multigiocatoreOfflineLabel.setText(jsonObj.getString("multigiocatoreOffline"));
-		multigiocatoreOnlineLabel.setText(jsonObj.getString("multigiocatoreOnline"));
-		giocaButton.setText(jsonObj.getString("gioca"));
-	}
+    private void traduciTutto() throws JSONException {
+        JSONObject jsonObj = Settings.lingue.getJSONObject("menu");
+        Platform.runLater(() ->
+        {
+            lingueCombo.getItems().setAll(Settings.lingue.getLingue());
+            lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
+        });
+        scacchiLabel.setText(jsonObj.getString("scacchi"));
+        multigiocatoreOfflineLabel.setText(jsonObj.getString("multigiocatoreOffline"));
+        multigiocatoreOnlineLabel.setText(jsonObj.getString("multigiocatoreOnline"));
+        giocaButton.setText(jsonObj.getString("gioca"));
+    }
 
-	/**
-	 * Initializes the controller class.
-	 */
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		lingueCombo.getItems().addAll(Settings.lingue.getLingue());
-		lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
-		try
-		{
-			traduciTutto();
-		}
-		catch (JSONException ex)
-		{
-			Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
+    /**
+     * Initializes the controller class.
+     */
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        lingueCombo.getItems().addAll(Settings.lingue.getLingue());
+        lingueCombo.getSelectionModel().select(Settings.lingue.getLinguaCaricata());
+        try
+        {
+            traduciTutto();
+        }
+        catch (JSONException ex)
+        {
+            Logger.getLogger(MenuPrincipaleController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
 }

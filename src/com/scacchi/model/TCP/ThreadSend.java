@@ -102,7 +102,7 @@ public class ThreadSend extends Thread {
 						Settings.schieramento = Pezzo.Colore.BIANCO;
 					else
 						Settings.schieramento = Pezzo.Colore.NERO;
-					Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
+					Settings.threadAccetta = new ThreadAccetta(port, controller);
 					Settings.threadAccetta.start();
 				}
 				else if (line.equals("richiesta colore"))
@@ -120,7 +120,7 @@ public class ThreadSend extends Thread {
 							bw.write(Settings.schieramento.notThis().toString().toLowerCase());
 							bw.newLine();
 							bw.flush();
-							Settings.threadAccetta = new ThreadAccetta(50000, controller);//TODO parametrizzare la porta con la variabile istanza port
+							Settings.threadAccetta = new ThreadAccetta(port, controller);
 							Settings.threadAccetta.start();
 						}
 						catch (IOException ex)

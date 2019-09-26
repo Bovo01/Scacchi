@@ -55,7 +55,7 @@ public class Scacchi extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-		Settings.lingue = new ListaLingue();
+        Settings.lingue = new ListaLingue();
         launch(args);
     }
 }

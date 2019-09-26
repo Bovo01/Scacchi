@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
 
 /**
  *
@@ -51,6 +50,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 	public void run() {
 		if (controller != null && !isSpettatore)
 			Platform.runLater(() -> controller.inizioPartita());
+		boolean isFinitaPerSpettatore = false;
 		while (true)
 		{
 			try
@@ -59,6 +59,10 @@ public class ThreadRicevi extends Thread implements Closeable {
 				if (line == null)
 				{
 					if (Settings.scacchieraOnlineController != null)
+					{
+						ThreadRicevi.sendToSpettatori("fine");
+						ThreadRicevi.sendToSpettatori(Settings.schieramento.toString());
+						ThreadRicevi.sendToSpettatori("resa" + Settings.schieramento.notThis().toString());
 						Platform.runLater(() ->
 						{
 							Settings.scacchieraOnlineController.disattivaBottoni();
@@ -76,11 +80,9 @@ public class ThreadRicevi extends Thread implements Closeable {
 								{
 									Logger.getLogger(ThreadRicevi.class.getName()).log(Level.SEVERE, null, ex);
 								}
-							ThreadRicevi.sendToSpettatori("fine");
-							ThreadRicevi.sendToSpettatori(Settings.schieramento.toString());
-							ThreadRicevi.sendToSpettatori("resa" + Settings.schieramento.notThis().toString());
 						});
-					if (Settings.threadAccetta == null)
+					}
+					else if (Settings.threadAccetta == null && !isFinitaPerSpettatore)
 						Platform.runLater(() ->
 						{
 							FunctionsController.alertInfo("finePartita", "resa" + Settings.schieramento.toString());
@@ -111,6 +113,8 @@ public class ThreadRicevi extends Thread implements Closeable {
 					String vincitore = Settings.playerReader.readLine();
 					String comeEFinita = Settings.playerReader.readLine();
 					if (!Settings.partita.isFinita())
+					{
+						isFinitaPerSpettatore = true;
 						Platform.runLater(() ->
 						{
 							if (vincitore == null || vincitore.equals("null"))
@@ -120,15 +124,16 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.partita.fine();
 							Settings.scacchieraOnlineSpettatoriController.mostraScacchi();
 						});
+					}
 				}
 				else if (line.substring(0, 5).equals("mossa"))
 				{
 					String temp = line.substring(6, line.length());//lunghezza di 5 caratteri
 					Posizione pos1 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(temp.charAt(1))], Posizione.Colonna.getFromChar(temp.charAt(0)));
 					Posizione pos2 = new Posizione(Posizione.Riga.values()[8 - Character.getNumericValue(temp.charAt(3))], Posizione.Colonna.getFromChar(temp.charAt(2)));
-					Platform.runLater(() -> Settings.partita.muovi(Settings.partita.trovaPezzo(pos1), pos2));
+					Settings.partita.muovi(Settings.partita.trovaPezzo(pos1), pos2);
 					if (temp.charAt(4) != '0')
-						Platform.runLater(() -> Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]));
+						Settings.partita.promozione(Settings.partita.trovaPezzo(pos2), Pezzo.Simbolo.values()[Integer.parseInt(Character.toString(temp.charAt(4)))]);
 					if (Settings.scacchieraOnlineController != null)
 					{
 						sendToSpettatori(line);
@@ -153,9 +158,9 @@ public class ThreadRicevi extends Thread implements Closeable {
 					{
 						if (Settings.partita.isFinita())
 							if (Settings.partita.vincitore() == null)
-								FunctionsController.alertInfo("patta", Settings.partita.comeEFinita());
+								Platform.runLater(() -> FunctionsController.alertInfo("patta", Settings.partita.comeEFinita()));
 							else
-								FunctionsController.alertInfo("finePartita", Settings.partita.comeEFinita(), "vincitore", Settings.partita.vincitore().toString().toLowerCase());
+								Platform.runLater(() -> FunctionsController.alertInfo("finePartita", Settings.partita.comeEFinita(), "vincitore", Settings.partita.vincitore().toString().toLowerCase()));
 						Platform.runLater(() -> Settings.scacchieraOnlineSpettatoriController.mostraScacchi());
 					}
 				}
@@ -182,7 +187,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 					Platform.runLater(() ->
 					{
 						Settings.scacchieraOnlineController.attivaBottoni();
-						FunctionsController.alertInfo("Patta rifiutata", "La tua richiesta di patta è stata rifiutata");
+						FunctionsController.alertInfo("pattaRifiutata", "pattaRifiutata");
 					});
 				else if (line.equals("richiesta restart"))
 					Platform.runLater(() ->
@@ -193,6 +198,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 				else if (line.equals("conferma restart"))
 					Platform.runLater(() ->
 					{
+						FunctionsController.alertInfo("restart", "restartAccettato");
 						if (Settings.scacchieraOnlineController != null)
 						{
 							sendToSpettatori(line);
@@ -200,10 +206,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.scacchieraOnlineController.attivaBottoni();
 						}
 						else if (Settings.scacchieraOnlineSpettatoriController != null)
-						{
 							Settings.scacchieraOnlineSpettatoriController.ricomincia();
-							Platform.runLater(() -> FunctionsController.alertInfo("Restart", "La partita è ricominciata"));
-						}
 					});
 				else if (line.equals("rifiuto restart"))
 					Platform.runLater(() ->
@@ -215,7 +218,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.scacchieraOnlineController.restart.setDisable(false);
 							Settings.scacchieraOnlineController.salvaCaricaElimina.setDisable(false);
 						}
-						FunctionsController.alertInfo("Restart rifiutato", "La tua richiesta di ricominciare è stata rifiutata");
+						FunctionsController.alertInfo("restartRifiutato", "restartRifiutato");
 					});
 				else if (line.equals("richiesta caricamento"))
 				{
@@ -229,7 +232,7 @@ public class ThreadRicevi extends Thread implements Closeable {
 					{//La classe sarà sempre corretta
 					}
 					catch (IOException ex)
-					{
+					{//Dovrei aver risolto questo problema ma non si sa mai
 						String temp;
 						while ((temp = Settings.playerReader.readLine()) != null)
 						{//Svuoto il buffer buggato dell'oggetto partita in stringhe
@@ -242,15 +245,14 @@ public class ThreadRicevi extends Thread implements Closeable {
 						{
 							boolean isCaricato = Settings.scacchieraOnlineController.richiestaCaricamento();
 							Settings.scacchieraOnlineController.confermaCaricamento(isCaricato);
-							if (isCaricato)
-								sendObjectToSpettatori(Settings.partitaDaCaricare);
 						});
 					else
-						Platform.runLater(() -> FunctionsController.alertErrore("C'è stato un problema nel caricamento"));
+						Platform.runLater(() -> FunctionsController.alertErrore("problemaCaricamento"));
 				}
 				else if (line.equals("conferma caricamento"))
 					Platform.runLater(() ->
 					{
+						FunctionsController.alertInfo("caricato", "partitaCaricata");
 						if (Settings.scacchieraOnlineController != null)
 						{
 							sendToSpettatori(line);
@@ -259,18 +261,15 @@ public class ThreadRicevi extends Thread implements Closeable {
 							Settings.scacchieraOnlineController.partita = Settings.partita;
 							Settings.scacchieraOnlineController.mostraScacchi();
 							Settings.scacchieraOnlineController.attivaBottoni();
-							FunctionsController.alertInfo("caricato", "partitaCaricata");
 						}
 						else if (Settings.scacchieraOnlineSpettatoriController != null)
-						{
 							Settings.scacchieraOnlineSpettatoriController.ricomincia();
-							FunctionsController.alertInfo("caricato", "partitaCaricata");
-						}
 					});
 				else if (line.equals("rifiuto caricamento"))
 				{
 					Settings.partitaDaCaricare = null;
 					Settings.scacchieraOnlineController.attivaBottoni();
+					Platform.runLater(() -> FunctionsController.alertInfo("caricamentoRifiutato", "caricamentoRifiutato"));
 				}
 				else if (line.equals("iniziata")) //Messaggio per spettatori
 				{
@@ -281,10 +280,13 @@ public class ThreadRicevi extends Thread implements Closeable {
 			}
 			catch (IOException ex)
 			{
-				if (ex.getMessage().equals("Socket closed") || isFinito)
-					return;
-				Logger logger = Logger.getAnonymousLogger();
-				logger.log(Level.SEVERE, "an exception was thrown", ex);
+				if (Settings.scacchieraOnlineController != null)
+				{
+					sendToSpettatori("fine");
+					sendToSpettatori(Settings.schieramento.notThis().toString());
+					sendToSpettatori("resa " + Settings.schieramento.toString());
+				}
+				return;
 			}
 		}
 	}

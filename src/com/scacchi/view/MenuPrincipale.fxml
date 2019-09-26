@@ -22,12 +22,12 @@
                      <font>
                         <Font size="36.0" />
                      </font>
-                     <toggleGroup>
-                        <ToggleGroup fx:id="gioco" />
-                     </toggleGroup>
                      <VBox.margin>
                         <Insets left="50.0" />
                      </VBox.margin>
+                     <toggleGroup>
+                        <ToggleGroup fx:id="gioco" />
+                     </toggleGroup>
                   </RadioButton>
                   <RadioButton fx:id="multigiocatoreOnlineLabel" mnemonicParsing="false" onAction="#modalita" prefHeight="53.0" prefWidth="559.0" text="multigiocatoreOnline" toggleGroup="$gioco">
                      <font>

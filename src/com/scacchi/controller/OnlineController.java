@@ -125,18 +125,18 @@ public class OnlineController implements Initializable {
 			FunctionsController.alertErrore("riempiCampi");
 			return;
 		}
-		disattivaTutto();//TODO togli il commento
-//		try
-//		{
-//			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
-//			server.close();
+		disattivaTutto();
+		try
+		{
+			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
+			server.close();
 		new ThreadSend(ipv4_1.getText(), Settings.DEFAULTPORT, this, "richiesta").start();
-//		}
-//		catch (IOException ex)
-//		{
-//			sbloccaTutto();
-//			FunctionsController.alertErrore("nonPuoiConnetterti");
-//		}
+		}
+		catch (IOException ex)
+		{
+			sbloccaTutto();
+			FunctionsController.alertErrore("nonPuoiConnetterti");
+		}
 	}
 
 	@FXML
@@ -338,18 +338,18 @@ public class OnlineController implements Initializable {
 		try
 		{
 			disattivaTutto();
-			btnSpect.setDisable(false);//TODO togli il commento
-//		try
-//		{
-//			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
-//			server.close();
-//		}
-//		catch (IOException ex)
-//		{
-//			sbloccaTutto();
-//			FunctionsController.alertErrore("nonPuoiConneterti");
-//			return;
-//		}
+			btnSpect.setDisable(false);
+		try
+		{
+			ServerSocket server = new ServerSocket(Settings.DEFAULTPORT);
+			server.close();
+		}
+		catch (IOException ex)
+		{
+			sbloccaTutto();
+			FunctionsController.alertErrore("nonPuoiConneterti");
+			return;
+		}
 			String net = getReteOfMe();
 			if (net.equals("127.0.0."))
 			{

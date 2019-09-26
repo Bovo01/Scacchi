@@ -35,7 +35,6 @@ public class FunctionsController {
 		}
 		catch (JSONException ex)
 		{
-			alertErrore("Titolo: " + title + "\nMessaggio: " + message, false);
 		}
 	}
 
@@ -57,18 +56,7 @@ public class FunctionsController {
 		}
 		catch (JSONException ex)
 		{
-			alertErrore("Titolo: " + title + "\nMessaggio: " + message + ", " + coseDaAggiungere + ", " + messageDaAggiungere, false);
 		}
-	}
-
-	public static void alertErrore(String message, boolean isErrore) {//TODO Togli funzione test
-		Alert alert = new Alert(Alert.AlertType.ERROR);
-		if (isErrore)
-			alert.setTitle("Errore");
-		else
-			alert.setTitle("Info");
-		alert.setContentText(message);
-		alert.show();
 	}
 
 	/**
@@ -86,7 +74,6 @@ public class FunctionsController {
 		}
 		catch (JSONException ex)
 		{
-			alertErrore("Message: " + message, true);
 		}
 	}
 }
